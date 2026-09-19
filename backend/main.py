@@ -1,0 +1,667 @@
+import os
+import sys
+import re
+import datetime
+import json
+import logging
+import requests
+from typing import Optional
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, Response
+from pydantic import BaseModel
+
+from backend.services.youtube_service import YouTubeService
+from backend.services.keyword_service import KeywordService
+from backend.services.trend_service import TrendService
+from backend.services.competitor_service import CompetitorService
+from backend.services.strategy_service import StrategyService
+from backend.services.time_service import TimeService
+from backend.services.publish_time_service import PublishTimeService
+import yt_dlp
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
+
+CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config.json")
+
+def load_saved_config() -> dict:
+    if os.path.exists(CONFIG_PATH):
+        try:
+            with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return {}
+    return {}
+
+def save_config(cfg: dict):
+    try:
+        with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+            json.dump(cfg, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        logger.error(f"Lỗi khi lưu config: {e}")
+
+def get_default_api_key() -> Optional[str]:
+    cfg = load_saved_config()
+    key = cfg.get("youtube_api_key") or os.environ.get("YOUTUBE_API_KEY")
+    return key.strip() if key and key.strip() else None
+
+app = FastAPI(title="YouTube Channel & Trend Analyzer API", version="1.2.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+youtube_service = YouTubeService()
+keyword_service = KeywordService()
+trend_service = TrendService()
+competitor_service = CompetitorService()
+strategy_service = StrategyService()
+time_service = TimeService()
+publish_time_service = PublishTimeService()
+
+class ChannelAnalysisRequest(BaseModel):
+    channel_input: Optional[str] = None
+    channel_identifier: Optional[str] = None
+    max_videos: Optional[int] = 25
+    max_results: Optional[int] = None
+    target_geo: Optional[str] = None
+    target_country: Optional[str] = None
+    api_key: Optional[str] = None
+
+class KeywordAnalysisRequest(BaseModel):
+    keyword: str
+    geo: Optional[str] = "US"
+    country: Optional[str] = None
+
+class PublishTimeRequest(BaseModel):
+    channel_id: str
+    api_key: Optional[str] = None
+    limit: Optional[int] = 50
+
+class ApiKeyPayload(BaseModel):
+    api_key: Optional[str] = None
+
+@app.get("/api/health")
+def health_check():
+    return {"status": "ok", "service": "YouTube Trend & Channel Analyzer", "version": "1.2.0"}
+
+@app.get("/api/settings/api-key")
+def get_api_key_status():
+    key = get_default_api_key()
+    if key:
+        masked = key[:6] + "..." + key[-4:] if len(key) > 10 else "***"
+        return {"has_key": True, "masked_key": masked, "api_key": key}
+    return {"has_key": False, "masked_key": "", "api_key": ""}
+
+@app.post("/api/settings/api-key")
+def set_saved_api_key(payload: ApiKeyPayload):
+    cfg = load_saved_config()
+    clean_key = (payload.api_key or "").strip()
+    if clean_key:
+        cfg["youtube_api_key"] = clean_key
+    else:
+        cfg.pop("youtube_api_key", None)
+    save_config(cfg)
+    has_key = bool(clean_key)
+    masked = clean_key[:6] + "..." + clean_key[-4:] if len(clean_key) > 10 else ("***" if clean_key else "")
+    return {"success": True, "has_key": has_key, "masked_key": masked}
+
+@app.post("/api/channel/publish-times")
+def get_channel_publish_times(req: PublishTimeRequest):
+    """Trích xuất lịch sử ngày giờ đăng chi tiết theo Channel ID (UC...) chuyển sang giờ VN."""
+    if not req.channel_id or not req.channel_id.strip():
+        raise HTTPException(status_code=400, detail="Vui lòng nhập Channel ID (bắt đầu bằng UC...) hoặc đường dẫn kênh.")
+    
+    try:
+        limit_val = max(5, min(200, req.limit or 50))
+        effective_key = req.api_key.strip() if req.api_key else get_default_api_key()
+        result = publish_time_service.get_publish_times(
+            channel_input=req.channel_id.strip(),
+            api_key=effective_key,
+            limit=limit_val
+        )
+        return result
+    except ValueError as ve:
+        logger.warning(f"Publish time validation error: {ve}")
+        raise HTTPException(status_code=400, detail=str(ve))
+    except Exception as e:
+        logger.error(f"Error fetching publish times: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Không thể lấy giờ đăng: {str(e)}")
+
+@app.post("/api/analyze/channel")
+def analyze_channel(req: ChannelAnalysisRequest):
+    ch_input = req.channel_input or req.channel_identifier
+    if not ch_input or not ch_input.strip():
+        raise HTTPException(status_code=400, detail="Vui lòng nhập đường dẫn kênh, @handle hoặc tên kênh.")
+
+    try:
+        geo = (req.target_country or req.target_geo or "US").strip().upper()
+        if not geo:
+            geo = "US"
+        max_v = req.max_videos or req.max_results or 25
+        effective_key = req.api_key.strip() if req.api_key else get_default_api_key()
+        
+        channel_data = youtube_service.get_channel_info_and_videos(ch_input.strip(), max_videos=max_v, api_key=effective_key)
+        channel_meta = channel_data["channel"]
+        videos = channel_data["videos"]
+        stats = channel_data["stats"]
+
+        keyword_data = keyword_service.extract_keywords_from_videos(videos, stats.get("avg_views", 0))
+
+        trend_data = trend_service.evaluate_channel_trend(
+            videos, 
+            keyword_data.get("top_keywords", []), 
+            stats.get("avg_views", 0),
+            target_geo=geo,
+            channel_meta=channel_meta
+        )
+
+        time_data = time_service.analyze_upload_times(videos, target_geo=geo)
+
+        # Enrich time_data with friendly UI fields
+        if "best_upload_time_vn" not in time_data or not time_data["best_upload_time_vn"]:
+            time_data["best_upload_time_vn"] = time_data.get("best_upload_vn") or "02:00 - 04:00"
+        if "peak_view_time_vn" not in time_data or not time_data["peak_view_time_vn"]:
+            time_data["peak_view_time_vn"] = time_data.get("peak_view_vn") or "06:00 - 10:00"
+        if "best_day_of_week" not in time_data:
+            best_w = time_data.get("best_weekdays", ["Thứ Bảy"])
+            time_data["best_day_of_week"] = best_w[0] if best_w else "Thứ Bảy"
+        if "hour_distribution" not in time_data and "hours_distribution" in time_data:
+            time_data["hour_distribution"] = {item["hour"]: item["video_count"] for item in time_data["hours_distribution"]}
+
+        competitors = competitor_service.find_similar_channels(
+            channel_meta.get("channel_title", ""),
+            channel_meta.get("channel_url", ""),
+            keyword_data.get("top_keywords", []),
+            limit=6,
+            api_key=effective_key
+        )
+
+        strategy_data = strategy_service.generate_recommendations(channel_meta, stats, keyword_data, trend_data)
+
+        # Channel info alias
+        channel_info_merged = dict(channel_meta)
+        channel_info_merged["title"] = channel_meta.get("channel_title", "")
+        channel_info_merged["avg_views"] = stats.get("avg_views", 0)
+        channel_info_merged["cadence_days"] = stats.get("upload_frequency_days", 0)
+        channel_info_merged["view_to_sub_ratio"] = stats.get("views_to_subs_ratio", 0)
+        channel_info_merged["outlier_videos"] = stats.get("outliers", [])
+        channel_info_merged["recent_videos"] = videos
+        channel_info_merged["keywords"] = [k["keyword"] for k in keyword_data.get("top_keywords", [])]
+
+        return {
+            "success": True,
+            "channel": channel_meta,
+            "channel_info": channel_info_merged,
+            "stats": stats,
+            "videos": videos,
+            "keywords": keyword_data,
+            "keyword_intelligence": keyword_data,
+            "trend": trend_data,
+            "trend_momentum": trend_data,
+            "upload_time_analysis": time_data,
+            "publish_time_analysis": time_data,
+            "competitors": competitors,
+            "competitor_sources": competitors,
+            "strategy": strategy_data,
+            "strategy_recommendations": strategy_data
+        }
+    except ValueError as ve:
+        logger.warning(f"Validation error: {ve}")
+        raise HTTPException(status_code=400, detail=str(ve))
+    except Exception as e:
+        logger.error(f"Error during channel analysis: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Không thể phân tích kênh: {str(e)}")
+
+@app.post("/api/analyze/keyword")
+def analyze_keyword(req: KeywordAnalysisRequest):
+    kw = req.keyword.strip()
+    if not kw:
+        raise HTTPException(status_code=400, detail="Vui lòng nhập từ khóa cần kiểm tra xu hướng.")
+
+    try:
+        geo = req.geo or "US"
+        trend_res = trend_service.get_keyword_trend(kw, geo=geo)
+
+        yt_results = []
+        try:
+            ydl_opts = {
+                'quiet': True,
+                'skip_download': True,
+                'extract_flat': True,
+                'socket_timeout': 10
+            }
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                search_res = ydl.extract_info(f"ytsearch6:{kw}", download=False)
+                if search_res and search_res.get('entries'):
+                    for e in search_res['entries']:
+                        if not e:
+                            continue
+                        thumb = ""
+                        thumbs = e.get('thumbnails', [])
+                        if thumbs:
+                            thumb = thumbs[-1].get('url') or thumbs[0].get('url', '')
+                        elif e.get('id'):
+                            thumb = f"https://i.ytimg.com/vi/{e.get('id')}/hqdefault.jpg"
+
+                        yt_results.append({
+                            'id': e.get('id'),
+                            'title': e.get('title'),
+                            'channel': e.get('channel') or e.get('uploader'),
+                            'views': e.get('view_count') or 0,
+                            'url': e.get('url') or f"https://www.youtube.com/watch?v={e.get('id')}",
+                            'thumbnail': thumb
+                        })
+        except Exception as yt_err:
+            logger.warning(f"Lỗi khi search YouTube cho từ khóa {kw}: {yt_err}")
+
+        points = trend_res.get("points", [])
+        avg_interest = trend_res.get("average_interest", 0)
+        direction = trend_res.get("direction", "STABLE")
+
+        hot_score = int(min(99, max(10, avg_interest)))
+        if direction == "RISING":
+            hot_score = min(99, hot_score + 15)
+
+        is_trending = hot_score >= 60
+
+        return {
+            "success": True,
+            "keyword": kw,
+            "geo": geo,
+            "trend_score": hot_score,
+            "is_trending": is_trending,
+            "direction": direction,
+            "average_interest": avg_interest,
+            "trend_points": points,
+            "related_queries": trend_res.get("related_queries", []),
+            "top_youtube_videos": yt_results
+        }
+    except Exception as e:
+        logger.error(f"Error during keyword analysis: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Lỗi khi tra cứu từ khóa: {str(e)}")
+
+NICHE_LOCALIZED_QUERIES = {
+    "philosophy": {
+        "VN": "triết lý sống khắc kỷ ý nghĩa cuộc sống bài học cuộc đời",
+        "US": "philosophy stoicism lessons on life deep thinking",
+        "GB": "philosophy stoicism life lessons meaning",
+        "JP": "哲学 ストア派 人生訓 深い思考",
+        "KR": "철학 인생 스토아학파 삶의 교훈",
+        "DE": "Philosophie Stoizismus Lebenslektionen",
+        "DEFAULT": "philosophy stoicism life lessons deep thinking"
+    },
+    "buddhism": {
+        "VN": "phật pháp vấn đáp lời phật dạy chữa lành tâm hồn thiền",
+        "US": "buddhism teachings mindfulness inner peace monk wisdom",
+        "GB": "buddhism mindfulness peace zen wisdom",
+        "JP": "仏教 説法 禅 瞑想 心の平安",
+        "KR": "불교 설법 명상 힐링 마음의 평화",
+        "DE": "Buddhismus Achtsamkeit Meditation Weisheit",
+        "DEFAULT": "buddhism mindfulness teachings inner peace zen"
+    },
+    "elderly_wisdom": {
+        "VN": "tâm sự tuổi già lời khuyên người già bài học viện dưỡng lão",
+        "US": "elderly wisdom senior life lessons 80 year old regrets nursing home",
+        "GB": "elderly life lessons senior wisdom advice",
+        "JP": "高齢者 人生の教訓 80歳 老後の知恵",
+        "KR": "노인의 지혜 인생 교훈 80세 노후",
+        "DE": "Lebensweisheiten älterer Menschen Ratschläge",
+        "DEFAULT": "elderly wisdom senior life lessons regrets advice"
+    },
+    "reddit_stories": {
+        "VN": "truyện reddit tâm sự confessions bóc phốt",
+        "US": "reddit stories AITA update confessions best of reddit",
+        "GB": "reddit stories confessions drama AITA",
+        "JP": "2ch スレ 面白い話 修羅場 朗読",
+        "KR": "레딧 썰 사연 모음",
+        "DE": "Reddit Geschichten Beichten",
+        "DEFAULT": "reddit stories AITA confessions updates"
+    },
+    "drama_expose": {
+        "VN": "drama bóc phốt hóng biến showbiz vụ bê bối",
+        "US": "drama exposé documentary the downfall of scandal",
+        "GB": "documentary exposé downfall scandal",
+        "JP": "炎上 事件の真相 暴露",
+        "KR": "사건 폭로 이슈 정리",
+        "DE": "Skandal Doku Enthüllung",
+        "DEFAULT": "drama exposé the downfall of scandal documentary"
+    },
+    "true_crime": {
+        "VN": "vụ án có thật kỳ án hồ sơ trinh sát phòng thẩm vấn",
+        "US": "true crime interrogation documentary unsolved mystery police",
+        "GB": "true crime documentary police interrogation case",
+        "JP": "未解決事件 実際の事件 犯罪ドキュメンタリー",
+        "KR": "실화 범죄 미제 사건 다큐",
+        "DE": "True Crime Kriminalfall Dokumentation",
+        "DEFAULT": "true crime interrogation mystery case documentary"
+    },
+    "horror_stories": {
+        "VN": "truyện ma đêm muộn kinh dị có thật tâm linh rùng rợn",
+        "US": "scary horror stories creepypasta encounters skinwalker night",
+        "GB": "horror stories ghost encounters spooky night",
+        "JP": "怖い話 怪談 実話 朗読",
+        "KR": "무서운 이야기 실화 괴담 공포",
+        "DE": "Gruselgeschichten Horror Creepypasta",
+        "DEFAULT": "scary horror stories creepypasta encounters"
+    },
+    "history_geopolitics": {
+        "VN": "lịch sử quân sự địa chính trị chiến tranh thế giới đế chế",
+        "US": "history documentary military warfare geopolitics empire",
+        "GB": "history documentary geopolitics war empire",
+        "JP": "歴史 ドキュメンタリー 地政学 戦争",
+        "KR": "역사 다큐멘터리 전쟁 지정학",
+        "DE": "Geschichte Dokumentation Geopolitik",
+        "DEFAULT": "history documentary military geopolitics warfare"
+    },
+    "space_science": {
+        "VN": "bí ẩn vũ trụ khoa học thiên văn hố đen nghịch lý",
+        "US": "space science documentary universe black hole paradox",
+        "GB": "space universe science paradox documentary",
+        "JP": "宇宙 科学 ブラックホール 謎 パラドックス",
+        "KR": "우주 과학 블랙홀 미스터리 패러독스",
+        "DE": "Weltraum Wissenschaft Universum Dokumentation",
+        "DEFAULT": "space science universe black hole paradox documentary"
+    },
+    "finance_money": {
+        "VN": "tài chính cá nhân đầu tư kiếm tiền online làm giàu quản lý tài chính",
+        "US": "personal finance investing side hustle make money online wealth",
+        "GB": "personal finance investing side hustle wealth",
+        "JP": "個人資産 投資 副業 貯金 お金",
+        "KR": "재테크 투자 부업 돈 모으기",
+        "DE": "Finanzen Investieren Passives Einkommen",
+        "DEFAULT": "personal finance investing side hustle wealth online"
+    },
+    "tech_ai": {
+        "VN": "công nghệ trí tuệ nhân tạo ai tools tương lai công nghệ mới",
+        "US": "artificial intelligence ai tools future tech automation",
+        "GB": "artificial intelligence ai tools technology",
+        "JP": "人工知能 AIツール 最新テクノロジー",
+        "KR": "인공지능 AI 도구 신기술",
+        "DE": "Künstliche Intelligenz AI Tools Technologie",
+        "DEFAULT": "artificial intelligence ai tools future tech"
+    },
+    "recap_stories": {
+        "VN": "tóm tắt phim review phim anime tóm tắt truyện hoạt hình",
+        "US": "movie recap film summary comic recap anime recap",
+        "GB": "movie recap film summary story recap",
+        "JP": "映画 要約 アニメ 解説",
+        "KR": "영화 요약 결말 포함 애니 리뷰",
+        "DE": "Film Zusammenfassung Filmkritik Recap",
+        "DEFAULT": "movie recap film summary anime story recap"
+    },
+    "gaming": {
+        "VN": "gameplay highlights gaming việt nam streamer",
+        "US": "gaming gameplay highlights walkthrough best moments",
+        "GB": "gaming highlights gameplay walkthrough",
+        "JP": "ゲーム 実況 プレイ動画 ハイライト",
+        "KR": "게임 플레이 하이라이트 실황",
+        "DE": "Gaming Gameplay Highlights Deutsch",
+        "DEFAULT": "gaming highlights gameplay walkthrough"
+    },
+    "entertainment": {
+        "VN": "hài hước giải trí viral gameshow triệu view",
+        "US": "entertainment funny viral comedy challenge",
+        "GB": "entertainment comedy viral funny",
+        "JP": "エンタメ 面白い バラエティ",
+        "KR": "예능 레전드 웃긴 영상",
+        "DE": "Unterhaltung Comedy Viral",
+        "DEFAULT": "entertainment funny viral comedy show"
+    }
+}
+
+def parse_iso_duration(dur_str: str) -> int:
+    if not dur_str:
+        return 0
+    m = re.match(r'PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?', dur_str)
+    if not m:
+        return 0
+    h = int(m.group(1) or 0)
+    minute = int(m.group(2) or 0)
+    s = int(m.group(3) or 0)
+    return h * 3600 + minute * 60 + s
+
+def format_duration_display(seconds: int) -> str:
+    if not seconds:
+        return "Video Dài"
+    h = seconds // 3600
+    m = (seconds % 3600) // 60
+    s = seconds % 60
+    if h > 0:
+        return f"{h}:{m:02d}:{s:02d}"
+    return f"{m:02d}:{s:02d}"
+
+def format_published_age(pub_iso: str) -> str:
+    if not pub_iso:
+        return ""
+    try:
+        dt = datetime.datetime.fromisoformat(pub_iso.replace("Z", "+00:00"))
+        now = datetime.datetime.now(datetime.timezone.utc)
+        diff_days = (now - dt).days
+        years = diff_days // 365
+        months = diff_days // 30
+        if years >= 2:
+            return f"🏛️ {years} năm trước • Bền vững kinh điển"
+        elif years == 1:
+            return f"🏛️ 1 năm trước • Trụ cột ngách"
+        elif months >= 3:
+            return f"⏳ {months} tháng trước"
+        else:
+            return f"🔥 Gần đây ({diff_days} ngày)"
+    except Exception:
+        return pub_iso[:10]
+
+@app.get("/api/trending/feed")
+def get_trending_feed(
+    country: Optional[str] = None, 
+    geo: Optional[str] = "US", 
+    category: Optional[str] = "all",
+    duration: Optional[str] = "long_form",
+    feed_mode: Optional[str] = "evergreen"
+):
+    import requests
+    geo_code = (country or geo or "US").upper()
+    cat = (category or "all").lower()
+    dur_filter = (duration or "long_form").lower()
+    mode = (feed_mode or "evergreen").lower()
+    api_key = get_default_api_key()
+
+    videos = []
+
+    # 1. Thử dùng YouTube Data API v3 chính thức nếu có API Key
+    if api_key:
+        try:
+            # Xác định từ khóa truy vấn
+            niche_dict = NICHE_LOCALIZED_QUERIES.get(cat, {})
+            if cat != "all" and niche_dict:
+                q_term = niche_dict.get(geo_code, niche_dict.get("DEFAULT", cat))
+            else:
+                country_names = {
+                    "US": "United States documentary", "GB": "United Kingdom documentary", 
+                    "JP": "日本 特集 ドキュメンタリー", "KR": "한국 다큐멘터리 명강의", 
+                    "DE": "Deutschland Dokumentation", "VN": "Việt Nam phóng sự tài liệu"
+                }
+                q_term = country_names.get(geo_code, "documentary in-depth analysis")
+
+            # videoDuration parameter cho YouTube API
+            # medium: 4-20 min, long: >20 min. Tránh short bằng cách không bao giờ dùng short.
+            v_dur_param = "medium"
+            if dur_filter == "deep_dive":
+                v_dur_param = "long"
+
+            s_url = (
+                f"https://www.googleapis.com/youtube/v3/search?part=snippet&type=video"
+                f"&videoDuration={v_dur_param}&order=viewCount&regionCode={geo_code}"
+                f"&q={requests.utils.quote(q_term)}&maxResults=25&key={api_key}"
+            )
+            s_res = requests.get(s_url, timeout=10).json()
+            items = s_res.get("items", [])
+            v_ids = [it["id"]["videoId"] for it in items if it.get("id", {}).get("videoId")]
+
+            if v_ids:
+                # Lấy thông số chi tiết video (độ dài, lượt xem)
+                d_url = f"https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id={','.join(v_ids)}&key={api_key}"
+                d_res = requests.get(d_url, timeout=10).json()
+                video_items = d_res.get("items", [])
+
+                # Lấy thông tin kênh để xác nhận kênh còn sống và có lượng sub ổn định
+                ch_ids = list(set([it["snippet"]["channelId"] for it in video_items if it.get("snippet", {}).get("channelId")]))
+                ch_map = {}
+                if ch_ids:
+                    ch_url = f"https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id={','.join(ch_ids)}&key={api_key}"
+                    ch_res = requests.get(ch_url, timeout=10).json()
+                    for ch in ch_res.get("items", []):
+                        ch_map[ch["id"]] = ch
+
+                for item in video_items:
+                    v_id = item.get("id")
+                    snippet = item.get("snippet", {})
+                    stats = item.get("statistics", {})
+                    content_det = item.get("contentDetails", {})
+                    
+                    # LOẠI BỎ TOÀN BỘ SHORTS VÀ VIDEO QUÁ NGẮN (< 180 giây)
+                    dur_iso = content_det.get("duration", "")
+                    dur_seconds = parse_iso_duration(dur_iso)
+                    title_raw = snippet.get("title", "")
+                    
+                    if dur_seconds < 180 or "#shorts" in title_raw.lower() or "shorts" in title_raw.lower().split():
+                        continue
+                    if dur_filter == "deep_dive" and dur_seconds < 1200:
+                        continue
+
+                    # Kiểm tra kênh hoạt động & ổn định
+                    ch_id = snippet.get("channelId", "")
+                    ch_info = ch_map.get(ch_id, {})
+                    ch_stats = ch_info.get("statistics", {})
+                    subs_count = int(ch_stats.get("subscriberCount") or 0)
+                    total_vids = int(ch_stats.get("videoCount") or 0)
+                    
+                    # Xác định trạng thái kênh còn sống
+                    is_active_channel = subs_count >= 2000 and total_vids >= 10
+                    channel_badge_text = "🟢 Kênh Ổn Định" if is_active_channel else "📺 Đang Hoạt Động"
+                    if subs_count > 0:
+                        channel_badge_text += f" • {subs_count // 1000}K Subs"
+
+                    if mode == "active_channels" and not is_active_channel:
+                        continue
+
+                    thumb = (snippet.get("thumbnails", {}).get("high") or snippet.get("thumbnails", {}).get("medium") or {}).get("url") or f"https://i.ytimg.com/vi/{v_id}/hqdefault.jpg"
+                    pub_at = snippet.get("publishedAt", "")
+                    
+                    videos.append({
+                        "video_id": v_id,
+                        "id": v_id,
+                        "title": title_raw,
+                        "channel_title": snippet.get("channelTitle", "YouTube Creator"),
+                        "channel": snippet.get("channelTitle", "YouTube Creator"),
+                        "channel_id": ch_id,
+                        "channel_subs": subs_count,
+                        "channel_videos": total_vids,
+                        "channel_badge": channel_badge_text,
+                        "is_active_channel": is_active_channel,
+                        "view_count": int(stats.get("viewCount", 0)),
+                        "views": int(stats.get("viewCount", 0)),
+                        "duration_seconds": dur_seconds,
+                        "duration_formatted": format_duration_display(dur_seconds),
+                        "published_at": pub_at[:10],
+                        "published_age": format_published_age(pub_at),
+                        "url": f"https://www.youtube.com/watch?v={v_id}",
+                        "thumbnail": thumb
+                    })
+        except Exception as api_err:
+            logger.warning(f"Lỗi truy vấn trending qua YouTube Data API: {api_err}")
+
+    # 2. Nếu không có API Key hoặc API trả về rỗng, dùng fallback qua yt-dlp ytsearch
+    if not videos:
+        try:
+            country_names = {
+                "US": "United States", "GB": "United Kingdom", "JP": "Japan",
+                "KR": "Korea", "DE": "Germany", "VN": "Việt Nam", "IN": "India",
+                "BR": "Brazil", "CA": "Canada", "AU": "Australia"
+            }
+            c_name = country_names.get(geo_code, geo_code)
+            
+            if cat in NICHE_LOCALIZED_QUERIES:
+                niche_dict = NICHE_LOCALIZED_QUERIES[cat]
+                q_term = niche_dict.get(geo_code, niche_dict.get("DEFAULT", cat))
+                search_query = f"{q_term}"
+            else:
+                search_query = f"in-depth documentary {c_name}"
+
+            ydl_opts = {
+                'quiet': True,
+                'skip_download': True,
+                'extract_flat': True,
+                'socket_timeout': 10
+            }
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                res = ydl.extract_info(f"ytsearch30:{search_query}", download=False)
+                if res and res.get('entries'):
+                    for e in res['entries']:
+                        if not e:
+                            continue
+                        dur = e.get('duration') or 0
+                        t = e.get('title', '')
+                        # Loại bỏ shorts
+                        if dur > 0 and dur < 180:
+                            continue
+                        if dur_filter == "deep_dive" and dur > 0 and dur < 1200:
+                            continue
+                        if '#shorts' in t.lower() or 'shorts' in t.lower().split():
+                            continue
+
+                        v_id = e.get('id')
+                        thumb = ""
+                        thumbs = e.get('thumbnails', [])
+                        if thumbs:
+                            thumb = thumbs[-1].get('url') or thumbs[0].get('url', '')
+                        elif v_id:
+                            thumb = f"https://i.ytimg.com/vi/{v_id}/hqdefault.jpg"
+
+                        videos.append({
+                            "video_id": v_id,
+                            "id": v_id,
+                            "title": t,
+                            "channel_title": e.get('channel') or e.get('uploader') or 'YouTube Creator',
+                            "channel": e.get('channel') or e.get('uploader') or 'YouTube Creator',
+                            "channel_badge": "🟢 Kênh Hoạt Động",
+                            "is_active_channel": True,
+                            "view_count": e.get('view_count') or 0,
+                            "views": e.get('view_count') or 0,
+                            "duration_seconds": dur,
+                            "duration_formatted": format_duration_display(dur),
+                            "published_age": "🏛️ Bền vững nhiều năm",
+                            "url": e.get('url') or f"https://www.youtube.com/watch?v={v_id}",
+                            "thumbnail": thumb
+                        })
+        except Exception as yt_err:
+            logger.error(f"Lỗi khi lấy trending fallback: {yt_err}")
+
+    return {
+        "success": True,
+        "geo": geo_code,
+        "country": geo_code,
+        "category": cat,
+        "duration_filter": dur_filter,
+        "mode": mode,
+        "total": len(videos),
+        "videos": videos[:18],
+        "trending_videos": videos[:18]
+    }
+
+frontend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
+if os.path.exists(frontend_dir):
+    app.mount("/static", StaticFiles(directory=frontend_dir), name="static")
+
+@app.get("/")
+def serve_index():
+    index_path = os.path.join(frontend_dir, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    return {"message": "Frontend chưa được khởi tạo."}

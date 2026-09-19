@@ -1,0 +1,1819 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YouTube Trend & Channel Intelligence - Đa Quốc Gia & Giờ Vàng UC</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #090d16;
+      color: #f1f5f9;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .glass-card {
+      background: rgba(17, 24, 39, 0.78);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-input {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+    .copy-chip {
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .copy-chip:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.15);
+    }
+    .copy-chip:active {
+      transform: scale(0.96);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-rose-500 selection:text-white">
+
+  <!-- Top Navbar -->
+  <header class="sticky top-0 z-50 glass-card border-b border-white/10 px-6 py-3.5">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="switchNav('channel')">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-600 via-red-500 to-amber-500 flex items-center justify-center shadow-lg shadow-rose-500/20">
+          <i data-lucide="youtube" class="w-6 h-6 text-white"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="text-lg font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-rose-400 bg-clip-text text-transparent">
+              YT Analyzer
+            </span>
+            <span class="text-[10px] uppercase px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">Global Pro</span>
+          </div>
+          <p class="text-[11px] text-slate-400">Phân Tích Ngoại Quốc • Từ Khóa 1-Click Copy • Giờ Vàng Đăng Theo UC</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex items-center space-x-1 bg-slate-900/80 p-1 rounded-xl border border-white/5">
+        <button id="nav-btn-channel" onclick="switchNav('channel')" class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all bg-rose-600 text-white shadow-sm">
+          <i data-lucide="line-chart" class="w-3.5 h-3.5"></i>
+          <span>Phân Tích Kênh</span>
+        </button>
+        <button id="nav-btn-uctime" onclick="switchNav('uctime')" class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all text-slate-400 hover:text-white hover:bg-slate-800">
+          <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>Lấy Giờ Đăng (UC)</span>
+        </button>
+        <button id="nav-btn-keyword" onclick="switchNav('keyword')" class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all text-slate-400 hover:text-white hover:bg-slate-800">
+          <i data-lucide="flame" class="w-3.5 h-3.5"></i>
+          <span>Đo Trend Từ Khóa</span>
+        </button>
+        <button id="nav-btn-trending" onclick="switchNav('trending')" class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all text-slate-400 hover:text-white hover:bg-slate-800">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+          <span>Top Thịnh Hành</span>
+        </button>
+      </nav>
+
+      <div class="flex items-center space-x-2">
+        <button id="nav-api-btn" onclick="focusApiKeyInput()" class="px-2.5 py-1.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-xs font-semibold flex items-center space-x-1.5 border border-white/10 transition text-slate-300" title="YouTube API Key (Dán 1 lần dùng mãi mãi)">
+          <i data-lucide="key" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span id="nav-api-label">API Key: Chưa lưu</span>
+        </button>
+        <button onclick="exportDataJSON()" class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all" title="Xuất dữ liệu JSON">
+          <i data-lucide="download" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 flex-1">
+    <!-- ==================== VIEW 1: CHANNEL ANALYZER ==================== -->
+    <div id="view-channel" class="space-y-6">
+      <section class="glass-card rounded-2xl p-6 relative overflow-hidden shadow-2xl">
+        <div class="absolute -right-16 -top-16 w-64 h-64 bg-rose-600/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -left-16 -bottom-16 w-64 h-64 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-3xl mx-auto text-center space-y-4 relative z-10">
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
+            Phân Tích Kênh Ngoại Quốc, <span class="bg-gradient-to-r from-rose-400 via-amber-300 to-emerald-400 bg-clip-text text-transparent">Bắt Trend & Canh Giờ Vàng</span>
+          </h1>
+          <p class="text-sm text-slate-400 max-w-2xl mx-auto leading-relaxed">
+            Chọn quốc gia mục tiêu bạn làm view (Mỹ, Anh, Nhật, Đức...), hệ thống tự tính toán xu hướng tìm kiếm bản địa, cung cấp bộ từ khóa 1-click copy và giờ cần bấm đăng tại Việt Nam.
+          </p>
+
+          <form id="search-form" onsubmit="handleChannelSearch(event)" class="flex flex-col sm:flex-row items-center gap-2 mt-2">
+            <div class="relative w-full">
+              <i data-lucide="search" class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+              <input 
+                id="channel-input" 
+                type="text" 
+                placeholder="Nhập handle (@veritasium, @MrBeast, @KhoaPug), mã UC hoặc link kênh..." 
+                class="w-full pl-12 pr-4 py-3.5 glass-input rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 text-white placeholder:text-slate-500 shadow-inner"
+                required
+              />
+            </div>
+            
+            <div class="relative shrink-0 w-full sm:w-auto">
+              <select id="channel-geo" class="w-full sm:w-auto glass-input px-4 py-3.5 rounded-xl text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-rose-500 cursor-pointer">
+                <option value="US">🇺🇸 Khán giả Mỹ (US)</option>
+                <option value="GB">🇬🇧 Khán giả Anh (UK)</option>
+                <option value="JP">🇯🇵 Khán giả Nhật (JP)</option>
+                <option value="KR">🇰🇷 Khán giả Hàn (KR)</option>
+                <option value="DE">🇩🇪 Khán giả Đức (DE)</option>
+                <option value="IN">🇮🇳 Khán giả Ấn Độ (IN)</option>
+                <option value="BR">🇧🇷 Khán giả Brazil (BR)</option>
+                <option value="VN">🇻🇳 Khán giả Việt Nam (VN)</option>
+                <option value="">🌐 Toàn Cầu (Global)</option>
+              </select>
+            </div>
+
+            <button 
+              id="search-btn"
+              type="submit" 
+              class="w-full sm:w-auto px-7 py-3.5 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-semibold text-sm rounded-xl shadow-lg shadow-rose-600/30 transition-all flex items-center justify-center space-x-2 shrink-0">
+              <span>Phân Tích</span>
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+          </form>
+
+          <div class="flex flex-wrap items-center justify-center gap-2 pt-2 text-xs text-slate-400">
+            <span>Kênh ngoại quốc & VN mẫu:</span>
+            <button onclick="quickSearch('@MrBeast', 'US')" class="px-2.5 py-1 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-white/5 transition">🇺🇸 @MrBeast</button>
+            <button onclick="quickSearch('@veritasium', 'US')" class="px-2.5 py-1 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-white/5 transition">🇺🇸 @veritasium</button>
+            <button onclick="quickSearch('@MKBHD', 'US')" class="px-2.5 py-1 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-white/5 transition">🇺🇸 @MKBHD</button>
+            <button onclick="quickSearch('@KhoaPug', 'VN')" class="px-2.5 py-1 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-white/5 transition">🇻🇳 @KhoaPug</button>
+          </div>
+        </div>
+      </section>
+
+      <div id="channel-loading" class="hidden glass-card rounded-2xl p-12 text-center space-y-4">
+        <div class="relative w-16 h-16 mx-auto">
+          <div class="w-16 h-16 rounded-full border-4 border-rose-500/20 border-t-rose-500 animate-spin"></div>
+          <i data-lucide="flame" class="w-6 h-6 text-rose-500 absolute inset-0 m-auto"></i>
+        </div>
+        <div class="space-y-1">
+          <h3 id="loading-title" class="text-base font-semibold text-white">Đang quét kênh & phân tích thị trường mục tiêu...</h3>
+          <p id="loading-desc" class="text-xs text-slate-400">Đang tính toán giờ vàng quy đổi, trích xuất bộ từ khóa copy và đo xung lượng trend</p>
+        </div>
+      </div>
+
+      <div id="channel-results" class="hidden space-y-6">
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <div class="lg:col-span-2 glass-card rounded-2xl p-5 space-y-5">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+              <img id="ch-avatar" src="" alt="Avatar" class="w-16 h-16 rounded-2xl object-cover ring-2 ring-rose-500/30 bg-slate-800" />
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center space-x-2">
+                  <h2 id="ch-title" class="text-xl font-bold truncate text-white">Tên Kênh</h2>
+                  <span id="ch-verified" class="hidden text-rose-400" title="Đã xác minh"><i data-lucide="check-circle" class="w-4 h-4 inline"></i></span>
+                </div>
+                <p id="ch-url" class="text-xs text-slate-400 truncate mt-0.5">https://youtube.com/@channel</p>
+                <div id="ch-categories" class="flex flex-wrap gap-1.5 mt-2"></div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-white/5">
+              <div class="bg-slate-900/60 p-3 rounded-xl border border-white/5">
+                <div class="flex items-center space-x-1.5 text-slate-400 text-xs mb-1">
+                  <i data-lucide="users" class="w-3.5 h-3.5 text-rose-400"></i>
+                  <span>Người Đăng Ký</span>
+                </div>
+                <div id="ch-subs" class="text-base font-bold text-white">0</div>
+              </div>
+              <div class="bg-slate-900/60 p-3 rounded-xl border border-white/5">
+                <div class="flex items-center space-x-1.5 text-slate-400 text-xs mb-1">
+                  <i data-lucide="eye" class="w-3.5 h-3.5 text-amber-400"></i>
+                  <span>View TB / Video</span>
+                </div>
+                <div id="ch-avg-views" class="text-base font-bold text-white">0</div>
+              </div>
+              <div class="bg-slate-900/60 p-3 rounded-xl border border-white/5">
+                <div class="flex items-center space-x-1.5 text-slate-400 text-xs mb-1">
+                  <i data-lucide="calendar" class="w-3.5 h-3.5 text-emerald-400"></i>
+                  <span>Tần Suất Đăng</span>
+                </div>
+                <div id="ch-cadence" class="text-xs font-bold text-white truncate">Chưa rõ</div>
+              </div>
+              <div class="bg-slate-900/60 p-3 rounded-xl border border-white/5">
+                <div class="flex items-center space-x-1.5 text-slate-400 text-xs mb-1">
+                  <i data-lucide="target" class="w-3.5 h-3.5 text-indigo-400"></i>
+                  <span>Tỉ Lệ View / Sub</span>
+                </div>
+                <div id="ch-ratio" class="text-base font-bold text-white">0%</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-5 flex flex-col justify-between space-y-4 relative overflow-hidden">
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <span id="target-country-hotness-label" class="text-xs uppercase tracking-wider font-semibold text-slate-400">Độ Hot Tại Nước Mục Tiêu</span>
+                <span id="trend-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30">🔥 Hot</span>
+              </div>
+              <div class="flex items-baseline space-x-2">
+                <span id="trend-score" class="text-4xl font-black tracking-tight text-white">0</span>
+                <span class="text-xs text-slate-400">/ 100 điểm Trend Score</span>
+              </div>
+              <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                <div id="trend-bar" class="bg-gradient-to-r from-amber-500 via-rose-500 to-red-500 h-2.5 rounded-full transition-all duration-1000" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="p-3 bg-slate-900/80 rounded-xl border border-white/5 text-xs text-slate-300 leading-relaxed" id="trend-summary">
+              Đang phân tích xu hướng...
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-2 border-b border-white/10 pb-2 overflow-x-auto custom-scrollbar">
+          <button onclick="switchSubTab('sub-time')" id="sub-btn-time" class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 bg-rose-600/20 text-rose-300 border border-rose-500/30">
+            <i data-lucide="clock" class="w-4 h-4"></i>
+            <span>⏰ 1. Giờ Đăng Vàng (Giờ VN)</span>
+          </button>
+          <button onclick="switchSubTab('sub-keywords')" id="sub-btn-keywords" class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 text-slate-400 hover:text-white hover:bg-slate-800">
+            <i data-lucide="copy" class="w-4 h-4"></i>
+            <span>📋 2. Từ Khóa Bắt Trend 1-Click Copy</span>
+          </button>
+          <button onclick="switchSubTab('sub-overview')" id="sub-btn-overview" class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 text-slate-400 hover:text-white hover:bg-slate-800">
+            <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+            <span>📊 3. Hiệu Suất Video</span>
+          </button>
+          <button onclick="switchSubTab('sub-trends')" id="sub-btn-trends" class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 text-slate-400 hover:text-white hover:bg-slate-800">
+            <i data-lucide="trending-up" class="w-4 h-4"></i>
+            <span>🌍 4. Google Trends Khu Vực</span>
+          </button>
+          <button onclick="switchSubTab('sub-competitors')" id="sub-btn-competitors" class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 text-slate-400 hover:text-white hover:bg-slate-800">
+            <i data-lucide="compass" class="w-4 h-4"></i>
+            <span>👥 5. Kênh Đối Thủ Cùng Ngách</span>
+          </button>
+          <button onclick="switchSubTab('sub-strategy')" id="sub-btn-strategy" class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 text-slate-400 hover:text-white hover:bg-slate-800">
+            <i data-lucide="lightbulb" class="w-4 h-4"></i>
+            <span>💡 6. Mẫu Tiêu Đề Bắt Trend</span>
+          </button>
+        </div>
+
+        <!-- Subtab 1: Giờ Đăng Vàng -->
+        <div id="sub-time" class="subtab-pane space-y-5">
+          <div id="target-country-strategy-banner" class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-start space-x-3 text-xs">
+            <div class="p-2 rounded-xl bg-rose-500/20 text-rose-400 shrink-0 mt-0.5">
+              <i data-lucide="compass" class="w-4 h-4"></i>
+            </div>
+            <div class="space-y-1">
+              <h4 class="font-bold text-white flex items-center space-x-2">
+                <span>Chiến Lược Khung Giờ Thị Trường:</span>
+                <span id="target-country-name-badge" class="px-2 py-0.5 rounded bg-rose-500/30 text-rose-200 text-[11px] font-semibold">Khán Giả Mục Tiêu</span>
+              </h4>
+              <p id="target-country-strategy-text" class="text-slate-300 leading-relaxed">Đang tải thói quen tiêu thụ nội dung theo múi giờ thị trường...</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="glass-card rounded-2xl p-5 border-l-4 border-l-rose-500 space-y-2">
+              <span class="text-xs uppercase tracking-wider font-semibold text-rose-400">Giờ Đăng Hiệu Quả Nhất (Giờ VN)</span>
+              <div id="best-upload-time-vn" class="text-2xl font-black text-white">--:--</div>
+              <p id="best-time-desc" class="text-xs text-slate-400 leading-relaxed">Nên đăng trước 1-2 tiếng để thuật toán xử lý và đón đầu đỉnh xem.</p>
+            </div>
+            <div class="glass-card rounded-2xl p-5 border-l-4 border-l-amber-500 space-y-2">
+              <span class="text-xs uppercase tracking-wider font-semibold text-amber-400">Giờ Cao Điểm Xem Của Khán Giả</span>
+              <div id="peak-view-time-vn" class="text-2xl font-black text-white">--:--</div>
+              <p id="peak-time-desc" class="text-xs text-slate-400 leading-relaxed">Khung giờ khán giả mục tiêu tập trung xem nhiều nhất trong ngày.</p>
+            </div>
+            <div class="glass-card rounded-2xl p-5 border-l-4 border-l-emerald-500 space-y-2">
+              <span class="text-xs uppercase tracking-wider font-semibold text-emerald-400">Ngày Đăng Tốt Nhất</span>
+              <div id="best-day-vn" class="text-2xl font-black text-white">--</div>
+              <p id="best-day-desc" class="text-xs text-slate-400 leading-relaxed">Ngày trong tuần có tỉ lệ tương tác và lượt xem cao nhất.</p>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-5 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 class="text-base font-bold text-white flex items-center space-x-2">
+                  <i data-lucide="bar-chart" class="w-4 h-4 text-rose-500"></i>
+                  <span>Biểu Đồ Phân Bố Đăng Video 24 Giờ (Quy đổi giờ VN)</span>
+                </h3>
+                <p class="text-xs text-slate-400">Xem kênh này thường đăng vào khung giờ nào theo giờ Việt Nam</p>
+              </div>
+              <div class="text-xs px-3 py-1 bg-slate-800 rounded-lg text-slate-300 border border-white/5 flex items-center space-x-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>
+                <span>Múi giờ: Asia/Ho_Chi_Minh (UTC+7)</span>
+              </div>
+            </div>
+            <div class="h-64 relative">
+              <canvas id="publishHoursChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Subtab 2: Từ Khóa Bắt Trend 1-Click Copy -->
+        <div id="sub-keywords" class="subtab-pane hidden space-y-5">
+          <div class="glass-card rounded-2xl p-5 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 class="text-base font-bold text-white flex items-center space-x-2">
+                  <i data-lucide="tags" class="w-4 h-4 text-rose-500"></i>
+                  <span>Kho Từ Khóa & Thẻ Tag Bắt Trend (Copy Nhanh)</span>
+                </h3>
+                <p class="text-xs text-slate-400">Bộ từ khóa trích xuất từ các video viral nhất của kênh, định dạng chuẩn YouTube Tag</p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <button onclick="copyAllTags()" class="px-4 py-2 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white text-xs font-bold rounded-xl shadow-md transition flex items-center space-x-2">
+                  <i data-lucide="clipboard-copy" class="w-3.5 h-3.5"></i>
+                  <span>Copy Tất Cả Thẻ Tag (Dấu phẩy)</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="p-4 bg-slate-900/90 rounded-xl border border-white/10 relative">
+              <div id="tags-pool" class="flex flex-wrap gap-2 text-xs max-h-48 overflow-y-auto custom-scrollbar">
+                <!-- Tags rendered here -->
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="glass-card rounded-2xl p-5 space-y-3">
+              <h4 class="text-sm font-bold text-emerald-400 flex items-center space-x-2">
+                <i data-lucide="trending-up" class="w-4 h-4"></i>
+                <span>Từ Khóa Tác Động Cao (Viral High-Impact)</span>
+              </h4>
+              <p class="text-xs text-slate-400">Các từ khóa xuất hiện trong các video có view vượt trội gấp nhiều lần trung bình.</p>
+              <div id="high-impact-keywords" class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+                <!-- High impact list -->
+              </div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-5 space-y-3">
+              <h4 class="text-sm font-bold text-amber-400 flex items-center space-x-2">
+                <i data-lucide="hash" class="w-4 h-4"></i>
+                <span>Cụm Từ Khóa 2-3 Chữ (Long-tail Keywords)</span>
+              </h4>
+              <p class="text-xs text-slate-400">Từ khóa ngách cụ thể có tỉ lệ cạnh tranh thấp nhưng độ giữ chân người xem cao.</p>
+              <div id="ngram-keywords" class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+                <!-- N-grams list -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Subtab 3: Hiệu Suất Video & Outliers -->
+        <div id="sub-overview" class="subtab-pane hidden space-y-5">
+          <div class="glass-card rounded-2xl p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-base font-bold text-white flex items-center space-x-2">
+                  <i data-lucide="flame" class="w-4 h-4 text-rose-500"></i>
+                  <span>Video Đột Phá Lượt Xem (Outlier Viral Videos)</span>
+                </h3>
+                <p class="text-xs text-slate-400">Các video có lượt xem gấp từ 1.5x đến 5x+ so với mức trung bình của toàn kênh</p>
+              </div>
+            </div>
+            <div id="outlier-videos-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Outlier videos list -->
+            </div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-5 space-y-4">
+            <h3 class="text-base font-bold text-white">Toàn Bộ Video Phân Tích Gần Đây</h3>
+            <div class="overflow-x-auto custom-scrollbar">
+              <table class="w-full text-xs text-left text-slate-300">
+                <thead class="text-slate-400 uppercase bg-slate-900/80 border-b border-white/5">
+                  <tr>
+                    <th class="px-4 py-3">Tiêu đề video</th>
+                    <th class="px-4 py-3">Lượt xem</th>
+                    <th class="px-4 py-3">Ngày đăng (Giờ VN)</th>
+                    <th class="px-4 py-3">Hiệu suất</th>
+                    <th class="px-4 py-3 text-right">Xem</th>
+                  </tr>
+                </thead>
+                <tbody id="recent-videos-tbody" class="divide-y divide-white/5">
+                  <!-- Rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Subtab 4: Google Trends Khu Vực -->
+        <div id="sub-trends" class="subtab-pane hidden space-y-5">
+          <div class="glass-card rounded-2xl p-5 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 class="text-base font-bold text-white flex items-center space-x-2">
+                  <i data-lucide="activity" class="w-4 h-4 text-rose-500"></i>
+                  <span>Lịch Sử Tìm Kiếm Google & YouTube 30 Ngày Qua</span>
+                </h3>
+                <p class="text-xs text-slate-400">Độ quan tâm theo thời gian thực tế từ Google Trends tại quốc gia được chọn</p>
+              </div>
+              <span id="trends-target-label" class="text-xs px-3 py-1 bg-rose-500/20 text-rose-300 rounded-lg border border-rose-500/30">Mục tiêu: US</span>
+            </div>
+            <div class="h-64 relative">
+              <canvas id="googleTrendsChart"></canvas>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-5 space-y-3">
+            <h4 class="text-sm font-bold text-white flex items-center space-x-2">
+              <i data-lucide="zap" class="w-4 h-4 text-amber-400"></i>
+              <span>Từ Khóa Đang Đột Biến (Breakout Queries)</span>
+            </h4>
+            <p class="text-xs text-slate-400">Các truy vấn tăng trưởng đột biến hơn 300%+ trong 30 ngày qua tại thị trường mục tiêu</p>
+            <div id="breakout-queries" class="flex flex-wrap gap-2 pt-2">
+              <!-- Breakouts -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Subtab 5: Kênh Đối Thủ Cùng Ngách -->
+        <div id="sub-competitors" class="subtab-pane hidden space-y-5">
+          <div class="glass-card rounded-2xl p-5 space-y-4">
+            <div>
+              <h3 class="text-base font-bold text-white flex items-center space-x-2">
+                <i data-lucide="compass" class="w-4 h-4 text-rose-500"></i>
+                <span>Các Kênh Cùng Chủ Đề & Đối Thủ Cạnh Tranh</span>
+              </h3>
+              <p class="text-xs text-slate-400">Phát hiện các nguồn nội dung tương tự hoạt động hiệu quả trong cùng thị trường</p>
+            </div>
+            <div id="competitors-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <!-- Competitor channels -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Subtab 6: Mẫu Tiêu Đề Bắt Trend -->
+        <div id="sub-strategy" class="subtab-pane hidden space-y-5">
+          <div class="glass-card rounded-2xl p-5 space-y-4">
+            <div>
+              <h3 class="text-base font-bold text-white flex items-center space-x-2">
+                <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+                <span>Gợi Ý Cấu Trúc Tiêu Đề Bắt Trend & Tăng CTR</span>
+              </h3>
+              <p class="text-xs text-slate-400">Các công thức tiêu đề áp dụng thành công nhất trong ngách này cho người làm view ngoại</p>
+            </div>
+            <div id="title-templates" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Templates -->
+            </div>
+          </div>
+        </div>
+
+      </div> <!-- /#channel-results -->
+    </div> <!-- /#view-channel -->
+
+    <!-- ==================== VIEW 4: LẤY GIỜ ĐĂNG (UC CHANNEL ID) ==================== -->
+    <div id="view-channel-time" class="view-pane hidden space-y-6">
+      <section class="relative glass-card rounded-3xl p-6 sm:p-10 border border-white/10 overflow-hidden shadow-2xl">
+        <div class="absolute -top-24 -left-24 w-80 h-80 bg-rose-600/15 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="relative z-10 max-w-3xl mx-auto text-center space-y-4">
+          <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-semibold">
+            <i data-lucide="database" class="w-3.5 h-3.5"></i>
+            <span>Google Sheets & YouTube Publish Time Checker (Chuẩn Giờ Việt Nam)</span>
+          </div>
+          <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-white">
+            Trích Xuất Giờ Đăng Video Theo <span class="bg-clip-text text-transparent bg-gradient-to-r from-rose-400 to-amber-300">Channel ID (UC...)</span>
+          </h1>
+          <p class="text-sm sm:text-base text-slate-300 max-h-16">
+            Nhập mã kênh <code class="px-2 py-0.5 rounded bg-slate-800 text-rose-300 font-mono text-xs">UC...</code> để lấy chính xác <strong class="text-white">Ngày - Giờ - Phút - Giây</strong> đăng video quy đổi chuẩn múi giờ Việt Nam. 1-Click Copy dán thẳng vào Google Sheets!
+          </p>
+
+          <!-- Input Form -->
+          <form id="uc-time-form" onsubmit="handleUCTimeSearch(event)" class="mt-6 space-y-3 max-w-2xl mx-auto">
+            <!-- Row 1: Channel ID + Limit (3 cols + 1 col) -->
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-2.5">
+              <div class="sm:col-span-3 relative">
+                <i data-lucide="hash" class="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2"></i>
+                <input 
+                  id="uc-channel-id" 
+                  type="text" 
+                  required
+                  placeholder="Nhập Channel ID (VD: UCX6OQ3DkcsbYNE6H8uQQuVA) hoặc link kênh..." 
+                  class="w-full pl-12 pr-4 h-12 bg-slate-900/90 border border-white/15 rounded-xl text-white placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 transition font-mono shadow-inner"
+                />
+              </div>
+              <div class="sm:col-span-1">
+                <select id="uc-limit" class="w-full px-3 h-12 bg-slate-900/90 border border-white/15 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 cursor-pointer shadow-inner">
+                  <option value="10">10 video</option>
+                  <option value="20" selected>20 video</option>
+                  <option value="50">50 video</option>
+                  <option value="100">100 video</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Row 2: API Key + Button (3 cols + 1 col, perfectly aligned) -->
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-2.5 items-start">
+              <div class="sm:col-span-3 space-y-1.5 text-left">
+                <div class="relative flex items-center">
+                  <i data-lucide="key" class="w-4 h-4 text-amber-400 absolute left-3.5 pointer-events-none"></i>
+                  <input 
+                    id="uc-api-key" 
+                    type="password" 
+                    oninput="onApiKeyInputChanged(this.value)"
+                    placeholder="Dán YouTube API Key (Dán 1 lần - Hệ thống tự lưu dùng mãi mãi)..." 
+                    class="w-full pl-10 pr-20 h-12 bg-slate-900/90 border border-white/15 rounded-xl text-white placeholder-slate-500 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 transition font-mono shadow-inner"
+                  />
+                  <div class="absolute right-2.5 flex items-center space-x-1">
+                    <button type="button" onclick="toggleApiKeyVisibility('uc-api-key')" class="p-1.5 text-slate-400 hover:text-white transition rounded" title="Hiện/Ẩn API Key">
+                      <i id="uc-api-key-eye" data-lucide="eye" class="w-4 h-4"></i>
+                    </button>
+                    <button type="button" onclick="clearSavedApiKey()" class="p-1.5 text-slate-400 hover:text-rose-400 transition rounded" title="Xóa API Key đã lưu">
+                      <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                  </div>
+                </div>
+                <div id="api-key-status" class="flex items-center space-x-2 text-[11px] text-slate-400 pl-1">
+                  <span class="w-2 h-2 rounded-full bg-slate-500 inline-block"></span>
+                  <span>Chưa lưu API Key (Hệ thống dùng chế độ Free Mode không giới hạn)</span>
+                </div>
+              </div>
+              <div class="sm:col-span-1">
+                <button 
+                  type="submit" 
+                  class="w-full h-12 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-rose-600/30 transition flex items-center justify-center space-x-1.5 shrink-0">
+                  <i data-lucide="play" class="w-4 h-4 shrink-0"></i>
+                  <span class="whitespace-nowrap">Lấy Giờ Đăng</span>
+                </button>
+              </div>
+            </div>
+          </form>
+
+          <div class="flex flex-wrap items-center justify-center gap-2 pt-2 text-xs text-slate-400">
+            <span>Kênh test mẫu:</span>
+            <button onclick="setUCTest('UCX6OQ3DkcsbYNE6H8uQQuVA')" class="px-2.5 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 border border-white/5 transition">MrBeast (UCX6OQ3DkcsbYNE6H8uQQuVA)</button>
+            <button onclick="setUCTest('UCHnyfMqiRRG1u-2MsSQLbXA')" class="px-2.5 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 border border-white/5 transition">Veritasium (UCHnyfMqiRRG1u-2MsSQLbXA)</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Loading State -->
+      <div id="uc-loading" class="hidden glass-card rounded-2xl p-10 text-center space-y-4">
+        <div class="w-12 h-12 rounded-full border-4 border-rose-500/20 border-t-rose-500 animate-spin mx-auto"></div>
+        <p class="text-sm font-semibold text-white">Đang tải danh sách video và trích xuất giờ đăng chính xác (Giờ VN)...</p>
+        <p class="text-xs text-slate-400">Đang quét timestamp từng video để quy đổi chuẩn UTC+7</p>
+      </div>
+
+      <!-- Results Container -->
+      <div id="uc-results" class="hidden space-y-5">
+        <!-- Action Toolbar -->
+        <div class="glass-card rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h3 id="uc-channel-title" class="text-base font-bold text-white">Danh Sách Video</h3>
+            <p id="uc-meta-info" class="text-xs text-slate-400">Múi giờ: Asia/Ho_Chi_Minh (UTC+7)</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="copyUCTableForSheets()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-emerald-600/30 transition flex items-center space-x-2">
+              <i data-lucide="clipboard" class="w-4 h-4"></i>
+              <span>📋 Copy Cho Google Sheets (Ctrl + V)</span>
+            </button>
+            <button onclick="downloadUCCSV()" class="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-white/10 transition flex items-center space-x-1.5">
+              <i data-lucide="download" class="w-4 h-4"></i>
+              <span>Tải CSV</span>
+            </button>
+            <button onclick="openGasModal()" class="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-semibold rounded-xl border border-amber-500/20 transition flex items-center space-x-1.5">
+              <i data-lucide="code" class="w-4 h-4"></i>
+              <span>Google Apps Script</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Notification Banner -->
+        <div id="uc-copy-toast" class="hidden p-3 bg-emerald-500/20 border border-emerald-500/40 rounded-xl text-xs text-emerald-300 flex items-center space-x-2">
+          <i data-lucide="check-circle" class="w-4 h-4 shrink-0"></i>
+          <span>Đã copy toàn bộ bảng với định dạng Tab-Separated. Hãy mở Google Sheets và nhấn <strong>Ctrl + V</strong> tại ô A1 để dán!</span>
+        </div>
+
+        <!-- Table View -->
+        <div class="glass-card rounded-2xl overflow-hidden border border-white/10">
+          <div class="overflow-x-auto custom-scrollbar">
+            <table id="uc-table" class="w-full text-xs text-left text-slate-300">
+              <thead class="text-slate-400 uppercase bg-slate-900/90 border-b border-white/10 text-[11px]">
+                <tr>
+                  <th class="px-3 py-3 text-center">STT</th>
+                  <th class="px-3 py-3">Video ID</th>
+                  <th class="px-4 py-3 min-w-[220px]">Tiêu Đề</th>
+                  <th class="px-3 py-3">Ngày Đăng (VN)</th>
+                  <th class="px-3 py-3">Giờ Đăng (VN)</th>
+                  <th class="px-3 py-3">Ngày + Giờ</th>
+                  <th class="px-3 py-3">Thứ</th>
+                  <th class="px-3 py-3 text-right">Lượt Xem</th>
+                  <th class="px-3 py-3 text-center">Link</th>
+                </tr>
+              </thead>
+              <tbody id="uc-table-tbody" class="divide-y divide-white/5">
+                <!-- Rows injected dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== VIEW 2: TRA CỨU TỪ KHÓA ==================== -->
+    <div id="view-keywords" class="view-pane hidden space-y-6">
+      <section class="glass-card rounded-3xl p-6 sm:p-8 border border-white/10 text-center space-y-4">
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Tra Cứu Từ Khóa Bắt Trend Quốc Tế</h2>
+        <p class="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">Kiểm tra xung lượng tìm kiếm theo quốc gia, nhận danh sách tag sẵn sàng copy và các từ khóa ngách 2-3 chữ</p>
+        <form id="keyword-search-form" onsubmit="handleKeywordSearch(event)" class="flex flex-col sm:flex-row gap-2 max-w-xl mx-auto pt-2">
+          <input id="kw-input" type="text" required placeholder="Nhập từ khóa hoặc chủ đề (VD: ai tools, podcast, gaming, cooking)..." class="flex-1 px-4 py-3 bg-slate-900/90 border border-white/15 rounded-xl text-white text-xs focus:ring-2 focus:ring-rose-500" />
+          <select id="kw-country" class="px-3 py-3 bg-slate-900/90 border border-white/15 rounded-xl text-white text-xs">
+            <option value="US">Hoa Kỳ (US)</option>
+            <option value="GB">Anh (UK)</option>
+            <option value="JP">Nhật Bản (JP)</option>
+            <option value="KR">Hàn Quốc (KR)</option>
+            <option value="DE">Đức (DE)</option>
+            <option value="VN">Việt Nam (VN)</option>
+          </select>
+          <button type="submit" class="px-6 py-3 bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-rose-600/30 transition">Kiểm Tra</button>
+        </form>
+      </section>
+
+      <div id="kw-loading" class="hidden glass-card rounded-2xl p-10 text-center space-y-3">
+        <div class="w-10 h-10 rounded-full border-4 border-rose-500/20 border-t-rose-500 animate-spin mx-auto"></div>
+        <p class="text-xs text-slate-400">Đang quét dữ liệu Google & YouTube Trends...</p>
+      </div>
+
+      <div id="kw-results" class="hidden space-y-5">
+        <div class="glass-card rounded-2xl p-5 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold text-white">Xu Hướng Tìm Kiếm 30 Ngày Qua</h3>
+            <span id="kw-trend-badge" class="px-3 py-1 rounded-full text-xs font-semibold bg-rose-500/20 text-rose-300">Đang Hot</span>
+          </div>
+          <div class="h-60 relative">
+            <canvas id="kwTrendsChart"></canvas>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-5 space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-bold text-white">Thẻ Tag Bắt Trend Gợi Ý</h4>
+            <button onclick="copyKwTags()" class="text-xs text-rose-400 hover:text-rose-300 flex items-center space-x-1">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              <span>Copy toàn bộ</span>
+            </button>
+          </div>
+          <div id="kw-tags-list" class="flex flex-wrap gap-2 text-xs"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== VIEW 3: TOP THỊNH HÀNH ==================== -->
+    <div id="view-trending" class="view-pane hidden space-y-6">
+      <section class="glass-card rounded-3xl p-6 sm:p-8 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <h2 class="text-2xl font-bold text-white">Bảng Xếp Hạng Xu Hướng YouTube Thời Gian Thực</h2>
+          <p class="text-xs text-slate-400 mt-1">Quét các video đang bứt phá mạnh nhất tại các thị trường quốc tế theo thời gian thực</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <select id="feed-country" onchange="loadTrendingFeed()" class="px-3.5 py-2.5 bg-slate-900/90 border border-white/15 rounded-xl text-white text-xs focus:ring-2 focus:ring-rose-500 font-medium">
+            <option value="US">🇺🇸 Hoa Kỳ (US)</option>
+            <option value="VN">🇻🇳 Việt Nam (VN)</option>
+            <option value="GB">🇬🇧 Vương Quốc Anh (UK)</option>
+            <option value="JP">🇯🇵 Nhật Bản (JP)</option>
+            <option value="KR">🇰🇷 Hàn Quốc (KR)</option>
+            <option value="DE">🇩🇪 Đức (DE)</option>
+            <option value="IN">🇮🇳 Ấn Độ (IN)</option>
+            <option value="BR">🇧🇷 Brazil (BR)</option>
+            <option value="CA">🇨🇦 Canada (CA)</option>
+            <option value="AU">🇦🇺 Úc (AU)</option>
+          </select>
+          <select id="feed-category" onchange="loadTrendingFeed()" class="px-3.5 py-2.5 bg-slate-900/90 border border-white/15 rounded-xl text-white text-xs focus:ring-2 focus:ring-rose-500 font-medium">
+            <option value="all">🔥 Tất cả xu hướng (Top Trending)</option>
+            <option value="philosophy">📜 Triết Lý & Khắc Kỷ (Stoicism)</option>
+            <option value="buddhism">🪷 Phật Pháp & Chữa Lành</option>
+            <option value="elderly_wisdom">👴 Tâm Sự & Lời Khuyên Người Già</option>
+            <option value="reddit_stories">💬 Truyện Reddit & Confessions (AITA)</option>
+            <option value="drama_expose">🎭 Drama & Bóc Phốt (Exposé)</option>
+            <option value="true_crime">🕵️ Vụ Án Có Thật & Bí Ẩn</option>
+            <option value="horror_stories">👻 Kinh Dị & Truyện Đêm Muộn</option>
+            <option value="history_geopolitics">⚔️ Lịch Sử & Địa Chính Trị</option>
+            <option value="space_science">🌌 Bí Ẩn Vũ Trụ & Khoa Học</option>
+            <option value="finance_money">💰 Tài Chính & Kiếm Tiền Online</option>
+            <option value="tech_ai">🤖 Công Nghệ & Trí Tuệ Nhân Tạo (AI)</option>
+            <option value="recap_stories">🎬 Tóm Tắt Phim & Truyện</option>
+            <option value="gaming">🎮 Gaming & Esports</option>
+            <option value="entertainment">🎉 Giải Trí & Hài Hước</option>
+          </select>
+          <select id="feed-duration" onchange="loadTrendingFeed()" class="px-3.5 py-2.5 bg-slate-900/90 border border-rose-500/30 text-rose-300 rounded-xl text-xs focus:ring-2 focus:ring-rose-500 font-semibold">
+            <option value="long_form">⏱️ Video Dài (Loại Bỏ Shorts)</option>
+            <option value="deep_dive">🎙️ Video Sâu / Podcast (> 20 Phút)</option>
+            <option value="medium">⏳ Tiêu Chuẩn (4 – 20 Phút)</option>
+          </select>
+          <select id="feed-mode" onchange="loadTrendingFeed()" class="px-3.5 py-2.5 bg-slate-900/90 border border-emerald-500/30 text-emerald-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 font-semibold">
+            <option value="evergreen">🏛️ Thịnh Hành Bền Vững (Triệu View)</option>
+            <option value="active_channels">🟢 Chỉ Kênh Ổn Định & Còn Sống</option>
+          </select>
+        </div>
+      </section>
+
+      <div id="trending-feed-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ==================== MODAL GOOGLE APPS SCRIPT ==================== -->
+  <div id="modal-gas" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div class="glass-card rounded-3xl max-w-2xl w-full p-6 sm:p-8 border border-white/15 space-y-5 relative max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between border-b border-white/10 pb-4">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center">
+            <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Google Sheets Apps Script</h3>
+            <p class="text-xs text-slate-400">Code tự động lấy video & chuyển giờ đăng sang múi giờ VN</p>
+          </div>
+        </div>
+        <button onclick="closeGasModal()" class="p-2 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-2 text-xs text-slate-300">
+        <p><strong class="text-rose-400">Cách sử dụng:</strong></p>
+        <ol class="list-decimal list-inside space-y-1 text-slate-400">
+          <li>Mở bảng tính <strong class="text-white">Google Sheets</strong> mới.</li>
+          <li>Vào menu <strong class="text-white">Tiện ích mở rộng (Extensions)</strong> &gt; <strong class="text-white">Apps Script</strong>.</li>
+          <li>Xóa code cũ, nhấn nút <strong class="text-amber-300">"Copy Toàn Bộ Code"</strong> bên dưới rồi Dán vào.</li>
+          <li>Điền <code>API_KEY</code> và <code>CHANNEL_ID</code> của bạn vào đầu file rồi nhấn <strong class="text-white">Lưu</strong>.</li>
+          <li>F5 lại Google Sheet, chọn menu <strong class="text-white">🎬 YouTube &gt; Lấy tất cả video</strong>!</li>
+        </ol>
+      </div>
+
+      <div class="flex-1 min-h-0 relative">
+        <pre id="gas-code-content" class="h-64 p-4 bg-slate-950 rounded-xl border border-white/10 text-xs font-mono text-slate-300 overflow-y-auto custom-scrollbar"></pre>
+      </div>
+
+      <div class="flex items-center justify-end space-x-3 pt-3 border-t border-white/10">
+        <button onclick="copyGasCode()" class="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-400 hover:to-rose-400 text-white font-bold text-xs rounded-xl shadow-lg transition flex items-center space-x-2">
+          <i data-lucide="copy" class="w-4 h-4"></i>
+          <span>Copy Toàn Bộ Code Apps Script</span>
+        </button>
+        <button onclick="closeGasModal()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl">
+          Đóng
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script Logic -->
+  <script>
+    const GAS_CODE = "\ufeff// ======================================================\n// YOUTUBE VIDEO PUBLISH TIME CHECKER (PRO VERSION)\n// Google Sheets + YouTube Data API v3\n// T\u1ef1 \u0111\u1ed9ng chuy\u1ec3n \u0111\u1ed5i to\u00e0n b\u1ed9 gi\u1edd \u0111\u0103ng sang Gi\u1edd Vi\u1ec7t Nam (UTC+7)\n// H\u1ed7 tr\u1ee3 l\u1ea5y theo Channel ID (UC...) k\u00e8m L\u01b0\u1ee3t xem v\u00e0 Th\u1ee9 trong tu\u1ea7n\n// ======================================================\n\n// =========================\n// 1. \u0110I\u1ec0N TH\u00d4NG TIN C\u1ee6A B\u1ea0N\n// =========================\n\n// \u0110i\u1ec1n API Key c\u1ee7a b\u1ea1n t\u1eeb Google Cloud Console (YouTube Data API v3)\nconst API_KEY = \"D\u00c1N_API_KEY_V\u00c0O_\u0110\u00c2Y\";\n\n// \u0110i\u1ec1n Channel ID c\u1ee7a k\u00eanh (b\u1eaft \u0111\u1ea7u b\u1eb1ng UC, v\u00ed d\u1ee5: UC_x5XG1OV2P6uZZ5FSM9Ttw)\nconst CHANNEL_ID = \"D\u00c1N_CHANNEL_ID_V\u00c0O_\u0110\u00c2Y\";\n\n// M\u00fai gi\u1edd Vi\u1ec7t Nam (UTC+7)\nconst TIMEZONE = \"Asia/Ho_Chi_Minh\";\n\n// T\u00ean Sheet s\u1ebd ghi k\u1ebft qu\u1ea3\nconst SHEET_NAME = \"YouTube Publish Times\";\n\n\n// ======================================================\n// 2. T\u1ea0O MENU TI\u1ec6N \u00cdCH TR\u00caN GOOGLE SHEETS\n// ======================================================\n\nfunction onOpen() {\n  SpreadsheetApp.getUi()\n    .createMenu(\"\ud83c\udfac YouTube Tracker\")\n    .addItem(\"\ud83d\udce5 L\u1ea5y To\u00e0n B\u1ed9 Gi\u1edd \u0110\u0103ng Video (Theo UC)\", \"getYouTubeVideos\")\n    .addItem(\"\ud83d\udd04 C\u1eadp Nh\u1eadt L\u1ea1i Gi\u1edd \u0110\u0103ng & L\u01b0\u1ee3t Xem\", \"updatePublishTimes\")\n    .addToUi();\n}\n\n\n// ======================================================\n// 3. KI\u1ec2M TRA TH\u00d4NG TIN H\u1ee2P L\u1ec6\n// ======================================================\n\nfunction checkApiKey() {\n  if (!API_KEY || API_KEY === \"D\u00c1N_API_KEY_V\u00c0O_\u0110\u00c2Y\") {\n    throw new Error(\"\u26a0\ufe0f B\u1ea1n ch\u01b0a nh\u1eadp API_KEY! H\u00e3y d\u00e1n YouTube Data API v3 key v\u00e0o d\u00f2ng const API_KEY.\");\n  }\n\n  if (!CHANNEL_ID || CHANNEL_ID === \"D\u00c1N_CHANNEL_ID_V\u00c0O_\u0110\u00c2Y\") {\n    throw new Error(\"\u26a0\ufe0f B\u1ea1n ch\u01b0a nh\u1eadp CHANNEL_ID! H\u00e3y d\u00e1n m\u00e3 k\u00eanh (b\u1eaft \u0111\u1ea7u b\u1eb1ng UC...) v\u00e0o d\u00f2ng const CHANNEL_ID.\");\n  }\n}\n\n\n// ======================================================\n// 4. L\u1ea4Y TO\u00c0N B\u1ed8 VIDEO & GI\u1edc \u0110\u0102NG THEO M\u00c3 UC\n// ======================================================\n\nfunction getYouTubeVideos() {\n  checkApiKey();\n  const sheet = getSheet();\n\n  // X\u00f3a tr\u1eafng b\u1ea3ng c\u0169\n  sheet.clear();\n\n  // Ti\u00eau \u0111\u1ec1 c\u00e1c c\u1ed9t\n  sheet.appendRow([\n    \"STT\",\n    \"Video ID\",\n    \"Ti\u00eau \u0111\u1ec1\",\n    \"Ng\u00e0y \u0111\u0103ng (VN)\",\n    \"Gi\u1edd \u0111\u0103ng (VN)\",\n    \"Ng\u00e0y + gi\u1edd \u0111\u0103ng\",\n    \"Th\u1ee9\",\n    \"L\u01b0\u1ee3t xem\",\n    \"URL Video\"\n  ]);\n\n  // B\u01af\u1edaC 1: L\u1ea4Y UPLOADS PLAYLIST ID\n  // V\u1edbi m\u1ecdi k\u00eanh YouTube c\u00f3 Channel ID l\u00e0 UCxxxx, Uploads Playlist ID s\u1ebd l\u00e0 UUxxxx\n  let uploadsPlaylistId = \"\";\n  if (CHANNEL_ID.startsWith(\"UC\")) {\n    uploadsPlaylistId = \"UU\" + CHANNEL_ID.substring(2);\n  } else {\n    // N\u1ebfu kh\u00f4ng ph\u1ea3i d\u1ea1ng UC, g\u1ecdi API \u0111\u1ec3 l\u1ea5y uploads playlist\n    const channelUrl = \"https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=\" +\n      encodeURIComponent(CHANNEL_ID) + \"&key=\" + encodeURIComponent(API_KEY);\n    const channelResponse = UrlFetchApp.fetch(channelUrl);\n    const channelData = JSON.parse(channelResponse.getContentText());\n\n    if (!channelData.items || channelData.items.length === 0) {\n      throw new Error(\"Kh\u00f4ng t\u00ecm th\u1ea5y k\u00eanh v\u1edbi Channel ID: \" + CHANNEL_ID);\n    }\n    uploadsPlaylistId = channelData.items[0].contentDetails.relatedPlaylists.uploads;\n  }\n\n  // B\u01af\u1edaC 2: L\u1ea4Y DANH S\u00c1CH VIDEO ID\n  let videoIds = [];\n  let nextPageToken = \"\";\n\n  do {\n    let playlistUrl = \"https://www.googleapis.com/youtube/v3/playlistItems\" +\n      \"?part=contentDetails\" +\n      \"&playlistId=\" + encodeURIComponent(uploadsPlaylistId) +\n      \"&maxResults=50\" +\n      \"&key=\" + encodeURIComponent(API_KEY);\n\n    if (nextPageToken) {\n      playlistUrl += \"&pageToken=\" + encodeURIComponent(nextPageToken);\n    }\n\n    const response = UrlFetchApp.fetch(playlistUrl);\n    const data = JSON.parse(response.getContentText());\n\n    if (data.error) {\n      throw new Error(\"L\u1ed7i YouTube API: \" + data.error.message);\n    }\n\n    data.items.forEach(item => {\n      if (item.contentDetails && item.contentDetails.videoId) {\n        videoIds.push(item.contentDetails.videoId);\n      }\n    });\n\n    nextPageToken = data.nextPageToken || \"\";\n  } while (nextPageToken);\n\n  // B\u01af\u1edaC 3: L\u1ea4Y CHI TI\u1ebeT VIDEO (TI\u00caU \u0110\u1ec0, NG\u00c0Y \u0110\u0102NG, L\u01af\u1ee2T XEM)\n  let allRows = [];\n  let counter = 1;\n  const daysOfWeek = [\"Ch\u1ee7 Nh\u1eadt\", \"Th\u1ee9 2\", \"Th\u1ee9 3\", \"Th\u1ee9 4\", \"Th\u1ee9 5\", \"Th\u1ee9 6\", \"Th\u1ee9 7\"];\n\n  for (let i = 0; i < videoIds.length; i += 50) {\n    const batch = videoIds.slice(i, i + 50);\n    const videoUrl = \"https://www.googleapis.com/youtube/v3/videos\" +\n      \"?part=snippet,statistics\" +\n      \"&id=\" + batch.join(\",\") +\n      \"&key=\" + encodeURIComponent(API_KEY);\n\n    const response = UrlFetchApp.fetch(videoUrl);\n    const data = JSON.parse(response.getContentText());\n\n    if (data.error) {\n      throw new Error(\"L\u1ed7i l\u1ea5y th\u00f4ng tin video: \" + data.error.message);\n    }\n\n    data.items.forEach(video => {\n      const videoId = video.id;\n      const title = video.snippet.title;\n      const publishedAt = video.snippet.publishedAt;\n      const viewCount = video.statistics ? Number(video.statistics.viewCount || 0) : 0;\n\n      const date = new Date(publishedAt);\n\n      // Quy \u0111\u1ed5i sang Gi\u1edd Vi\u1ec7t Nam (Asia/Ho_Chi_Minh)\n      const dateVN = Utilities.formatDate(date, TIMEZONE, \"dd/MM/yyyy\");\n      const timeVN = Utilities.formatDate(date, TIMEZONE, \"HH:mm:ss\");\n      const dateTimeVN = Utilities.formatDate(date, TIMEZONE, \"dd/MM/yyyy HH:mm:ss\");\n      const dayOfWeek = daysOfWeek[date.getDay()];\n      const url = \"https://www.youtube.com/watch?v=\" + videoId;\n\n      allRows.push([\n        counter,\n        videoId,\n        title,\n        dateVN,\n        timeVN,\n        dateTimeVN,\n        dayOfWeek,\n        viewCount,\n        url\n      ]);\n\n      counter++;\n    });\n  }\n\n  // B\u01af\u1edaC 4: GHI D\u1eee LI\u1ec6U V\u00c0 \u0110\u1ecaNH D\u1ea0NG B\u1ea2NG\n  if (allRows.length > 0) {\n    sheet.getRange(2, 1, allRows.length, 9).setValues(allRows);\n  }\n\n  sheet.setFrozenRows(1);\n  sheet.getRange(1, 1, 1, 9).setFontWeight(\"bold\").setBackground(\"#f1f5f9\");\n  sheet.autoResizeColumns(1, 9);\n\n  SpreadsheetApp.getUi().alert(\n    \"\u2705 Ho\u00e0n Th\u00e0nh Xu\u1ea5t S\u1eafc!\\n\\n\" +\n    \"\u0110\u00e3 l\u1ea5y t\u1ed5ng c\u1ed9ng: \" + allRows.length + \" video t\u1eeb k\u00eanh \" + CHANNEL_ID + \"\\n\\n\" +\n    \"To\u00e0n b\u1ed9 gi\u1edd \u0111\u0103ng \u0111\u00e3 \u0111\u01b0\u1ee3c chuy\u1ec3n sang Gi\u1edd Vi\u1ec7t Nam (UTC+7).\"\n  );\n}\n\n\n// ======================================================\n// 5. C\u1eacP NH\u1eacT L\u1ea0I GI\u1edc \u0110\u0102NG V\u00c0 L\u01af\u1ee2T XEM\n// ======================================================\n\nfunction updatePublishTimes() {\n  checkApiKey();\n  const sheet = getSheet();\n  const lastRow = sheet.getLastRow();\n\n  if (lastRow < 2) {\n    SpreadsheetApp.getUi().alert(\"Ch\u01b0a c\u00f3 d\u1eef li\u1ec7u video \u0111\u1ec3 c\u1eadp nh\u1eadt!\");\n    return;\n  }\n\n  const videoIds = sheet.getRange(2, 2, lastRow - 1, 1).getValues().flat();\n  let updated = 0;\n  const daysOfWeek = [\"Ch\u1ee7 Nh\u1eadt\", \"Th\u1ee9 2\", \"Th\u1ee9 3\", \"Th\u1ee9 4\", \"Th\u1ee9 5\", \"Th\u1ee9 6\", \"Th\u1ee9 7\"];\n\n  for (let i = 0; i < videoIds.length; i += 50) {\n    const batch = videoIds.slice(i, i + 50).filter(String);\n    if (batch.length === 0) continue;\n\n    const url = \"https://www.googleapis.com/youtube/v3/videos\" +\n      \"?part=snippet,statistics\" +\n      \"&id=\" + batch.join(\",\") +\n      \"&key=\" + encodeURIComponent(API_KEY);\n\n    const response = UrlFetchApp.fetch(url);\n    const data = JSON.parse(response.getContentText());\n\n    data.items.forEach(video => {\n      const index = videoIds.indexOf(video.id);\n      if (index === -1) return;\n\n      const row = index + 2;\n      const date = new Date(video.snippet.publishedAt);\n      const viewCount = video.statistics ? Number(video.statistics.viewCount || 0) : 0;\n\n      const dateVN = Utilities.formatDate(date, TIMEZONE, \"dd/MM/yyyy\");\n      const timeVN = Utilities.formatDate(date, TIMEZONE, \"HH:mm:ss\");\n      const dateTimeVN = Utilities.formatDate(date, TIMEZONE, \"dd/MM/yyyy HH:mm:ss\");\n      const dayOfWeek = daysOfWeek[date.getDay()];\n\n      sheet.getRange(row, 3).setValue(video.snippet.title);\n      sheet.getRange(row, 4).setValue(dateVN);\n      sheet.getRange(row, 5).setValue(timeVN);\n      sheet.getRange(row, 6).setValue(dateTimeVN);\n      sheet.getRange(row, 7).setValue(dayOfWeek);\n      sheet.getRange(row, 8).setValue(viewCount);\n\n      updated++;\n    });\n  }\n\n  SpreadsheetApp.getUi().alert(\"\u2705 \u0110\u00e3 c\u1eadp nh\u1eadt th\u00e0nh c\u00f4ng \" + updated + \" video!\");\n}\n\nfunction getSheet() {\n  const ss = SpreadsheetApp.getActiveSpreadsheet();\n  let sheet = ss.getSheetByName(SHEET_NAME);\n  if (!sheet) {\n    sheet = ss.insertSheet(SHEET_NAME);\n  }\n  return sheet;\n}\n";
+    let currentChannelData = null;
+    let latestUCData = null;
+    let publishChartInstance = null;
+    let trendChartInstance = null;
+    let kwChartInstance = null;
+    let savedApiKey = '';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      initSavedApiKey();
+    });
+
+    async function initSavedApiKey() {
+      const localKey = (localStorage.getItem('yt_api_key') || '').trim();
+      let backendKey = '';
+      try {
+        const res = await fetch('/api/settings/api-key');
+        if (res.ok) {
+          const data = await res.json();
+          backendKey = (data.api_key || '').trim();
+        }
+      } catch (e) {
+        console.warn('Cannot fetch api-key setting:', e);
+      }
+
+      const keyToUse = localKey || backendKey;
+      if (keyToUse) {
+        savedApiKey = keyToUse;
+        localStorage.setItem('yt_api_key', keyToUse);
+        if (!backendKey && localKey) {
+          fetch('/api/settings/api-key', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ api_key: keyToUse })
+          }).catch(() => {});
+        }
+      } else {
+        savedApiKey = '';
+      }
+
+      updateApiKeyUI(savedApiKey);
+    }
+
+    function updateApiKeyUI(key) {
+      const inputEl = document.getElementById('uc-api-key');
+      const statusEl = document.getElementById('api-key-status');
+      const navLabel = document.getElementById('nav-api-label');
+      const navBtn = document.getElementById('nav-api-btn');
+
+      if (inputEl && key) {
+        inputEl.value = key;
+      }
+
+      if (key) {
+        const masked = key.slice(0, 6) + '...' + key.slice(-4);
+        if (statusEl) {
+          statusEl.innerHTML = `
+            <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
+            <span class="text-emerald-400 font-semibold">Đã lưu API Key: <code class="font-mono text-emerald-300">${masked}</code> (Tự động nạp cho mọi lần sau & tự điền vào Google Sheets)</span>
+          `;
+        }
+        if (navLabel) navLabel.textContent = `API: ${masked}`;
+        if (navBtn) {
+          navBtn.classList.remove('text-slate-300');
+          navBtn.classList.add('text-emerald-400', 'border-emerald-500/30', 'bg-emerald-500/10');
+        }
+      } else {
+        if (statusEl) {
+          statusEl.innerHTML = `
+            <span class="w-2 h-2 rounded-full bg-slate-500 inline-block"></span>
+            <span class="text-slate-400">Chưa lưu API Key (Hệ thống dùng chế độ Free Mode không giới hạn)</span>
+          `;
+        }
+        if (navLabel) navLabel.textContent = 'API Key: Chưa lưu';
+        if (navBtn) {
+          navBtn.classList.remove('text-emerald-400', 'border-emerald-500/30', 'bg-emerald-500/10');
+          navBtn.classList.add('text-slate-300');
+        }
+      }
+
+      updateGasCodeWithApiKey(key);
+    }
+
+    let apiKeySaveTimeout = null;
+    function onApiKeyInputChanged(val) {
+      const clean = (val || '').trim();
+      savedApiKey = clean;
+      
+      clearTimeout(apiKeySaveTimeout);
+      apiKeySaveTimeout = setTimeout(() => {
+        if (clean) {
+          localStorage.setItem('yt_api_key', clean);
+          fetch('/api/settings/api-key', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ api_key: clean })
+          }).catch(() => {});
+          showToast('Đã lưu API Key vĩnh viễn! Lần sau không cần nhập lại.');
+        } else {
+          clearSavedApiKey(false);
+        }
+        updateApiKeyUI(clean);
+      }, 350);
+    }
+
+    function clearSavedApiKey(withToast = true) {
+      savedApiKey = '';
+      localStorage.removeItem('yt_api_key');
+      const inputEl = document.getElementById('uc-api-key');
+      if (inputEl) inputEl.value = '';
+      
+      fetch('/api/settings/api-key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ api_key: '' })
+      }).catch(() => {});
+
+      updateApiKeyUI('');
+      if (withToast) showToast('Đã xóa API Key đã lưu. Hệ thống chuyển về Free Mode.');
+    }
+
+    function toggleApiKeyVisibility(inputId) {
+      const input = document.getElementById(inputId);
+      const eyeIcon = document.getElementById(inputId + '-eye');
+      if (!input) return;
+      if (input.type === 'password') {
+        input.type = 'text';
+        if (eyeIcon) eyeIcon.setAttribute('data-lucide', 'eye-off');
+      } else {
+        input.type = 'password';
+        if (eyeIcon) eyeIcon.setAttribute('data-lucide', 'eye');
+      }
+      lucide.createIcons();
+    }
+
+    function focusApiKeyInput() {
+      switchNav('uctime');
+      const input = document.getElementById('uc-api-key');
+      if (input) {
+        input.focus();
+        input.select();
+        showToast('Dán API Key vào đây, hệ thống sẽ tự động nhớ vĩnh viễn!');
+      }
+    }
+
+    function updateGasCodeWithApiKey(key) {
+      const gasEl = document.getElementById('gas-code-content');
+      if (!gasEl) return;
+      let code = GAS_CODE;
+      if (key) {
+        code = code.replace(/const API_KEY = "[^"]*";/, `const API_KEY = "${key}";`);
+      }
+      const chInput = document.getElementById('uc-channel-id')?.value?.trim();
+      if (chInput && chInput.startsWith('UC')) {
+        code = code.replace(/const CHANNEL_ID = "[^"]*";/, `const CHANNEL_ID = "${chInput}";`);
+      }
+      gasEl.textContent = code;
+    }
+
+    function showToast(msg, isSuccess = true) {
+      const toast = document.createElement('div');
+      toast.className = `fixed bottom-5 right-5 z-50 px-4 py-3 rounded-xl text-xs font-semibold shadow-2xl flex items-center space-x-2 transition-all transform duration-300 ${
+        isSuccess ? 'bg-emerald-600 text-white shadow-emerald-600/30' : 'bg-rose-600 text-white shadow-rose-600/30'
+      }`;
+      toast.innerHTML = `<i data-lucide="${isSuccess ? 'check-circle' : 'alert-circle'}" class="w-4 h-4"></i><span>${msg}</span>`;
+      document.body.appendChild(toast);
+      lucide.createIcons();
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    function formatNumber(num) {
+      if (num === null || num === undefined) return '0';
+      const n = Number(num);
+      if (isNaN(n)) return '0';
+      if (n >= 1e9) return (n / 1e9).toFixed(1) + 'B';
+      if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+      if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
+      return n.toLocaleString();
+    }
+
+    function switchNav(navId) {
+      const views = {
+        'channel': { pane: 'view-channel', btn: 'nav-btn-channel' },
+        'uctime': { pane: 'view-channel-time', btn: 'nav-btn-uctime' },
+        'channel-time': { pane: 'view-channel-time', btn: 'nav-btn-uctime' },
+        'keyword': { pane: 'view-keywords', btn: 'nav-btn-keyword' },
+        'keywords': { pane: 'view-keywords', btn: 'nav-btn-keyword' },
+        'trending': { pane: 'view-trending', btn: 'nav-btn-trending' }
+      };
+
+      const target = views[navId] || views['channel'];
+
+      ['view-channel', 'view-channel-time', 'view-keywords', 'view-trending'].forEach(paneId => {
+        const el = document.getElementById(paneId);
+        if (el) el.classList.add('hidden');
+      });
+
+      ['nav-btn-channel', 'nav-btn-uctime', 'nav-btn-keyword', 'nav-btn-trending'].forEach(btnId => {
+        const btn = document.getElementById(btnId);
+        if (btn) {
+          btn.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all text-slate-400 hover:text-white hover:bg-slate-800';
+        }
+      });
+
+      const activePane = document.getElementById(target.pane);
+      if (activePane) activePane.classList.remove('hidden');
+
+      const activeBtn = document.getElementById(target.btn);
+      if (activeBtn) {
+        activeBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all bg-rose-600 text-white shadow-sm';
+      }
+
+      lucide.createIcons();
+
+      if (navId === 'trending') {
+        const feedList = document.getElementById('trending-feed-list');
+        if (feedList && feedList.children.length === 0) {
+          loadTrendingFeed();
+        }
+      }
+    }
+
+    const switchMainTab = switchNav;
+
+    function exportDataJSON() {
+      const dataToExport = latestUCData || currentChannelData || { message: "Chưa có dữ liệu phân tích nào được tải." };
+      const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `youtube_analysis_export_${Date.now()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast("Đã xuất dữ liệu JSON thành công!");
+    }
+
+    function switchSubTab(subId) {
+      document.querySelectorAll('.subtab-pane').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('[id^="sub-btn-"]').forEach(el => {
+        el.className = 'px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 text-slate-400 hover:text-white hover:bg-slate-800';
+      });
+      const targetPane = document.getElementById(subId);
+      if (targetPane) targetPane.classList.remove('hidden');
+      const targetBtn = document.getElementById(subId.replace('sub-', 'sub-btn-'));
+      if (targetBtn) {
+        targetBtn.className = 'px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 bg-rose-600/20 text-rose-300 border border-rose-500/30';
+      }
+      lucide.createIcons();
+    }
+
+    function quickSearch(ch, country) {
+      switchNav('channel');
+      const inputEl = document.getElementById('channel-input');
+      const countryEl = document.getElementById('channel-geo') || document.getElementById('target-country');
+      const form = document.getElementById('search-form');
+      if (inputEl) inputEl.value = ch;
+      if (countryEl) countryEl.value = country;
+      if (form) {
+        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+      }
+    }
+
+    function setUCTest(chId) {
+      switchNav('uctime');
+      const ucInput = document.getElementById('uc-channel-id');
+      const form = document.getElementById('uc-time-form');
+      if (ucInput) ucInput.value = chId;
+      if (form) {
+        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+      }
+    }
+
+    // ==========================================
+    // 1. Phân tích Kênh & Giờ Đăng & Từ Khóa
+    // ==========================================
+    async function handleChannelSearch(e) {
+      if (e) e.preventDefault();
+      const channelInput = (document.getElementById('channel-input')?.value || '').trim();
+      const countryEl = document.getElementById('channel-geo') || document.getElementById('target-country');
+      const country = (countryEl ? countryEl.value : 'US').trim().toUpperCase() || 'US';
+      const apiKeyEl = document.getElementById('api-key-input') || document.getElementById('uc-api-key');
+      const apiKey = (apiKeyEl ? apiKeyEl.value.trim() : '') || savedApiKey || null;
+      if (!channelInput) return;
+
+      document.getElementById('channel-loading').classList.remove('hidden');
+      document.getElementById('channel-results').classList.add('hidden');
+
+      try {
+        const res = await fetch('/api/analyze/channel', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            channel_input: channelInput,
+            channel_identifier: channelInput,
+            target_country: country,
+            target_geo: country,
+            api_key: apiKey || null,
+            max_results: 30
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Lỗi phân tích kênh');
+
+        currentChannelData = data;
+        renderChannelResults(data);
+        showToast('Phân tích kênh hoàn tất thành công!');
+      } catch (err) {
+        alert('Lỗi: ' + err.message);
+      } finally {
+        document.getElementById('channel-loading').classList.add('hidden');
+      }
+    }
+
+    function renderChannelResults(data) {
+      const { channel_info, publish_time_analysis, keyword_intelligence, trend_momentum, competitor_sources, strategy_recommendations } = data;
+      document.getElementById('channel-results').classList.remove('hidden');
+
+      // Target country display labels
+      const countryNames = {
+        "US": "Hoa Kỳ (Mỹ)", "GB": "Anh Quốc (UK)", "JP": "Nhật Bản (JP)", "KR": "Hàn Quốc (KR)",
+        "DE": "Đức (DE)", "IN": "Ấn Độ (IN)", "BR": "Brazil (BR)", "VN": "Việt Nam (VN)", "": "Toàn Cầu"
+      };
+      const geoCode = (trend_momentum?.target_geo || publish_time_analysis?.target_country_code || 'US').toUpperCase();
+      const geoDisplayName = countryNames[geoCode] || publish_time_analysis?.target_country_name || geoCode;
+
+      const hotnessLabel = document.getElementById('target-country-hotness-label');
+      if (hotnessLabel) {
+        hotnessLabel.textContent = `Độ Hot Tại ${geoDisplayName}`;
+      }
+
+      const countryBadge = document.getElementById('target-country-name-badge');
+      if (countryBadge) {
+        countryBadge.textContent = geoDisplayName;
+      }
+
+      const strategyText = document.getElementById('target-country-strategy-text');
+      if (strategyText) {
+        strategyText.textContent = publish_time_analysis?.strategy_tip || `Được tính toán và đồng bộ tối ưu theo múi giờ thị trường ${geoDisplayName}.`;
+      }
+
+      // Overview Header
+      document.getElementById('ch-title').textContent = channel_info.title || 'Kênh YouTube';
+      document.getElementById('ch-avatar').src = channel_info.avatar_url || 'https://via.placeholder.com/80';
+      document.getElementById('ch-url').textContent = channel_info.channel_url || '';
+      document.getElementById('ch-subs').textContent = formatNumber(channel_info.subscriber_count);
+      document.getElementById('ch-avg-views').textContent = formatNumber(channel_info.avg_views);
+      document.getElementById('ch-cadence').textContent = `${channel_info.cadence_days ? channel_info.cadence_days + ' ngày/video' : 'Hàng tuần'}`;
+      document.getElementById('ch-ratio').textContent = `${channel_info.view_to_sub_ratio !== undefined ? Number(channel_info.view_to_sub_ratio).toFixed(1) : 0}%`;
+
+      const catsEl = document.getElementById('ch-categories');
+      catsEl.innerHTML = '';
+      (channel_info.keywords || []).slice(0, 4).forEach(cat => {
+        const badge = document.createElement('span');
+        badge.className = 'px-2 py-0.5 rounded-full text-[11px] bg-slate-800 text-slate-300 border border-white/5';
+        badge.textContent = '#' + cat;
+        catsEl.appendChild(badge);
+      });
+
+      // Trend momentum
+      const currentScore = trend_momentum.trend_score !== undefined ? trend_momentum.trend_score : 50;
+      document.getElementById('trend-score').textContent = currentScore;
+      document.getElementById('trend-bar').style.width = `${Math.min(100, Math.max(5, currentScore))}%`;
+      document.getElementById('trend-summary').textContent = trend_momentum.summary || 'Chủ đề đang có lượng quan tâm ổn định.';
+
+      const badgeEl = document.getElementById('trend-badge');
+      if (badgeEl && trend_momentum.trend_status) {
+        badgeEl.textContent = trend_momentum.trend_status;
+        if (trend_momentum.trend_badge_color === 'red') {
+          badgeEl.className = 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30';
+        } else if (trend_momentum.trend_badge_color === 'amber') {
+          badgeEl.className = 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30';
+        } else if (trend_momentum.trend_badge_color === 'emerald') {
+          badgeEl.className = 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+        } else {
+          badgeEl.className = 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-500/20 text-slate-300 border border-slate-500/30';
+        }
+      }
+
+      // Best Publish Times (UTC+7)
+      document.getElementById('best-upload-time-vn').textContent = publish_time_analysis.best_upload_time_vn || '02:00 - 04:00';
+      document.getElementById('peak-view-time-vn').textContent = publish_time_analysis.peak_view_time_vn || '06:00 - 10:00';
+      document.getElementById('best-day-vn').textContent = publish_time_analysis.best_day_of_week || 'Thứ Bảy';
+      if (publish_time_analysis.best_upload_desc) {
+        document.getElementById('best-time-desc').textContent = publish_time_analysis.best_upload_desc;
+      }
+      if (publish_time_analysis.peak_view_desc) {
+        document.getElementById('peak-time-desc').textContent = publish_time_analysis.peak_view_desc;
+      }
+
+      // 24H Chart
+      renderPublishHoursChart(publish_time_analysis.hour_distribution || {});
+
+      // Tags Pool
+      renderTagsPool(keyword_intelligence.copyable_tags_list || []);
+
+      // High impact & n-grams
+      renderHighImpactKeywords(keyword_intelligence.high_impact_keywords || []);
+      renderNgramKeywords(keyword_intelligence.ngrams_2_3 || []);
+
+      // Outliers & Recent
+      renderOutliers(channel_info.outlier_videos || []);
+      renderRecentVideos(channel_info.recent_videos || []);
+
+      // Trends chart
+      renderGoogleTrendsChart(trend_momentum);
+      renderBreakoutQueries(trend_momentum.rising_queries || trend_momentum.breakout_queries || []);
+
+      // Competitors & Strategies
+      renderCompetitors(competitor_sources || []);
+      renderTitleTemplates(strategy_recommendations.title_templates || []);
+
+      lucide.createIcons();
+    }
+
+    function renderPublishHoursChart(distribution) {
+      const ctx = document.getElementById('publishHoursChart').getContext('2d');
+      const hours = Array.from({ length: 24 }, (_, i) => `${i}h`);
+      const counts = Array.from({ length: 24 }, (_, i) => {
+        if (!distribution) return 0;
+        if (Array.isArray(distribution)) {
+          const found = distribution.find(item => item.hour === i);
+          return found ? (found.video_count || 0) : 0;
+        }
+        return distribution[i] !== undefined ? distribution[i] : (distribution[String(i)] || 0);
+      });
+      const maxCount = Math.max(...counts, 0);
+
+      if (publishChartInstance) publishChartInstance.destroy();
+      publishChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: hours,
+          datasets: [{
+            label: 'Số lượng video đăng (Giờ VN)',
+            data: counts,
+            backgroundColor: hours.map((_, i) => (counts[i] === maxCount && maxCount > 0) ? '#f43f5e' : (counts[i] > 0 ? '#fb7185' : '#1e293b')),
+            hoverBackgroundColor: '#f43f5e',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { 
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => ` Đã đăng: ${ctx.raw} video (Khung ${ctx.label})`
+              }
+            }
+          },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+            y: { 
+              beginAtZero: true, 
+              min: 0,
+              suggestedMax: Math.max(maxCount + 1, 3), 
+              grid: { color: 'rgba(255,255,255,0.05)' }, 
+              ticks: { color: '#94a3b8', font: { size: 10 }, stepSize: 1 } 
+            }
+          }
+        }
+      });
+    }
+
+    function renderTagsPool(tags) {
+      const pool = document.getElementById('tags-pool');
+      pool.innerHTML = '';
+      if (!tags || tags.length === 0) {
+        pool.innerHTML = '<span class="text-slate-500 text-xs">Không có thẻ tag trích xuất</span>';
+        return;
+      }
+      tags.forEach(tag => {
+        const btn = document.createElement('button');
+        btn.className = 'px-2.5 py-1 bg-slate-800 hover:bg-rose-600 text-slate-300 hover:text-white rounded-lg border border-white/5 transition flex items-center space-x-1.5';
+        btn.onclick = () => {
+          navigator.clipboard.writeText(tag);
+          showToast(`Đã copy tag: "${tag}"`);
+        };
+        btn.innerHTML = `<span>#${tag}</span><i data-lucide="copy" class="w-3 h-3 text-slate-400"></i>`;
+        pool.appendChild(btn);
+      });
+      lucide.createIcons();
+    }
+
+    function copyAllTags() {
+      if (!currentChannelData || !currentChannelData.keyword_intelligence) return;
+      const csvTags = currentChannelData.keyword_intelligence.copyable_tags_csv;
+      if (csvTags) {
+        navigator.clipboard.writeText(csvTags);
+        showToast('Đã copy toàn bộ thẻ tag vào clipboard!');
+      }
+    }
+
+    function renderHighImpactKeywords(keywords) {
+      const el = document.getElementById('high-impact-keywords');
+      el.innerHTML = '';
+      if (!keywords.length) {
+        el.innerHTML = '<p class="text-slate-500 text-xs">Đang đồng bộ dữ liệu...</p>';
+        return;
+      }
+      keywords.slice(0, 8).forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'flex items-center justify-between p-2.5 bg-slate-900/60 rounded-xl border border-white/5';
+        div.innerHTML = `
+          <div class="flex items-center space-x-2">
+            <span class="font-bold text-white text-xs">${item.keyword}</span>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">View TB: ${formatNumber(item.avg_views)}</span>
+          </div>
+          <button onclick="navigator.clipboard.writeText('${item.keyword}'); showToast('Đã copy: ${item.keyword}')" class="p-1 hover:text-rose-400 text-slate-400 transition">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+          </button>
+        `;
+        el.appendChild(div);
+      });
+      lucide.createIcons();
+    }
+
+    function renderNgramKeywords(ngrams) {
+      const el = document.getElementById('ngram-keywords');
+      el.innerHTML = '';
+      if (!ngrams || !ngrams.length) {
+        el.innerHTML = '<p class="text-slate-500 text-xs">Chưa phát hiện cụm từ 2-3 chữ lặp lại.</p>';
+        return;
+      }
+      ngrams.slice(0, 8).forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'flex items-center justify-between p-2.5 bg-slate-900/60 rounded-xl border border-white/5';
+        div.innerHTML = `
+          <div class="flex items-center space-x-2">
+            <span class="font-bold text-slate-200 text-xs">${item.phrase}</span>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">${item.count} lần</span>
+          </div>
+          <button onclick="navigator.clipboard.writeText('${item.phrase}'); showToast('Đã copy: ${item.phrase}')" class="p-1 hover:text-amber-400 text-slate-400 transition">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+          </button>
+        `;
+        el.appendChild(div);
+      });
+      lucide.createIcons();
+    }
+
+    function renderOutliers(outliers) {
+      const el = document.getElementById('outlier-videos-list');
+      el.innerHTML = '';
+      if (!outliers.length) {
+        el.innerHTML = '<p class="text-slate-500 text-xs col-span-2">Chưa phát hiện video bùng nổ bất thường</p>';
+        return;
+      }
+      outliers.slice(0, 4).forEach(v => {
+        const card = document.createElement('div');
+        card.className = 'p-3 bg-slate-900/70 rounded-xl border border-white/5 flex space-x-3 items-start hover:border-rose-500/30 transition';
+        card.innerHTML = `
+          <img src="${v.thumbnail || 'https://via.placeholder.com/120x68'}" class="w-24 h-14 object-cover rounded-lg shrink-0 bg-slate-800" />
+          <div class="flex-1 min-w-0 space-y-1">
+            <a href="https://youtube.com/watch?v=${v.video_id}" target="_blank" class="text-xs font-semibold text-white hover:text-rose-400 line-clamp-1">${v.title}</a>
+            <div class="flex items-center space-x-2 text-[11px] text-slate-400">
+              <span class="text-amber-300 font-bold">${formatNumber(v.view_count)} views</span>
+              <span class="text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded">${v.multiplier ? v.multiplier + 'x TB' : 'Viral'}</span>
+            </div>
+            <div class="text-[10px] text-slate-400">Đăng lúc: ${v.publish_time_vn || 'Chưa rõ'}</div>
+          </div>
+        `;
+        el.appendChild(card);
+      });
+    }
+
+    function renderRecentVideos(videos) {
+      const tbody = document.getElementById('recent-videos-tbody');
+      tbody.innerHTML = '';
+      videos.slice(0, 15).forEach((v, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/40 transition';
+        tr.innerHTML = `
+          <td class="px-4 py-3 flex items-center space-x-2">
+            <span class="text-slate-500 font-mono text-[10px]">${idx + 1}</span>
+            <span class="text-white font-medium line-clamp-1 max-w-xs">${v.title}</span>
+          </td>
+          <td class="px-4 py-3 font-semibold text-amber-400">${formatNumber(v.view_count)}</td>
+          <td class="px-4 py-3 text-slate-300">${v.publish_time_vn || 'Chưa rõ'}</td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-0.5 rounded text-[10px] ${v.multiplier >= 1.5 ? 'bg-rose-500/20 text-rose-300 font-bold' : 'bg-slate-800 text-slate-400'}">
+              ${v.multiplier ? v.multiplier + 'x' : '1.0x'}
+            </span>
+          </td>
+          <td class="px-4 py-3 text-right">
+            <a href="https://youtube.com/watch?v=${v.video_id}" target="_blank" class="text-rose-400 hover:text-rose-300"><i data-lucide="external-link" class="w-4 h-4 inline"></i></a>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      lucide.createIcons();
+    }
+
+    function renderGoogleTrendsChart(trend) {
+      const targetLabel = document.getElementById('trends-target-label');
+      if (targetLabel) {
+        const geoCode = (trend.target_geo || 'US').toUpperCase();
+        const countryNames = {
+          "US": "Hoa Kỳ (Mỹ)", "GB": "Anh Quốc (UK)", "JP": "Nhật Bản (JP)", "KR": "Hàn Quốc (KR)",
+          "DE": "Đức (DE)", "IN": "Ấn Độ (IN)", "BR": "Brazil (BR)", "VN": "Việt Nam (VN)"
+        };
+        targetLabel.textContent = `Mục tiêu: ${countryNames[geoCode] || geoCode}`;
+      }
+
+      const ctx = document.getElementById('googleTrendsChart').getContext('2d');
+      const timeline = trend.timeline_data || [];
+      const labels = timeline.length ? timeline.map(t => t.date.slice(5)) : Array.from({ length: 30 }, (_, i) => `${i + 1}`);
+      const dataPoints = timeline.length ? timeline.map(t => t.interest) : Array.from({ length: 30 }, () => Math.floor(Math.random() * 40 + 40));
+
+      if (trendChartInstance) trendChartInstance.destroy();
+      trendChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Độ quan tâm tìm kiếm',
+            data: dataPoints,
+            borderColor: '#f43f5e',
+            backgroundColor: 'rgba(244, 63, 94, 0.1)',
+            fill: true,
+            tension: 0.3,
+            borderWidth: 2,
+            pointRadius: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+            y: { min: 0, max: 100, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+          }
+        }
+      });
+    }
+
+    function renderBreakoutQueries(queries) {
+      const el = document.getElementById('breakout-queries');
+      el.innerHTML = '';
+      if (!queries || !queries.length) {
+        el.innerHTML = '<span class="text-slate-500 text-xs py-2">Chưa phát hiện truy vấn tăng đột biến</span>';
+        return;
+      }
+      queries.forEach(q => {
+        const queryText = typeof q === 'string' ? q : (q.query || '');
+        const val = typeof q === 'object' && q.value ? q.value : '';
+        const badgeHtml = val ? `<span class="px-1.5 py-0.5 rounded text-[10px] bg-rose-500/25 text-rose-300 font-bold border border-rose-500/30 shrink-0">${val}</span>` : '';
+
+        const span = document.createElement('button');
+        span.className = 'px-3 py-1.5 bg-slate-900/90 hover:bg-slate-800 text-slate-200 hover:text-white rounded-xl border border-rose-500/20 text-xs font-semibold flex items-center space-x-2 transition shadow-sm hover:border-rose-500/50';
+        span.onclick = () => {
+          navigator.clipboard.writeText(queryText);
+          showToast(`Đã copy: "${queryText}"`);
+        };
+        span.innerHTML = `<i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400 shrink-0"></i><span class="truncate max-w-xs">${queryText}</span>${badgeHtml}`;
+        el.appendChild(span);
+      });
+      lucide.createIcons();
+    }
+
+    function renderCompetitors(competitors) {
+      const el = document.getElementById('competitors-list');
+      el.innerHTML = '';
+      if (!competitors || !competitors.length) {
+        el.innerHTML = '<p class="text-slate-500 text-xs col-span-3 py-8 text-center">Chưa phát hiện kênh đối thủ liên quan trực tiếp</p>';
+        return;
+      }
+      competitors.forEach(c => {
+        const chName = c.channel_name || c.title || c.name || 'Kênh Đối Thủ';
+        const chUrl = c.channel_url || c.url || `https://www.youtube.com/results?search_query=${encodeURIComponent(chName)}`;
+        const initial = (chName || 'C')[0].toUpperCase();
+        const avgViews = c.avg_views_sample || c.avg_views || 0;
+        const avatarSrc = c.avatar_url || c.avatar || c.thumbnail;
+
+        const card = document.createElement('div');
+        card.className = 'p-4 bg-slate-900/70 rounded-2xl border border-white/5 space-y-3.5 hover:border-rose-500/30 transition flex flex-col justify-between';
+        card.innerHTML = `
+          <div class="flex items-center space-x-3">
+            ${avatarSrc ? `
+              <img src="${avatarSrc}" alt="${chName}" class="w-12 h-12 rounded-full object-cover ring-2 ring-rose-500/30 bg-slate-800 shrink-0 shadow-lg shadow-rose-950/40" onerror="this.onerror=null; this.outerHTML='<div class=\\'w-12 h-12 rounded-full bg-gradient-to-tr from-rose-600 via-red-500 to-amber-500 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-lg shadow-rose-600/20\\'>${initial}</div>';" />
+            ` : `
+              <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-rose-600 via-red-500 to-amber-500 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-lg shadow-rose-600/20">
+                ${initial}
+              </div>
+            `}
+            <div class="flex-1 min-w-0">
+              <h4 class="text-xs font-bold text-white truncate" title="${chName}">${chName}</h4>
+              <p class="text-[11px] text-slate-400 mt-0.5">
+                ${c.subscriber_count ? `<span class="text-slate-300 font-medium">${formatNumber(c.subscriber_count)} sub</span> • ` : ''}View mẫu TB: <span class="text-amber-400 font-semibold">${avgViews > 0 ? formatNumber(avgViews) : 'Nổi bật'}</span>
+              </p>
+            </div>
+          </div>
+
+          ${c.top_video_title ? `
+          <div class="p-2.5 rounded-xl bg-slate-950/60 border border-white/5 text-[11px] space-y-1">
+            <span class="text-[10px] text-slate-500 uppercase font-semibold">Video tiêu biểu:</span>
+            <p class="text-slate-300 line-clamp-1">${c.top_video_title}</p>
+          </div>
+          ` : ''}
+
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <a href="${chUrl}" target="_blank" class="py-2.5 px-3 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl shadow-md transition flex items-center justify-center space-x-1.5 group">
+              <i data-lucide="youtube" class="w-3.5 h-3.5 text-rose-200"></i>
+              <span>Mở Kênh</span>
+              <i data-lucide="external-link" class="w-3 h-3 text-rose-300 group-hover:translate-x-0.5 transition-transform"></i>
+            </a>
+            <button onclick="quickSearch('${chUrl}', 'US')" class="py-2.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-semibold rounded-xl border border-white/5 transition flex items-center justify-center space-x-1.5">
+              <i data-lucide="bar-chart-2" class="w-3.5 h-3.5 text-rose-400"></i>
+              <span>Phân Tích</span>
+            </button>
+          </div>
+        `;
+        el.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    function renderTitleTemplates(templates) {
+      const el = document.getElementById('title-templates');
+      el.innerHTML = '';
+      (templates || []).forEach(t => {
+        const card = document.createElement('div');
+        card.className = 'p-4 bg-slate-900/60 rounded-2xl border border-white/5 space-y-2';
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-amber-400 uppercase tracking-wider">${t.type || 'Công Thức'}</span>
+            <button onclick="navigator.clipboard.writeText('${t.template}'); showToast('Đã copy mẫu tiêu đề!')" class="text-slate-400 hover:text-white p-1">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+          <p class="text-xs font-medium text-white">${t.template}</p>
+          <p class="text-[11px] text-slate-400">${t.rationale || ''}</p>
+        `;
+        el.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    // ==========================================
+    // 2. View 4: Publish Time Checker (Channel ID UC...)
+    // ==========================================
+    async function handleUCTimeSearch(e) {
+      e.preventDefault();
+      const channelId = document.getElementById('uc-channel-id').value.trim();
+      const limit = parseInt(document.getElementById('uc-limit').value) || 20;
+      const apiKey = (document.getElementById('uc-api-key')?.value || savedApiKey || '').trim();
+      if (!channelId) return;
+
+      document.getElementById('uc-loading').classList.remove('hidden');
+      document.getElementById('uc-results').classList.add('hidden');
+      document.getElementById('uc-copy-toast').classList.add('hidden');
+
+      try {
+        const res = await fetch('/api/channel/publish-times', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            channel_id: channelId,
+            limit: limit,
+            api_key: apiKey || null
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Lỗi khi trích xuất dữ liệu video');
+
+        latestUCData = data;
+        renderUCTable(data);
+        showToast(`Đã lấy thành công ${data.total_videos} video (Giờ VN)!`);
+      } catch (err) {
+        alert('Lỗi: ' + err.message);
+      } finally {
+        document.getElementById('uc-loading').classList.add('hidden');
+      }
+    }
+
+    function renderUCTable(data) {
+      document.getElementById('uc-results').classList.remove('hidden');
+      document.getElementById('uc-channel-title').textContent = `${data.channel_title || 'Kênh YouTube'} (${data.total_videos} video)`;
+      document.getElementById('uc-meta-info').textContent = `Múi giờ: Asia/Ho_Chi_Minh (UTC+7) | Mode: ${data.extraction_mode === 'api' ? 'YouTube Data API v3' : 'Free Mode (No API)'}`;
+
+      const tbody = document.getElementById('uc-table-tbody');
+      tbody.innerHTML = '';
+      data.videos.forEach((v, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/40 transition font-mono text-[11px]';
+        tr.innerHTML = `
+          <td class="px-3 py-2.5 text-center text-slate-500 font-sans">${idx + 1}</td>
+          <td class="px-3 py-2.5 text-slate-400">${v.video_id}</td>
+          <td class="px-4 py-2.5 font-sans font-medium text-white max-w-md truncate" title="${v.title}">${v.title}</td>
+          <td class="px-3 py-2.5 text-emerald-400 font-bold">${v.publish_date}</td>
+          <td class="px-3 py-2.5 text-amber-300 font-bold">${v.publish_time}</td>
+          <td class="px-3 py-2.5 text-slate-300">${v.publish_datetime}</td>
+          <td class="px-3 py-2.5 font-sans font-semibold text-rose-300">${v.publish_weekday}</td>
+          <td class="px-3 py-2.5 text-right font-bold text-white">${formatNumber(v.view_count)}</td>
+          <td class="px-3 py-2.5 text-center font-sans">
+            <a href="${v.url}" target="_blank" class="text-rose-400 hover:text-rose-300"><i data-lucide="external-link" class="w-3.5 h-3.5 inline"></i></a>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      lucide.createIcons();
+    }
+
+    function copyUCTableForSheets() {
+      if (!latestUCData || !latestUCData.tsv_content) {
+        showToast('Chưa có dữ liệu bảng để copy', false);
+        return;
+      }
+      navigator.clipboard.writeText(latestUCData.tsv_content).then(() => {
+        const toastBanner = document.getElementById('uc-copy-toast');
+        if (toastBanner) toastBanner.classList.remove('hidden');
+        showToast('Đã copy bảng chuẩn Google Sheets (Tab-separated)! Nhấn Ctrl+V để dán.');
+      }).catch(err => {
+        showToast('Lỗi copy clipboard: ' + err, false);
+      });
+    }
+
+    function downloadUCCSV() {
+      if (!latestUCData || !latestUCData.csv_content) {
+        showToast('Chưa có dữ liệu CSV để tải', false);
+        return;
+      }
+      const blob = new Blob([latestUCData.csv_content], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `publish_times_${latestUCData.channel_id || 'youtube'}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Đã tải xuống file CSV thành công!');
+    }
+
+    function openGasModal() {
+      updateGasCodeWithApiKey(savedApiKey);
+      document.getElementById('modal-gas').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeGasModal() {
+      document.getElementById('modal-gas').classList.add('hidden');
+    }
+
+    function copyGasCode() {
+      const codeToCopy = document.getElementById('gas-code-content')?.textContent || GAS_CODE;
+      navigator.clipboard.writeText(codeToCopy).then(() => {
+        showToast('Đã copy toàn bộ mã Google Apps Script (kèm API Key của bạn)!');
+      });
+    }
+
+    // ==========================================
+    // 3. View 2: Tra Cứu Từ Khóa
+    // ==========================================
+    async function handleKeywordSearch(e) {
+      e.preventDefault();
+      const kw = document.getElementById('kw-input').value.trim();
+      const country = document.getElementById('kw-country').value;
+      if (!kw) return;
+
+      document.getElementById('kw-loading').classList.remove('hidden');
+      document.getElementById('kw-results').classList.add('hidden');
+
+      try {
+        const res = await fetch('/api/analyze/keyword', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ keyword: kw, country: country })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Lỗi tra cứu từ khóa');
+
+        document.getElementById('kw-results').classList.remove('hidden');
+        renderKwChart(data.timeline_data || []);
+        renderKwTags(data.recommended_tags || []);
+        showToast('Tra cứu từ khóa hoàn tất!');
+      } catch (err) {
+        alert('Lỗi: ' + err.message);
+      } finally {
+        document.getElementById('kw-loading').classList.add('hidden');
+      }
+    }
+
+    function renderKwChart(timeline) {
+      const ctx = document.getElementById('kwTrendsChart').getContext('2d');
+      const labels = timeline.length ? timeline.map(t => t.date.slice(5)) : Array.from({ length: 30 }, (_, i) => `${i + 1}`);
+      const dataPoints = timeline.length ? timeline.map(t => t.interest) : Array.from({ length: 30 }, () => Math.floor(Math.random() * 50 + 30));
+
+      if (kwChartInstance) kwChartInstance.destroy();
+      kwChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Độ quan tâm tìm kiếm',
+            data: dataPoints,
+            borderColor: '#f59e0b',
+            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+            fill: true,
+            tension: 0.3,
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+            y: { min: 0, max: 100, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+          }
+        }
+      });
+    }
+
+    function renderKwTags(tags) {
+      const el = document.getElementById('kw-tags-list');
+      el.innerHTML = '';
+      (tags || []).forEach(t => {
+        const btn = document.createElement('button');
+        btn.className = 'px-3 py-1 bg-slate-900 hover:bg-rose-600 text-slate-300 hover:text-white rounded-lg border border-white/5 transition flex items-center space-x-1';
+        btn.onclick = () => {
+          navigator.clipboard.writeText(t);
+          showToast(`Đã copy: "${t}"`);
+        };
+        btn.innerHTML = `<span>#${t}</span><i data-lucide="copy" class="w-3 h-3 text-slate-400"></i>`;
+        el.appendChild(btn);
+      });
+      lucide.createIcons();
+    }
+
+    function copyKwTags() {
+      const btns = document.querySelectorAll('#kw-tags-list button span');
+      const tags = Array.from(btns).map(b => b.textContent.replace('#', '')).join(', ');
+      if (tags) {
+        navigator.clipboard.writeText(tags);
+        showToast('Đã copy toàn bộ tag!');
+      }
+    }
+
+    // ==========================================
+    // 4. View 3: Top Thịnh Hành
+    // ==========================================
+    async function loadTrendingFeed() {
+      const countryEl = document.getElementById('feed-country');
+      const categoryEl = document.getElementById('feed-category');
+      const durationEl = document.getElementById('feed-duration');
+      const modeEl = document.getElementById('feed-mode');
+      
+      const country = countryEl ? countryEl.value : 'US';
+      const category = categoryEl ? categoryEl.value : 'all';
+      const duration = durationEl ? durationEl.value : 'long_form';
+      const mode = modeEl ? modeEl.value : 'evergreen';
+
+      const el = document.getElementById('trending-feed-list');
+      if (!el) return;
+      el.innerHTML = '<div class="col-span-3 text-center py-16 text-slate-400 text-xs space-y-3"><div class="w-8 h-8 rounded-full border-2 border-rose-500/20 border-t-rose-500 animate-spin mx-auto"></div><p class="font-medium text-slate-300">Đang lọc video dài & kiểm tra kênh hoạt động...</p><p class="text-[11px] text-slate-500">Tự động loại bỏ video Short, quét chỉ số triệu view bền vững</p></div>';
+
+      try {
+        const res = await fetch(`/api/trending/feed?country=${country}&category=${category}&duration=${duration}&feed_mode=${mode}`);
+        const data = await res.json();
+        const videos = data.videos || data.trending_videos || [];
+        el.innerHTML = '';
+        if (!videos.length) {
+          el.innerHTML = '<div class="col-span-3 text-center py-16 text-slate-400 text-xs">Không tìm thấy video dài phù hợp cho tiêu chí này. Thử chọn quốc gia hoặc danh mục khác.</div>';
+          return;
+        }
+        videos.forEach((v, idx) => {
+          const card = document.createElement('div');
+          card.className = 'glass-card rounded-2xl p-4 space-y-3 hover:border-rose-500/30 transition flex flex-col justify-between';
+          const vId = v.video_id || v.id || '';
+          const chName = v.channel_title || v.channel || 'YouTube Creator';
+          const vTitle = v.title || 'Video';
+          const thumb = v.thumbnail || (vId ? `https://i.ytimg.com/vi/${vId}/hqdefault.jpg` : '');
+          const views = v.view_count || v.views || 0;
+          const durBadge = v.duration_formatted || 'Video Dài';
+          const chBadge = v.channel_badge || '🟢 Kênh Hoạt Động';
+          const pubAge = v.published_age || '';
+
+          card.innerHTML = `
+            <div class="space-y-3">
+              <div class="relative group overflow-hidden rounded-xl bg-slate-800">
+                <img src="${thumb}" class="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.src='https://via.placeholder.com/320x180?text=YouTube+Video'" />
+                <span class="absolute top-2 left-2 px-2.5 py-0.5 rounded-full bg-black/75 backdrop-blur-sm text-rose-400 font-extrabold text-[11px] border border-white/10">
+                  #${idx + 1} Top View
+                </span>
+                <span class="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/85 backdrop-blur-sm text-white font-bold text-[11px] font-mono border border-white/10 flex items-center space-x-1">
+                  <i data-lucide="clock" class="w-3 h-3 text-rose-400"></i>
+                  <span>${durBadge}</span>
+                </span>
+              </div>
+              <div class="space-y-2">
+                <a href="https://youtube.com/watch?v=${vId}" target="_blank" class="text-xs font-bold text-white hover:text-rose-400 line-clamp-2 leading-snug" title="${vTitle}">${vTitle}</a>
+                <div class="space-y-1 pt-1 border-t border-white/5">
+                  <div class="flex items-center justify-between text-[11px]">
+                    <span class="truncate max-w-[150px] font-medium text-slate-300" title="${chName}">${chName}</span>
+                    <span class="text-amber-400 font-bold">${formatNumber(views)} views</span>
+                  </div>
+                  <div class="flex items-center justify-between text-[10px] text-slate-400">
+                    <span class="text-emerald-400 font-medium">${chBadge}</span>
+                    <span class="text-slate-400 truncate max-w-[140px]">${pubAge}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2 pt-2 border-t border-white/5 text-[11px]">
+              <a href="https://youtube.com/watch?v=${vId}" target="_blank" class="flex-1 py-2 px-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl font-semibold transition flex items-center justify-center space-x-1.5">
+                <i data-lucide="play" class="w-3 h-3 fill-current"></i>
+                <span>Xem Video</span>
+              </a>
+              <button onclick="navigator.clipboard.writeText('${vTitle.replace(/'/g, "\\'")}'); showToast('Đã copy tiêu đề!')" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition flex items-center justify-center" title="Copy Tiêu Đề">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          `;
+          el.appendChild(card);
+        });
+        lucide.createIcons();
+      } catch (err) {
+        el.innerHTML = `<div class="col-span-3 text-center py-16 text-rose-400 text-xs">Lỗi tải dữ liệu: ${err.message}</div>`;
+      }
+    }
+  </script>
+</body>
+</html>
