@@ -351,6 +351,8 @@ def analyze_keyword(req: KeywordAnalysisRequest):
 
         is_trending = hot_score >= 55
 
+        long_tail = [t for t in suggested_tags if len(t.split()) >= 2 and len(t.split()) <= 4][:12]
+
         return {
             "success": True,
             "keyword": kw,
@@ -362,12 +364,71 @@ def analyze_keyword(req: KeywordAnalysisRequest):
             "timeline_data": timeline_data,
             "trend_points": timeline_data,
             "recommended_tags": suggested_tags[:25],
+            "long_tail_keywords": long_tail,
             "related_queries": related_queries,
             "top_youtube_videos": yt_results
         }
     except Exception as e:
         logger.error(f"Error during keyword analysis: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Lỗi khi tra cứu từ khóa: {str(e)}")
+
+@app.get("/api/keywords/trending-niche-tags")
+def get_trending_niche_tags(geo: Optional[str] = "US"):
+    geo_code = (geo or "US").upper()
+    tags_by_geo = {
+        "VN": [
+            {"tag": "học tiếng anh giao tiếp", "niche": "🎓 Học Tiếng Anh", "badge": "🔥 Hot"},
+            {"tag": "luyện nghe tiếng anh thụ động", "niche": "🎓 Học Tiếng Anh", "badge": "🚀 Đang lên"},
+            {"tag": "ngoại tình trả thù", "niche": "💔 Ngoại Tình", "badge": "🔥 Viral"},
+            {"tag": "bố chồng nàng dâu", "niche": "🏡 Gia Đình", "badge": "⚡ Drama"},
+            {"tag": "mẹ vợ con rể", "niche": "🏡 Gia Đình", "badge": "⚡ Drama"},
+            {"tag": "tâm sự đêm muộn 18", "niche": "🔞 Thầm Kín", "badge": "🔥 18+"},
+            {"tag": "vụ án có thật", "niche": "🕵️ Kỳ Án", "badge": "🚀 Triệu view"},
+            {"tag": "kiếm tiền online 2026", "niche": "💰 Tài Chính", "badge": "🔥 Trend"},
+            {"tag": "trí tuệ nhân tạo AI", "niche": "🤖 Công Nghệ", "badge": "🚀 Mới"},
+            {"tag": "truyện ma đêm muộn", "niche": "👻 Kinh Dị", "badge": "⚡ Rùng rợn"},
+            {"tag": "triết lý cuộc sống", "niche": "📜 Triết Lý", "badge": "🌱 Chữa lành"}
+        ],
+        "FR": [
+            {"tag": "apprendre l'anglais débutant", "niche": "🎓 Anglais", "badge": "🔥 Hot"},
+            {"tag": "cours d'anglais gratuit", "niche": "🎓 Anglais", "badge": "🚀 Tendance"},
+            {"tag": "tromperie vengeance drames", "niche": "💔 Revenge", "badge": "🔥 Viral"},
+            {"tag": "drame familial histoires", "niche": "🏡 Famille", "badge": "⚡ Drama"},
+            {"tag": "confessions secrètes", "niche": "🔞 Confessions", "badge": "🔥 Secret"},
+            {"tag": "faits divers documentaire", "niche": "🕵️ True Crime", "badge": "🚀 Populaire"},
+            {"tag": "intelligence artificielle IA", "niche": "🤖 Tech AI", "badge": "🔥 Trend"},
+            {"tag": "gagner de l'argent en ligne", "niche": "💰 Business", "badge": "⚡ 2026"},
+            {"tag": "histoires d'horreur paranormal", "niche": "👻 Horreur", "badge": "🌙 Nuit"}
+        ],
+        "IT": [
+            {"tag": "imparare l'inglese da zero", "niche": "🎓 Inglese", "badge": "🔥 Hot"},
+            {"tag": "corso inglese parlato", "niche": "🎓 Inglese", "badge": "🚀 Trend"},
+            {"tag": "tradimento vendetta storie", "niche": "💔 Vendetta", "badge": "🔥 Viral"},
+            {"tag": "drammi familiari storie", "niche": "🏡 Famiglia", "badge": "⚡ Drama"},
+            {"tag": "true crime casi reali", "niche": "🕵️ Cronaca", "badge": "🚀 Popolare"},
+            {"tag": "intelligenza artificiale AI", "niche": "🤖 Tech AI", "badge": "🔥 Trend"},
+            {"tag": "guadagnare online soldi", "niche": "💰 Finanza", "badge": "⚡ 2026"}
+        ],
+        "DEFAULT": [
+            {"tag": "learn english conversation", "niche": "🎓 Learn English", "badge": "🔥 Viral"},
+            {"tag": "english speaking practice", "niche": "🎓 Learn English", "badge": "🚀 High View"},
+            {"tag": "revenge stories", "niche": "💔 Revenge", "badge": "🔥 Breakout"},
+            {"tag": "cheating spouse caught", "niche": "💔 Cheating", "badge": "⚡ Drama"},
+            {"tag": "reddit stories AITA", "niche": "💬 Reddit", "badge": "🔥 Trending"},
+            {"tag": "mother in law drama", "niche": "🏡 Family", "badge": "⚡ Drama"},
+            {"tag": "father in law drama", "niche": "🏡 Family", "badge": "⚡ Story"},
+            {"tag": "secret affair confessions", "niche": "🔞 Late Night", "badge": "🔥 18+"},
+            {"tag": "ai tools 2026", "niche": "🤖 AI Tech", "badge": "🚀 Trend"},
+            {"tag": "make money online", "niche": "💰 Finance", "badge": "🔥 High CPM"},
+            {"tag": "true crime interrogation", "niche": "🕵️ True Crime", "badge": "🚀 Deep Dive"},
+            {"tag": "scary horror stories", "niche": "👻 Horror", "badge": "🌙 Spooky"},
+            {"tag": "stoicism life lessons", "niche": "📜 Stoicism", "badge": "🌱 Wisdom"}
+        ]
+    }
+    return {
+        "geo": geo_code,
+        "niche_tags": tags_by_geo.get(geo_code, tags_by_geo["DEFAULT"])
+    }
 
 NICHE_LOCALIZED_QUERIES = {
     "philosophy": {

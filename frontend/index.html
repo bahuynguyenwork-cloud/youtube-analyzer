@@ -640,19 +640,31 @@
         <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Tra Cứu Từ Khóa Bắt Trend Quốc Tế</h2>
         <p class="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">Kiểm tra xung lượng tìm kiếm theo quốc gia, nhận danh sách tag sẵn sàng copy và các từ khóa ngách 2-3 chữ</p>
         <form id="keyword-search-form" onsubmit="handleKeywordSearch(event)" class="flex flex-col sm:flex-row gap-2 max-w-xl mx-auto pt-2">
-          <input id="kw-input" type="text" required placeholder="Nhập từ khóa hoặc chủ đề (VD: ai tools, podcast, gaming, cooking)..." class="flex-1 px-4 py-3 bg-slate-900/90 border border-white/15 rounded-xl text-white text-xs focus:ring-2 focus:ring-rose-500" />
-          <select id="kw-country" class="px-3 py-3 bg-slate-900/90 border border-white/15 rounded-xl text-white text-xs">
+          <input id="kw-input" type="text" required placeholder="Nhập từ khóa hoặc chủ đề (VD: learn english, revenge, ai tools)..." class="flex-1 px-4 py-3 bg-slate-900/90 border border-white/15 rounded-xl text-white text-xs focus:ring-2 focus:ring-rose-500" />
+          <select id="kw-country" onchange="loadQuickNicheTags()" class="px-3 py-3 bg-slate-900/90 border border-white/15 rounded-xl text-white text-xs">
             <option value="US">Hoa Kỳ (US)</option>
             <option value="GB">Anh (UK)</option>
-            <option value="JP">Nhật Bản (JP)</option>
-            <option value="KR">Hàn Quốc (KR)</option>
-            <option value="DE">Đức (DE)</option>
             <option value="FR">Pháp (FR)</option>
             <option value="IT">Ý (IT)</option>
+            <option value="DE">Đức (DE)</option>
+            <option value="JP">Nhật Bản (JP)</option>
+            <option value="KR">Hàn Quốc (KR)</option>
             <option value="VN">Việt Nam (VN)</option>
           </select>
           <button type="submit" class="px-6 py-3 bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-rose-600/30 transition">Kiểm Tra</button>
         </form>
+
+        <!-- Thanh Gợi Ý Thẻ Tag Xu Hướng Ngách Hiện Tại -->
+        <div class="pt-3 max-w-3xl mx-auto text-left space-y-2.5">
+          <div class="flex items-center justify-between text-xs">
+            <span class="flex items-center space-x-1.5 font-bold text-rose-400">
+              <i data-lucide="sparkles" class="w-4 h-4 text-amber-400 animate-pulse"></i>
+              <span>Gợi ý thẻ tag xu hướng ngách đang hot (Bấm để tra cứu ngay):</span>
+            </span>
+            <span class="text-slate-400 text-[10px] hidden sm:inline">Thích ứng theo quốc gia</span>
+          </div>
+          <div id="quick-niche-tags" class="flex flex-wrap gap-2 text-xs"></div>
+        </div>
       </section>
 
       <div id="kw-loading" class="hidden glass-card rounded-2xl p-10 text-center space-y-3">
@@ -686,6 +698,24 @@
             </button>
           </div>
           <div id="kw-tags-list" class="flex flex-wrap gap-2 text-xs"></div>
+        </div>
+
+        <!-- Cụm Từ Khóa Ngách Dài (Long-Tail Keywords) -->
+        <div id="kw-longtail-container" class="hidden glass-card rounded-2xl p-5 space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <h4 class="text-xs font-bold text-white flex items-center space-x-1.5">
+                <i data-lucide="target" class="w-3.5 h-3.5 text-rose-400"></i>
+                <span>Cụm Từ Khóa Ngách Dài (Long-Tail Keywords)</span>
+              </h4>
+              <p class="text-[10px] text-slate-400">Từ khóa 2–4 chữ có tỷ lệ chuyển đổi cao để chèn tiêu đề và mô tả video</p>
+            </div>
+            <button onclick="copyLongTailTags()" class="text-xs text-amber-400 hover:text-amber-300 flex items-center space-x-1.5 px-3 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              <span>Copy toàn bộ</span>
+            </button>
+          </div>
+          <div id="kw-longtail-list" class="flex flex-wrap gap-2 text-xs"></div>
         </div>
 
         <div id="kw-top-videos-container" class="hidden glass-card rounded-2xl p-5 space-y-3">
@@ -1034,6 +1064,10 @@
       }
 
       lucide.createIcons();
+
+      if (navId === 'keyword' || navId === 'keywords') {
+        loadQuickNicheTags();
+      }
 
       if (navId === 'trending') {
         const feedList = document.getElementById('trending-feed-list');
@@ -1726,12 +1760,128 @@
 
         renderKwChart(data.timeline_data || data.trend_points || []);
         renderKwTags(data.recommended_tags || []);
+        renderLongTailKeywords(data.long_tail_keywords || []);
         renderKwTopVideos(data.top_youtube_videos || []);
         showToast('Tra cứu từ khóa hoàn tất!');
       } catch (err) {
         alert('Lỗi: ' + err.message);
       } finally {
         document.getElementById('kw-loading').classList.add('hidden');
+      }
+    }
+
+    const QUICK_NICHE_TAGS_MAP = {
+      "VN": [
+        { tag: "học tiếng anh giao tiếp", niche: "🎓 Học Tiếng Anh", badge: "🔥 Hot" },
+        { tag: "luyện nghe tiếng anh phản xạ", niche: "🎓 Học Tiếng Anh", badge: "🚀 Bứt phá" },
+        { tag: "ngoại tình trả thù", niche: "💔 Ngoại Tình", badge: "🔥 Viral" },
+        { tag: "bố chồng nàng dâu", niche: "🏡 Gia Đình", badge: "⚡ Drama" },
+        { tag: "mẹ vợ con rể", niche: "🏡 Gia Đình", badge: "⚡ Drama" },
+        { tag: "tâm sự đêm muộn 18", niche: "🔞 Thầm Kín", badge: "🔥 18+" },
+        { tag: "vụ án có thật", niche: "🕵️ Kỳ Án", badge: "🚀 Triệu view" },
+        { tag: "kiếm tiền online 2026", niche: "💰 Tài Chính", badge: "🔥 Trend" },
+        { tag: "trí tuệ nhân tạo AI", niche: "🤖 Công Nghệ", badge: "🚀 Mới" },
+        { tag: "truyện ma đêm muộn", niche: "👻 Kinh Dị", badge: "⚡ Rùng rợn" },
+        { tag: "triết lý cuộc sống", niche: "📜 Triết Lý", badge: "🌱 Chữa lành" }
+      ],
+      "FR": [
+        { tag: "apprendre l'anglais débutant", niche: "🎓 Anglais", badge: "🔥 Hot" },
+        { tag: "cours d'anglais gratuit", niche: "🎓 Anglais", badge: "🚀 Tendance" },
+        { tag: "tromperie vengeance drames", niche: "💔 Revenge", badge: "🔥 Viral" },
+        { tag: "drame familial histoires", niche: "🏡 Famille", badge: "⚡ Drama" },
+        { tag: "confessions secrètes", niche: "🔞 Confessions", badge: "🔥 Secret" },
+        { tag: "faits divers documentaire", niche: "🕵️ True Crime", badge: "🚀 Populaire" },
+        { tag: "intelligence artificielle IA", niche: "🤖 Tech AI", badge: "🔥 Trend" },
+        { tag: "gagner de l'argent en ligne", niche: "💰 Business", badge: "⚡ 2026" },
+        { tag: "histoires d'horreur paranormal", niche: "👻 Horreur", badge: "🌙 Nuit" }
+      ],
+      "IT": [
+        { tag: "imparare l'inglese da zero", niche: "🎓 Inglese", badge: "🔥 Hot" },
+        { tag: "corso inglese parlato", niche: "🎓 Inglese", badge: "🚀 Trend" },
+        { tag: "tradimento vendetta storie", niche: "💔 Vendetta", badge: "🔥 Viral" },
+        { tag: "drammi familiari storie", niche: "🏡 Famiglia", badge: "⚡ Drama" },
+        { tag: "true crime casi reali", niche: "🕵️ Cronaca", badge: "🚀 Popolare"},
+        { tag: "intelligenza artificiale AI", niche: "🤖 Tech AI", badge: "🔥 Trend" },
+        { tag: "guadagnare online soldi", niche: "💰 Finanza", badge: "⚡ 2026" }
+      ],
+      "DEFAULT": [
+        { tag: "learn english conversation", niche: "🎓 Learn English", badge: "🔥 Viral" },
+        { tag: "english speaking practice", niche: "🎓 Learn English", badge: "🚀 High View" },
+        { tag: "revenge stories", niche: "💔 Revenge", badge: "🔥 Breakout" },
+        { tag: "cheating spouse caught", niche: "💔 Cheating", badge: "⚡ Drama" },
+        { tag: "reddit stories AITA", niche: "💬 Reddit", badge: "🔥 Trending" },
+        { tag: "mother in law drama", niche: "🏡 Family", badge: "⚡ Drama" },
+        { tag: "father in law drama", niche: "🏡 Family", badge: "⚡ Story" },
+        { tag: "secret affair confessions", niche: "🔞 Late Night", badge: "🔥 18+" },
+        { tag: "ai tools 2026", niche: "🤖 AI Tech", badge: "🚀 Trend" },
+        { tag: "make money online", niche: "💰 Finance", badge: "🔥 High CPM" },
+        { tag: "true crime interrogation", niche: "🕵️ True Crime", badge: "🚀 Deep Dive" },
+        { tag: "scary horror stories", niche: "👻 Horror", badge: "🌙 Spooky" },
+        { tag: "stoicism life lessons", niche: "📜 Stoicism", badge: "🌱 Wisdom" }
+      ]
+    };
+
+    function loadQuickNicheTags() {
+      const countryEl = document.getElementById('kw-country');
+      const country = countryEl ? countryEl.value : 'US';
+      const container = document.getElementById('quick-niche-tags');
+      if (!container) return;
+
+      const tags = QUICK_NICHE_TAGS_MAP[country] || QUICK_NICHE_TAGS_MAP['DEFAULT'];
+      container.innerHTML = '';
+      tags.forEach(item => {
+        const btn = document.createElement('button');
+        btn.className = 'px-3 py-1.5 bg-slate-900/90 hover:bg-slate-800 text-slate-200 hover:text-white rounded-xl border border-white/10 hover:border-rose-500/50 transition flex items-center space-x-1.5 text-xs shadow-sm group';
+        btn.onclick = () => quickSearchKw(item.tag);
+        btn.innerHTML = `
+          <span class="font-medium text-slate-300 group-hover:text-rose-400 transition">${item.tag}</span>
+          <span class="px-1.5 py-0.5 rounded text-[10px] bg-rose-500/20 text-rose-300 font-bold">${item.badge}</span>
+        `;
+        container.appendChild(btn);
+      });
+      lucide.createIcons();
+    }
+
+    function quickSearchKw(tag) {
+      const input = document.getElementById('kw-input');
+      if (input) {
+        input.value = tag;
+        const form = document.getElementById('keyword-search-form');
+        if (form) {
+          form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+        }
+      }
+    }
+
+    function renderLongTailKeywords(longTailList) {
+      const container = document.getElementById('kw-longtail-container');
+      const el = document.getElementById('kw-longtail-list');
+      if (!container || !el) return;
+      if (!longTailList || !longTailList.length) {
+        container.classList.add('hidden');
+        return;
+      }
+      container.classList.remove('hidden');
+      el.innerHTML = '';
+      longTailList.forEach(phrase => {
+        const btn = document.createElement('button');
+        btn.className = 'px-3 py-1.5 bg-slate-900/90 hover:bg-amber-600/80 text-slate-200 hover:text-white rounded-xl border border-amber-500/20 transition flex items-center space-x-1.5 text-xs shadow-sm';
+        btn.onclick = () => {
+          navigator.clipboard.writeText(phrase);
+          showToast(`Đã copy từ khóa ngách: "${phrase}"`);
+        };
+        btn.innerHTML = `<i data-lucide="zap" class="w-3 h-3 text-amber-400"></i><span>${phrase}</span>`;
+        el.appendChild(btn);
+      });
+      lucide.createIcons();
+    }
+
+    function copyLongTailTags() {
+      const btns = document.querySelectorAll('#kw-longtail-list button span');
+      const phrases = Array.from(btns).map(b => b.textContent).join(', ');
+      if (phrases) {
+        navigator.clipboard.writeText(phrases);
+        showToast('Đã copy toàn bộ cụm từ khóa ngách dài!');
       }
     }
 
@@ -1954,6 +2104,11 @@
         el.innerHTML = `<div class="col-span-3 text-center py-16 text-rose-400 text-xs">Lỗi tải dữ liệu: ${err.message}</div>`;
       }
     }
+
+    // Khởi tạo thẻ tag gợi ý ngách ngay khi tải trang
+    document.addEventListener('DOMContentLoaded', () => {
+      loadQuickNicheTags();
+    });
   </script>
 </body>
 </html>
