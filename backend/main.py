@@ -1743,3 +1743,10 @@ def serve_favicon():
         return FileResponse(fav_path, media_type="image/svg+xml")
     return Response(status_code=204)
 
+@app.get("/health")
+@app.get("/ping")
+def health_check():
+    return {"status": "ok", "service": "YouTube Trend Analyzer", "time": datetime.datetime.now(datetime.timezone.utc).isoformat()}
+
+
+
