@@ -197,7 +197,14 @@ def analyze_channel(req: ChannelAnalysisRequest):
             channel_meta=channel_meta
         )
 
-        time_data = time_service.analyze_upload_times(videos, target_geo=geo)
+        extracted_kw = [k.get("keyword", "") for k in keyword_data.get("top_keywords", [])] if isinstance(keyword_data, dict) else []
+        time_data = time_service.analyze_upload_times(
+            videos=videos, 
+            target_geo=geo,
+            channel_keywords=extracted_kw,
+            channel_title=channel_meta.get("channel_title", ""),
+            channel_description=channel_meta.get("description", "")
+        )
 
         # Enrich time_data with friendly UI fields
         if "best_upload_time_vn" not in time_data or not time_data["best_upload_time_vn"]:

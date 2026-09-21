@@ -286,9 +286,10 @@
               <i data-lucide="compass" class="w-4 h-4"></i>
             </div>
             <div class="space-y-1">
-              <h4 class="font-bold text-white flex items-center space-x-2">
+              <h4 class="font-bold text-white flex items-center space-x-2 flex-wrap gap-y-1">
                 <span>Chiến Lược Khung Giờ Thị Trường:</span>
                 <span id="target-country-name-badge" class="px-2 py-0.5 rounded bg-rose-500/30 text-rose-200 text-[11px] font-semibold">Khán Giả Mục Tiêu</span>
+                <span id="target-niche-name-badge" class="hidden px-2 py-0.5 rounded bg-amber-500/30 text-amber-200 text-[11px] font-semibold">Chủ Đề</span>
               </h4>
               <p id="target-country-strategy-text" class="text-slate-300 leading-relaxed">Đang tải thói quen tiêu thụ nội dung theo múi giờ thị trường...</p>
             </div>
@@ -311,6 +312,9 @@
               <p id="best-day-desc" class="text-xs text-slate-400 leading-relaxed">Ngày trong tuần có tỉ lệ tương tác và lượt xem cao nhất.</p>
             </div>
           </div>
+
+          <!-- Top Detailed Recommendations according to Niche & Country -->
+          <div id="publish-time-recommendations" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
 
           <div class="glass-card rounded-2xl p-5 space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -1192,6 +1196,16 @@
         countryBadge.textContent = geoDisplayName;
       }
 
+      const nicheBadge = document.getElementById('target-niche-name-badge');
+      if (nicheBadge) {
+        if (publish_time_analysis?.detected_niche_name) {
+          nicheBadge.textContent = `🎯 Ngách: ${publish_time_analysis.detected_niche_name}`;
+          nicheBadge.classList.remove('hidden');
+        } else {
+          nicheBadge.classList.add('hidden');
+        }
+      }
+
       const strategyText = document.getElementById('target-country-strategy-text');
       if (strategyText) {
         strategyText.textContent = publish_time_analysis?.strategy_tip || `Được tính toán và đồng bộ tối ưu theo múi giờ thị trường ${geoDisplayName}.`;
@@ -1248,6 +1262,9 @@
 
       // 24H Chart
       renderPublishHoursChart(publish_time_analysis.hour_distribution || {});
+
+      // Detailed recommendations by niche & country
+      renderTopTimeRecommendations(publish_time_analysis.top_recommendations || []);
 
       // Tags Pool
       renderTagsPool(keyword_intelligence.copyable_tags_list || []);
@@ -1320,6 +1337,30 @@
           }
         }
       });
+    }
+
+    function renderTopTimeRecommendations(recommendations) {
+      const container = document.getElementById('publish-time-recommendations');
+      if (!container) return;
+      if (!recommendations || recommendations.length === 0) {
+        container.innerHTML = '';
+        return;
+      }
+      container.innerHTML = recommendations.map(rec => `
+        <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-white/10 flex items-start space-x-3 text-xs">
+          <div class="p-2 rounded-xl bg-rose-500/20 text-rose-400 shrink-0 mt-0.5">
+            <i data-lucide="clock" class="w-4 h-4"></i>
+          </div>
+          <div class="space-y-1">
+            <div class="flex items-center space-x-2">
+              <span class="font-bold text-white text-sm">${rec.time_slot_vn}</span>
+              <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 text-[10px] font-medium border border-white/5">${rec.target_local_time || 'Giờ mục tiêu'}</span>
+            </div>
+            <p class="text-rose-300 font-semibold">${rec.target_audience || ''}</p>
+            <p class="text-slate-400 leading-relaxed">${rec.recommended_for || ''}</p>
+          </div>
+        </div>
+      `).join('');
     }
 
     function renderTagsPool(tags) {
