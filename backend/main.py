@@ -42,9 +42,11 @@ def save_config(cfg: dict):
     except Exception as e:
         logger.error(f"Lỗi khi lưu config: {e}")
 
+DEFAULT_API_KEY = "AIzaSyCotv0Bh3MjCCMiWjcRcLtW2mSs5c1vWt8"
+
 def get_default_api_key() -> Optional[str]:
     cfg = load_saved_config()
-    key = cfg.get("youtube_api_key") or os.environ.get("YOUTUBE_API_KEY")
+    key = cfg.get("youtube_api_key") or os.environ.get("YOUTUBE_API_KEY") or DEFAULT_API_KEY
     return key.strip() if key and key.strip() else None
 
 app = FastAPI(title="YouTube Channel & Trend Analyzer API", version="1.2.0")
@@ -712,6 +714,10 @@ def get_trending_feed(
                         if '#shorts' in t.lower() or 'shorts' in t.lower().split():
                             continue
 
+                        v_cnt = int(e.get('view_count') or 0)
+                        if v_cnt < 1000:
+                            continue
+
                         v_id = e.get('id')
                         thumb = ""
                         thumbs = e.get('thumbnails', [])
@@ -727,15 +733,20 @@ def get_trending_feed(
                             "channel_title": e.get('channel') or e.get('uploader') or 'YouTube Creator',
                             "channel": e.get('channel') or e.get('uploader') or 'YouTube Creator',
                             "channel_badge": "🟢 Kênh Hoạt Động",
+                            "channel_subs": e.get('channel_follower_count') or 0,
+                            "is_verified": bool(e.get('channel_is_verified')),
                             "is_active_channel": True,
-                            "view_count": e.get('view_count') or 0,
-                            "views": e.get('view_count') or 0,
+                            "view_count": v_cnt,
+                            "views": v_cnt,
                             "duration_seconds": dur,
                             "duration_formatted": format_duration_display(dur),
+                            "published_at": "",
                             "published_age": "🔥 Xu hướng tuần này",
                             "url": e.get('url') or f"https://www.youtube.com/watch?v={v_id}",
                             "thumbnail": thumb
                         })
+
+                videos.sort(key=lambda x: x["view_count"], reverse=True)
         except Exception as yt_err:
             logger.error(f"Lỗi khi lấy trending fallback: {yt_err}")
 

@@ -29,7 +29,6 @@ venv.bak/
 
 # Environment and sensitive config
 .env
-backend/config.json
 scratch_test.py
 *.log
 
