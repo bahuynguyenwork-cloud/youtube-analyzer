@@ -439,6 +439,39 @@ def format_duration_display(seconds: int) -> str:
         return f"{h}:{m:02d}:{s:02d}"
     return f"{m:02d}:{s:02d}"
 
+def is_stream_video(item: dict) -> bool:
+    """Kiểm tra video có phải là livestream, restream hoặc phát trực tiếp không."""
+    snippet = item.get("snippet", {})
+    title = snippet.get("title", "").lower()
+    lbc = snippet.get("liveBroadcastContent", "none")
+    if lbc in ["live", "upcoming"]:
+        return True
+
+    stream_keywords = [
+        "restream", "livestream", "live stream", "trực tiếp", "🔴", 
+        "buổi stream", "phát trực tiếp", "streamed live", "[live]", "(live)",
+        "giao lưu trực tiếp", "talkshow live"
+    ]
+    for kw in stream_keywords:
+        if kw in title:
+            return True
+
+    ls = item.get("liveStreamingDetails")
+    if ls:
+        start_str = ls.get("actualStartTime")
+        end_str = ls.get("actualEndTime")
+        if start_str and not end_str:
+            return True
+        if start_str and end_str:
+            try:
+                st = datetime.datetime.fromisoformat(start_str.replace("Z", "+00:00"))
+                et = datetime.datetime.fromisoformat(end_str.replace("Z", "+00:00"))
+                if (et - st).total_seconds() > 1200:
+                    return True
+            except Exception:
+                pass
+    return False
+
 def format_published_age(pub_iso: str) -> str:
     if not pub_iso:
         return ""
@@ -516,7 +549,7 @@ def get_trending_feed(
             # TRƯỜNG HỢP 1: Tất cả xu hướng (Top Trending chung của quốc gia)
             if cat == "all":
                 chart_url = (
-                    f"https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics"
+                    f"https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics,liveStreamingDetails"
                     f"&chart=mostPopular&regionCode={geo_code}&maxResults=50&key={api_key}"
                 )
                 chart_res = requests.get(chart_url, timeout=10).json()
@@ -574,7 +607,7 @@ def get_trending_feed(
                 v_ids = [it["id"]["videoId"] for it in s_items if it.get("id", {}).get("videoId")]
 
                 if v_ids:
-                    d_url = f"https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id={','.join(v_ids[:40])}&key={api_key}"
+                    d_url = f"https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails,liveStreamingDetails&id={','.join(v_ids[:40])}&key={api_key}"
                     d_res = requests.get(d_url, timeout=10).json()
                     video_items = d_res.get("items", [])
 
@@ -604,7 +637,11 @@ def get_trending_feed(
                         except Exception:
                             pass
 
-                    # 2. LOẠI BỎ TOÀN BỘ SHORTS VÀ VIDEO QUÁ NGẮN (< 180 giây)
+                    # 2. LOẠI BỎ TOÀN BỘ VIDEO LIVESTREAM, RESTREAM, TRỰC TIẾP
+                    if is_stream_video(item):
+                        continue
+
+                    # 3. LOẠI BỎ TOÀN BỘ SHORTS VÀ VIDEO QUÁ NGẮN (< 180 giây)
                     dur_iso = content_det.get("duration", "")
                     dur_seconds = parse_iso_duration(dur_iso)
                     title_raw = snippet.get("title", "")
@@ -712,6 +749,13 @@ def get_trending_feed(
                         if dur_filter == "deep_dive" and dur > 0 and dur < 1200:
                             continue
                         if '#shorts' in t.lower() or 'shorts' in t.lower().split():
+                            continue
+
+                        # Loại bỏ video livestream, restream
+                        if e.get('live_status') in ['is_live', 'is_upcoming', 'was_live', 'post_live']:
+                            continue
+                        stream_kw = ['restream', 'livestream', 'live stream', 'trực tiếp', '🔴', 'buổi stream', 'phát trực tiếp', 'streamed live']
+                        if any(kw in t.lower() for kw in stream_kw):
                             continue
 
                         v_cnt = int(e.get('view_count') or 0)
