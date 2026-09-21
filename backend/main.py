@@ -571,6 +571,21 @@ NICHE_LOCALIZED_QUERIES = {
         "JP": "浮気 修羅場 復讐 スレ",
         "KR": "바람 불륜 참교육 사이다 썰",
         "DEFAULT": "cheating spouse caught revenge drama stories"
+    },
+    "learn_english": {
+        "VN": "học tiếng anh giao tiếp phát âm luyện nghe phản xạ",
+        "US": "learn english speaking practice listening conversation",
+        "GB": "learn english conversation british accent listening practice",
+        "FR": "apprendre l'anglais débutant cours d'anglais parler anglais",
+        "IT": "imparare l'inglese da zero corso inglese parlato pronuncia",
+        "DE": "englisch lernen anfänger sprechen verstehen konversation",
+        "IN": "learn english speaking practice daily conversation fluency",
+        "JP": "英語学習 英会話 リスニング 発音 独学",
+        "KR": "영어 회화 영어 공부 기초 리스닝 발음",
+        "BR": "aprender ingles do zero curso de ingles falar ingles",
+        "CA": "learn english speaking listening conversation skills",
+        "AU": "learn english speaking listening practice accent",
+        "DEFAULT": "learn english speaking practice listening conversation"
     }
 }
 
@@ -753,7 +768,7 @@ def is_video_matching_country(item: dict, ch_info: dict, target_geo: str) -> boo
             return False
         # Kiểm tra từ vựng / dấu tiếng Pháp đặc trưng để loại bỏ hoàn toàn video tiếng Anh lọt vào
         fr_accents = bool(re.search(r'[éèêëàâîïôùûçœæ]', combined_title, re.I))
-        fr_vocab = {'le', 'la', 'les', 'un', 'une', 'des', 'du', 'de', 'et', 'en', 'pour', 'dans', 'sur', 'avec', 'qui', 'que', 'ce', 'cette', 'est', 'sont', 'pas', 'ne', 'au', 'aux', 'par', 'film', 'français', 'france', 'histoire', 'drames', 'drame', 'amour', 'femme', 'homme', 'mari', 'mariage', 'trahison', 'vengeance', 'secret', 'famille', 'fille', 'fils', 'père', 'mère'}
+        fr_vocab = {'le', 'la', 'les', 'un', 'une', 'des', 'du', 'de', 'et', 'en', 'pour', 'dans', 'sur', 'avec', 'qui', 'que', 'ce', 'cette', 'est', 'sont', 'pas', 'ne', 'au', 'aux', 'par', 'film', 'français', 'france', 'histoire', 'drames', 'drame', 'amour', 'femme', 'homme', 'mari', 'mariage', 'trahison', 'vengeance', 'secret', 'famille', 'fille', 'fils', 'père', 'mère', 'anglais', 'apprendre', 'cours', 'vocabulaire', 'parler'}
         t_words = set(re.findall(r'\b[a-zA-ZÀ-ÿ]{2,}\b', combined_title.lower()))
         has_fr_words = bool(t_words.intersection(fr_vocab))
         is_fr_channel = (ch_country == 'FR') or audio_lang.startswith('fr') or default_lang.startswith('fr')
@@ -771,7 +786,7 @@ def is_video_matching_country(item: dict, ch_info: dict, target_geo: str) -> boo
         if ch_country in ['US', 'GB', 'AU', 'IN', 'VN', 'RU', 'PK', 'BD', 'ID', 'KR', 'JP', 'TH']:
             return False
         it_accents = bool(re.search(r'[àèéìíîòóùú]', combined_title, re.I))
-        it_vocab = {'il', 'lo', 'la', 'i', 'gli', 'le', 'un', 'uno', 'una', 'di', 'a', 'da', 'in', 'con', 'su', 'per', 'tra', 'fra', 'che', 'non', 'sono', 'storie', 'storia', 'amore', 'tradimento', 'vendetta', 'famiglia', 'marito', 'moglie', 'segreto', 'dramma', 'racconto', 'italia', 'italiano'}
+        it_vocab = {'il', 'lo', 'la', 'i', 'gli', 'le', 'un', 'uno', 'una', 'di', 'a', 'da', 'in', 'con', 'su', 'per', 'tra', 'fra', 'che', 'non', 'sono', 'storie', 'storia', 'amore', 'tradimento', 'vendetta', 'famiglia', 'marito', 'moglie', 'segreto', 'dramma', 'racconto', 'italia', 'italiano', 'inglese', 'imparare', 'corso', 'vocabolario', 'parlare'}
         t_words_it = set(re.findall(r'\b[a-zA-ZÀ-ÿ]{2,}\b', combined_title.lower()))
         has_it_words = bool(t_words_it.intersection(it_vocab))
         is_it_channel = (ch_country == 'IT') or audio_lang.startswith('it') or default_lang.startswith('it')
