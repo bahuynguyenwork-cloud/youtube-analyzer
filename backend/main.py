@@ -1439,7 +1439,14 @@ if os.path.exists(frontend_dir):
 def serve_index():
     index_path = os.path.join(frontend_dir, "index.html")
     if os.path.exists(index_path):
-        return FileResponse(index_path)
+        return FileResponse(
+            index_path,
+            headers={
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "Expires": "0"
+            }
+        )
     return {"message": "Frontend chưa được khởi tạo."}
 
 @app.get("/favicon.ico")
