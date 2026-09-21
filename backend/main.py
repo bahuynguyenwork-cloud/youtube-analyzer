@@ -654,6 +654,7 @@ def get_trending_feed(
                         "channel": snippet.get("channelTitle", "YouTube Creator"),
                         "channel_id": ch_id,
                         "channel_subs": subs_count,
+                        "is_verified": subs_count >= 100000,
                         "channel_videos": total_vids,
                         "channel_badge": channel_badge_text,
                         "is_active_channel": is_active_channel,

@@ -66,9 +66,7 @@
   <header class="sticky top-0 z-50 glass-card border-b border-white/10 px-6 py-3.5">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
       <div class="flex items-center space-x-3 cursor-pointer" onclick="switchNav('channel')">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-600 via-red-500 to-amber-500 flex items-center justify-center shadow-lg shadow-rose-500/20">
-          <i data-lucide="youtube" class="w-6 h-6 text-white"></i>
-        </div>
+        <img src="/static/favicon.svg" class="w-10 h-10 rounded-xl shadow-lg shadow-rose-500/20 object-contain hover:scale-105 transition-transform" alt="YT Analyzer Logo" />
         <div>
           <div class="flex items-center space-x-2">
             <span class="text-lg font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-rose-400 bg-clip-text text-transparent">
@@ -1773,12 +1771,34 @@
           card.className = 'glass-card rounded-2xl p-4 space-y-3 hover:border-rose-500/30 transition flex flex-col justify-between';
           const vId = v.video_id || v.id || '';
           const chName = v.channel_title || v.channel || 'YouTube Creator';
+          const chId = v.channel_id || '';
+          const chSubs = v.channel_subs || 0;
+          const isVerified = v.is_verified || (chSubs >= 100000);
           const vTitle = v.title || 'Video';
           const thumb = v.thumbnail || (vId ? `https://i.ytimg.com/vi/${vId}/hqdefault.jpg` : '');
           const views = v.view_count || v.views || 0;
           const durBadge = v.duration_formatted || 'Video Dài';
           const chBadge = v.channel_badge || '🟢 Kênh Hoạt Động';
           const pubAge = v.published_age || '';
+
+          let subsText = '';
+          if (chSubs >= 1000000) {
+            subsText = (chSubs / 1000000).toFixed(1) + 'M Subs';
+          } else if (chSubs >= 1000) {
+            subsText = Math.round(chSubs / 1000) + 'K Subs';
+          } else if (chSubs > 0) {
+            subsText = chSubs + ' Subs';
+          } else {
+            subsText = 'Kênh hoạt động';
+          }
+
+          const verifiedBadgeHtml = isVerified ? `
+            <span class="inline-flex items-center text-slate-300 ml-1 shrink-0" title="Kênh chính thức / Đã xác minh (Verified)">
+              <svg class="w-3.5 h-3.5 text-slate-300 fill-current inline-block" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+            </span>
+          ` : '';
 
           card.innerHTML = `
             <div class="space-y-3">
@@ -1794,25 +1814,29 @@
               </div>
               <div class="space-y-2">
                 <a href="https://youtube.com/watch?v=${vId}" target="_blank" class="text-xs font-bold text-white hover:text-rose-400 line-clamp-2 leading-snug" title="${vTitle}">${vTitle}</a>
-                <div class="space-y-1 pt-1 border-t border-white/5">
+                <div class="space-y-1.5 pt-1 border-t border-white/5">
                   <div class="flex items-center justify-between text-[11px]">
-                    <span class="truncate max-w-[150px] font-medium text-slate-300" title="${chName}">${chName}</span>
-                    <span class="text-amber-400 font-bold">${formatNumber(views)} views</span>
+                    <div class="flex items-center truncate max-w-[170px]" title="${chName}">
+                      <span class="truncate font-semibold text-slate-200">${chName}</span>
+                      ${verifiedBadgeHtml}
+                    </div>
+                    <span class="text-rose-400 font-bold bg-rose-500/10 px-2 py-0.5 rounded-md border border-rose-500/20 text-[10px] shrink-0">${subsText}</span>
                   </div>
                   <div class="flex items-center justify-between text-[10px] text-slate-400">
-                    <span class="text-emerald-400 font-medium">${chBadge}</span>
+                    <span class="text-amber-400 font-bold">${formatNumber(views)} views</span>
                     <span class="text-amber-300 font-semibold truncate max-w-[140px]">${pubAge}</span>
                   </div>
                 </div>
               </div>
             </div>
             <div class="flex items-center space-x-2 pt-2 border-t border-white/5 text-[11px]">
-              <a href="https://youtube.com/watch?v=${vId}" target="_blank" class="flex-1 py-2 px-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl font-semibold transition flex items-center justify-center space-x-1.5">
-                <i data-lucide="play" class="w-3 h-3 fill-current"></i>
+              <a href="https://youtube.com/watch?v=${vId}" target="_blank" class="flex-1 py-2 px-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl font-semibold transition flex items-center justify-center space-x-1.5 border border-white/10">
+                <i data-lucide="play" class="w-3 h-3 fill-current text-rose-500"></i>
                 <span>Xem Video</span>
               </a>
-              <button onclick="navigator.clipboard.writeText('${vTitle.replace(/'/g, "\\'")}'); showToast('Đã copy tiêu đề!')" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition flex items-center justify-center" title="Copy Tiêu Đề">
-                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              <button onclick="quickSearch('${chId || chName}', '${country}')" class="flex-1 py-2 px-2.5 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white rounded-xl font-semibold transition flex items-center justify-center space-x-1.5 shadow-sm shadow-rose-600/30" title="Chuyển sang tab Phân Tích Kênh cho ${chName}">
+                <i data-lucide="line-chart" class="w-3.5 h-3.5"></i>
+                <span>Phân Tích Kênh</span>
               </button>
             </div>
           `;
