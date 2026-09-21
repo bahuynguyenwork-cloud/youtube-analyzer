@@ -281,30 +281,44 @@
 
         <!-- Subtab 1: Giờ Đăng Vàng -->
         <div id="sub-time" class="subtab-pane space-y-5">
-          <div id="target-country-strategy-banner" class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-start space-x-3 text-xs">
-            <div class="p-2 rounded-xl bg-rose-500/20 text-rose-400 shrink-0 mt-0.5">
-              <i data-lucide="compass" class="w-4 h-4"></i>
+          <div id="target-country-strategy-banner" class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div class="flex items-start space-x-3">
+              <div class="p-2 rounded-xl bg-rose-500/20 text-rose-400 shrink-0 mt-0.5">
+                <i data-lucide="compass" class="w-4 h-4"></i>
+              </div>
+              <div class="space-y-1">
+                <h4 class="font-bold text-white flex items-center space-x-2 flex-wrap gap-y-1">
+                  <span>Chiến Lược Khung Giờ Thị Trường:</span>
+                  <span id="target-country-name-badge" class="px-2 py-0.5 rounded bg-rose-500/30 text-rose-200 text-[11px] font-semibold">Khán Giả Mục Tiêu</span>
+                </h4>
+                <p id="target-country-strategy-text" class="text-slate-300 leading-relaxed">Đang tải thói quen tiêu thụ nội dung theo múi giờ thị trường...</p>
+              </div>
             </div>
-            <div class="space-y-1">
-              <h4 class="font-bold text-white flex items-center space-x-2 flex-wrap gap-y-1">
-                <span>Chiến Lược Khung Giờ Thị Trường:</span>
-                <span id="target-country-name-badge" class="px-2 py-0.5 rounded bg-rose-500/30 text-rose-200 text-[11px] font-semibold">Khán Giả Mục Tiêu</span>
-                <span id="target-niche-name-badge" class="hidden px-2 py-0.5 rounded bg-amber-500/30 text-amber-200 text-[11px] font-semibold">Chủ Đề</span>
-              </h4>
-              <p id="target-country-strategy-text" class="text-slate-300 leading-relaxed">Đang tải thói quen tiêu thụ nội dung theo múi giờ thị trường...</p>
+            <div class="flex items-center space-x-2 shrink-0 self-start sm:self-center">
+              <span class="text-slate-400 font-medium">Chủ đề ngách:</span>
+              <select id="niche-selector" onchange="onNicheChanged(this.value)" class="bg-slate-900 border border-white/10 text-white text-xs font-semibold rounded-xl px-3 py-1.5 focus:outline-none focus:border-rose-500">
+                <option value="general">🎬 Giải trí đại chúng / Vlog</option>
+                <option value="horror">👻 Kinh dị & Truyện ma / Quái đàm</option>
+                <option value="education">📚 Kiến thức & Giáo dục / Podcast</option>
+                <option value="drama_story">🎭 Drama, Tâm sự & Kể chuyện</option>
+                <option value="finance_biz">💰 Tài chính, Đầu tư & Kinh doanh</option>
+                <option value="gaming">🎮 Gaming & Livestream</option>
+                <option value="kids">👶 Trẻ em & Thiếu nhi (Kids)</option>
+                <option value="true_crime">🔍 Vụ án & Trinh thám (True Crime)</option>
+              </select>
             </div>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="glass-card rounded-2xl p-5 border-l-4 border-l-rose-500 space-y-2">
-              <span class="text-xs uppercase tracking-wider font-semibold text-rose-400">Giờ Đăng Hiệu Quả Nhất (Giờ VN)</span>
+              <span class="text-xs uppercase tracking-wider font-semibold text-rose-400">Khung Giờ Đăng 1 (Ưu Tiên Chính - Giờ VN)</span>
               <div id="best-upload-time-vn" class="text-2xl font-black text-white">--:--</div>
-              <p id="best-time-desc" class="text-xs text-slate-400 leading-relaxed">Nên đăng trước 1-2 tiếng để thuật toán xử lý và đón đầu đỉnh xem.</p>
+              <p id="best-time-desc" class="text-xs text-slate-400 leading-relaxed">Khung chính: Đón đầu khung xem đông nhất trong ngày.</p>
             </div>
             <div class="glass-card rounded-2xl p-5 border-l-4 border-l-amber-500 space-y-2">
-              <span class="text-xs uppercase tracking-wider font-semibold text-amber-400">Giờ Cao Điểm Xem Của Khán Giả</span>
-              <div id="peak-view-time-vn" class="text-2xl font-black text-white">--:--</div>
-              <p id="peak-time-desc" class="text-xs text-slate-400 leading-relaxed">Khung giờ khán giả mục tiêu tập trung xem nhiều nhất trong ngày.</p>
+              <span class="text-xs uppercase tracking-wider font-semibold text-amber-400">Khung Giờ Đăng 2 (Ca Phụ / Cuối Tuần - Giờ VN)</span>
+              <div id="second-upload-time-vn" class="text-2xl font-black text-white">--:--</div>
+              <p id="second-time-desc" class="text-xs text-slate-400 leading-relaxed">Khung phụ: Thích hợp video giải trí phụ hoặc phát hành cuối tuần.</p>
             </div>
             <div class="glass-card rounded-2xl p-5 border-l-4 border-l-emerald-500 space-y-2">
               <span class="text-xs uppercase tracking-wider font-semibold text-emerald-400">Ngày Đăng Tốt Nhất</span>
@@ -312,9 +326,6 @@
               <p id="best-day-desc" class="text-xs text-slate-400 leading-relaxed">Ngày trong tuần có tỉ lệ tương tác và lượt xem cao nhất.</p>
             </div>
           </div>
-
-          <!-- Top Detailed Recommendations according to Niche & Country -->
-          <div id="publish-time-recommendations" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
 
           <div class="glass-card rounded-2xl p-5 space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -1333,21 +1344,39 @@
       }
 
       // Best Publish Times (UTC+7)
-      document.getElementById('best-upload-time-vn').textContent = publish_time_analysis.best_upload_time_vn || '02:00 - 04:00';
-      document.getElementById('peak-view-time-vn').textContent = publish_time_analysis.peak_view_time_vn || '06:00 - 10:00';
-      document.getElementById('best-day-vn').textContent = publish_time_analysis.best_day_of_week || 'Thứ Bảy';
-      if (publish_time_analysis.best_upload_desc) {
-        document.getElementById('best-time-desc').textContent = publish_time_analysis.best_upload_desc;
+      const bestUploadEl = document.getElementById('best-upload-time-vn');
+      if (bestUploadEl) {
+        bestUploadEl.textContent = publish_time_analysis.best_upload_time_vn || '--:--';
       }
-      if (publish_time_analysis.peak_view_desc) {
-        document.getElementById('peak-time-desc').textContent = publish_time_analysis.peak_view_desc;
+      const secondUploadEl = document.getElementById('second-upload-time-vn');
+      if (secondUploadEl) {
+        secondUploadEl.textContent = publish_time_analysis.second_upload_time_vn || '--:--';
+      }
+      const bestDayEl = document.getElementById('best-day-vn');
+      if (bestDayEl) {
+        bestDayEl.textContent = publish_time_analysis.best_day_of_week || 'Thứ Bảy';
+      }
+      const bestDescEl = document.getElementById('best-time-desc');
+      if (bestDescEl) {
+        bestDescEl.textContent = publish_time_analysis.upload_slot_1_label || publish_time_analysis.best_upload_desc || 'Khung chính: Đón đầu khung xem đông nhất';
+      }
+      const secondDescEl = document.getElementById('second-time-desc');
+      if (secondDescEl) {
+        secondDescEl.textContent = publish_time_analysis.upload_slot_2_label || 'Khung phụ: Thích hợp video giải trí phụ / cuối tuần';
+      }
+      const bestDayDescEl = document.getElementById('best-day-desc');
+      if (bestDayDescEl && publish_time_analysis.best_weekdays) {
+        const daysStr = Array.isArray(publish_time_analysis.best_weekdays) ? publish_time_analysis.best_weekdays.join(', ') : publish_time_analysis.best_weekdays;
+        bestDayDescEl.textContent = `Ngày có lượt xem cao nhất (Ưu tiên: ${daysStr})`;
+      }
+
+      const nicheSelector = document.getElementById('niche-selector');
+      if (nicheSelector && publish_time_analysis.detected_niche_code) {
+        nicheSelector.value = publish_time_analysis.detected_niche_code;
       }
 
       // 24H Chart
       renderPublishHoursChart(publish_time_analysis.hour_distribution || {});
-
-      // Detailed recommendations by niche & country
-      renderTopTimeRecommendations(publish_time_analysis.top_recommendations || []);
 
       // Tags Pool
       renderTagsPool(keyword_intelligence.copyable_tags_list || []);
@@ -1422,28 +1451,150 @@
       });
     }
 
-    function renderTopTimeRecommendations(recommendations) {
-      const container = document.getElementById('publish-time-recommendations');
-      if (!container) return;
-      if (!recommendations || recommendations.length === 0) {
-        container.innerHTML = '';
-        return;
+    const NICHE_CLIENT_PROFILES = {
+      general: {
+        name_vi: "Giải trí đại chúng / Vlog / Đời sống",
+        upload_1_start: 16.5,
+        upload_1_end: 18.5,
+        upload_1_label: "Khung chính: Chiều tối ngày thường",
+        upload_2_start: 10.5,
+        upload_2_end: 12.0,
+        upload_2_label: "Khung phụ: Trưa & Cuối tuần",
+        best_weekdays: ["Thứ 6", "Thứ 7", "Chủ Nhật"],
+        behavior_insight: "Khán giả đại chúng xem nhiều nhất vào các buổi tối sau giờ tan làm và trưa cuối tuần."
+      },
+      horror: {
+        name_vi: "Kinh dị & Truyện ma / Quái đàm",
+        upload_1_start: 19.5,
+        upload_1_end: 21.0,
+        upload_1_label: "Khung chính: Đầu tối trước giờ ngủ",
+        upload_2_start: 21.5,
+        upload_2_end: 23.0,
+        upload_2_label: "Khung phụ: Đêm khuya cho cú đêm",
+        best_weekdays: ["Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+        behavior_insight: "Khán giả truyện ma & kinh dị có thói quen nghe vào đêm khuya trước khi đi ngủ. Nên đăng từ đầu tối đến đêm muộn."
+      },
+      education: {
+        name_vi: "Học tập / Ngoại ngữ / Giáo dục",
+        upload_1_start: 5.5,
+        upload_1_end: 7.0,
+        upload_1_label: "Khung chính: Sáng sớm trước giờ học/làm",
+        upload_2_start: 17.5,
+        upload_2_end: 19.0,
+        upload_2_label: "Khung phụ: Tối học bài sau giờ làm",
+        best_weekdays: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5"],
+        behavior_insight: "Người học tập trung nghe bài vào sáng sớm thức dậy hoặc tối sau giờ làm. Ngày trong tuần xem nhiều hơn cuối tuần."
+      },
+      drama_story: {
+        name_vi: "Drama / Bắt gian / Hóng biến / Gia đình",
+        upload_1_start: 10.5,
+        upload_1_end: 11.5,
+        upload_1_label: "Khung chính: Đón giờ nghỉ trưa ăn cơm",
+        upload_2_start: 18.5,
+        upload_2_end: 20.0,
+        upload_2_label: "Khung phụ: Đón ca tối sau bữa cơm",
+        best_weekdays: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Chủ Nhật"],
+        behavior_insight: "Khán giả drama hóng biến mạnh nhất lúc ăn trưa và tối thư giãn."
+      },
+      finance_biz: {
+        name_vi: "Tài chính / Crypto / MMO / Đầu tư",
+        upload_1_start: 6.5,
+        upload_1_end: 7.5,
+        upload_1_label: "Khung chính: Sáng trước giờ mở phiên",
+        upload_2_start: 15.5,
+        upload_2_end: 16.5,
+        upload_2_label: "Khung phụ: Chiều trước khi đóng phiên",
+        best_weekdays: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5"],
+        behavior_insight: "Khán giả tài chính theo sát lịch làm việc và phiên giao dịch từ Thứ 2 đến Thứ 5."
+      },
+      gaming: {
+        name_vi: "Gaming / Trò chơi / Esports",
+        upload_1_start: 14.0,
+        upload_1_end: 15.5,
+        upload_1_label: "Khung chính: Chiều đón tan học",
+        upload_2_start: 18.5,
+        upload_2_end: 20.0,
+        upload_2_label: "Khung phụ: Tối cày game & Cuối tuần",
+        best_weekdays: ["Thứ 6", "Thứ 7", "Chủ Nhật"],
+        behavior_insight: "Khán giả game xem nhiều từ chiều tan học và bùng nổ tối cuối tuần."
+      },
+      kids: {
+        name_vi: "Trẻ em / Hoạt hình thiếu nhi",
+        upload_1_start: 5.5,
+        upload_1_end: 6.5,
+        upload_1_label: "Khung chính: Sáng trước giờ đi học",
+        upload_2_start: 15.5,
+        upload_2_end: 16.5,
+        upload_2_label: "Khung phụ: Chiều cơm nước & Sáng cuối tuần",
+        best_weekdays: ["Thứ 7", "Chủ Nhật", "Thứ 6"],
+        behavior_insight: "Phụ huynh mở cho con xem sáng trước giờ đi học, chiều tắm rửa cơm nước và sáng cuối tuần."
+      },
+      true_crime: {
+        name_vi: "Vụ án có thật / Kỳ án / Trinh thám",
+        upload_1_start: 18.0,
+        upload_1_end: 19.5,
+        upload_1_label: "Khung chính: Đầu tối sau giờ làm",
+        upload_2_start: 20.5,
+        upload_2_end: 22.0,
+        upload_2_label: "Khung phụ: Tối muộn thư giãn sâu",
+        best_weekdays: ["Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+        behavior_insight: "Kỳ án và phim tài liệu điều tra đòi hỏi tập trung cao, xem nhiều vào tối cuối tuần."
       }
-      container.innerHTML = recommendations.map(rec => `
-        <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-white/10 flex items-start space-x-3 text-xs">
-          <div class="p-2 rounded-xl bg-rose-500/20 text-rose-400 shrink-0 mt-0.5">
-            <i data-lucide="clock" class="w-4 h-4"></i>
-          </div>
-          <div class="space-y-1">
-            <div class="flex items-center space-x-2">
-              <span class="font-bold text-white text-sm">${rec.time_slot_vn}</span>
-              <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 text-[10px] font-medium border border-white/5">${rec.target_local_time || 'Giờ mục tiêu'}</span>
-            </div>
-            <p class="text-rose-300 font-semibold">${rec.target_audience || ''}</p>
-            <p class="text-slate-400 leading-relaxed">${rec.recommended_for || ''}</p>
-          </div>
-        </div>
-      `).join('');
+    };
+
+    const COUNTRY_OFFSETS = {
+      US: -5,
+      GB: 0,
+      JP: 9,
+      KR: 9,
+      DE: 1,
+      IN: 5.5,
+      BR: -3,
+      FR: 1,
+      IT: 1,
+      VN: 7
+    };
+
+    function formatVnTimeRange(startHour, endHour, utcOffset) {
+      const s = ((startHour - utcOffset + 7) % 24 + 24) % 24;
+      const e = ((endHour - utcOffset + 7) % 24 + 24) % 24;
+      const sH = Math.floor(s);
+      const sM = Math.round((s - sH) * 60);
+      const eH = Math.floor(e);
+      const eM = Math.round((e - eH) * 60);
+      return `${String(sH).padStart(2, '0')}:${String(sM).padStart(2, '0')} - ${String(eH).padStart(2, '0')}:${String(eM).padStart(2, '0')}`;
+    }
+
+    function onNicheChanged(nicheKey) {
+      const niche = NICHE_CLIENT_PROFILES[nicheKey] || NICHE_CLIENT_PROFILES.general;
+      const geoCode = (currentChannelData?.trend_momentum?.target_geo || currentChannelData?.publish_time_analysis?.target_country_code || 'US').toUpperCase();
+      const offset = COUNTRY_OFFSETS[geoCode] !== undefined ? COUNTRY_OFFSETS[geoCode] : -5;
+      const countryName = countryNames[geoCode] || geoCode;
+
+      const slot1 = formatVnTimeRange(niche.upload_1_start, niche.upload_1_end, offset);
+      const slot2 = formatVnTimeRange(niche.upload_2_start, niche.upload_2_end, offset);
+
+      const bestUploadEl = document.getElementById('best-upload-time-vn');
+      if (bestUploadEl) bestUploadEl.textContent = slot1;
+
+      const secondUploadEl = document.getElementById('second-upload-time-vn');
+      if (secondUploadEl) secondUploadEl.textContent = slot2;
+
+      const bestTimeDescEl = document.getElementById('best-time-desc');
+      if (bestTimeDescEl) bestTimeDescEl.textContent = niche.upload_1_label;
+
+      const secondTimeDescEl = document.getElementById('second-time-desc');
+      if (secondTimeDescEl) secondTimeDescEl.textContent = niche.upload_2_label;
+
+      const bestDayDescEl = document.getElementById('best-day-desc');
+      if (bestDayDescEl) bestDayDescEl.textContent = `Ngày có lượt xem cao nhất (Ưu tiên: ${niche.best_weekdays.join(', ')})`;
+
+      const strategyText = document.getElementById('target-country-strategy-text');
+      if (strategyText) {
+        strategyText.textContent = `🎯 Chủ đề: ${niche.name_vi} | Thị trường: ${countryName}. ${niche.behavior_insight} Khuyến nghị đăng Khung 1 (${slot1}) hoặc Khung 2 (${slot2}) theo giờ VN.`;
+      }
+
+      showToast(`Đã chuyển lịch đăng sang ngách: ${niche.name_vi}`);
     }
 
     function renderTagsPool(tags) {

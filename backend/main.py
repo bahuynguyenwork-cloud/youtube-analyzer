@@ -208,12 +208,12 @@ def analyze_channel(req: ChannelAnalysisRequest):
 
         # Enrich time_data with friendly UI fields
         if "best_upload_time_vn" not in time_data or not time_data["best_upload_time_vn"]:
-            time_data["best_upload_time_vn"] = time_data.get("best_upload_vn") or "02:00 - 04:00"
-        if "peak_view_time_vn" not in time_data or not time_data["peak_view_time_vn"]:
-            time_data["peak_view_time_vn"] = time_data.get("peak_view_vn") or "06:00 - 10:00"
+            time_data["best_upload_time_vn"] = time_data.get("best_upload_vn") or "17:30 - 19:00"
+        if "second_upload_time_vn" not in time_data or not time_data["second_upload_time_vn"]:
+            time_data["second_upload_time_vn"] = "21:00 - 22:30"
         if "best_day_of_week" not in time_data:
-            best_w = time_data.get("best_weekdays", ["Thứ Bảy"])
-            time_data["best_day_of_week"] = best_w[0] if best_w else "Thứ Bảy"
+            best_w = time_data.get("best_weekdays", ["Thứ Sáu"])
+            time_data["best_day_of_week"] = best_w[0] if best_w else "Thứ Sáu"
         if "hour_distribution" not in time_data and "hours_distribution" in time_data:
             time_data["hour_distribution"] = {item["hour"]: item["video_count"] for item in time_data["hours_distribution"]}
 
