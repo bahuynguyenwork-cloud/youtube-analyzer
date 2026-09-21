@@ -443,17 +443,24 @@ def format_published_age(pub_iso: str) -> str:
     try:
         dt = datetime.datetime.fromisoformat(pub_iso.replace("Z", "+00:00"))
         now = datetime.datetime.now(datetime.timezone.utc)
-        diff_days = (now - dt).days
-        years = diff_days // 365
-        months = diff_days // 30
-        if years >= 2:
-            return f"🏛️ {years} năm trước • Bền vững kinh điển"
-        elif years == 1:
-            return f"🏛️ 1 năm trước • Trụ cột ngách"
-        elif months >= 3:
+        diff_seconds = (now - dt).total_seconds()
+        diff_hours = int(diff_seconds // 3600)
+        diff_days = int(diff_seconds // 86400)
+        
+        if diff_hours < 24:
+            return f"⚡ {max(1, diff_hours)} giờ trước • Mới"
+        elif diff_days == 1:
+            return "🔥 1 ngày trước • Đang lên"
+        elif diff_days <= 7:
+            return f"🔥 {diff_days} ngày trước • Xu hướng tuần"
+        elif diff_days <= 30:
+            return f"📅 {diff_days} ngày trước • Tháng này"
+        elif diff_days < 365:
+            months = max(1, diff_days // 30)
             return f"⏳ {months} tháng trước"
         else:
-            return f"🔥 Gần đây ({diff_days} ngày)"
+            years = max(1, diff_days // 365)
+            return f"🏛️ {years} năm trước • All-Time"
     except Exception:
         return pub_iso[:10]
 
@@ -462,59 +469,120 @@ def get_trending_feed(
     country: Optional[str] = None, 
     geo: Optional[str] = "US", 
     category: Optional[str] = "all",
+    time_range: Optional[str] = "7d",
     duration: Optional[str] = "long_form",
-    feed_mode: Optional[str] = "evergreen"
+    feed_mode: Optional[str] = "active_channels"
 ):
     import requests
     geo_code = (country or geo or "US").upper()
     cat = (category or "all").lower()
+    t_range = (time_range or "7d").lower()
     dur_filter = (duration or "long_form").lower()
-    mode = (feed_mode or "evergreen").lower()
+    mode = (feed_mode or "active_channels").lower()
     api_key = get_default_api_key()
+
+    now = datetime.datetime.now(datetime.timezone.utc)
+    cutoff_dt = None
+    published_after_str = None
+
+    if t_range == "24h":
+        cutoff_dt = now - datetime.timedelta(days=1)
+        published_after_str = cutoff_dt.strftime('%Y-%m-%dT%H:%M:%SZ')
+    elif t_range == "48h":
+        cutoff_dt = now - datetime.timedelta(days=2)
+        published_after_str = cutoff_dt.strftime('%Y-%m-%dT%H:%M:%SZ')
+    elif t_range == "7d":
+        cutoff_dt = now - datetime.timedelta(days=7)
+        published_after_str = cutoff_dt.strftime('%Y-%m-%dT%H:%M:%SZ')
+    elif t_range == "30d":
+        cutoff_dt = now - datetime.timedelta(days=30)
+        published_after_str = cutoff_dt.strftime('%Y-%m-%dT%H:%M:%SZ')
+    elif t_range == "all":
+        cutoff_dt = None
+        published_after_str = None
+    else:
+        cutoff_dt = now - datetime.timedelta(days=7)
+        published_after_str = cutoff_dt.strftime('%Y-%m-%dT%H:%M:%SZ')
 
     videos = []
 
     # 1. Thử dùng YouTube Data API v3 chính thức nếu có API Key
     if api_key:
         try:
-            # Xác định từ khóa truy vấn
-            niche_dict = NICHE_LOCALIZED_QUERIES.get(cat, {})
-            if cat != "all" and niche_dict:
-                q_term = niche_dict.get(geo_code, niche_dict.get("DEFAULT", cat))
-            else:
-                country_names = {
-                    "US": "United States documentary", "GB": "United Kingdom documentary", 
-                    "JP": "日本 特集 ドキュメンタリー", "KR": "한국 다큐멘터리 명강의", 
-                    "DE": "Deutschland Dokumentation", "VN": "Việt Nam phóng sự tài liệu"
-                }
-                q_term = country_names.get(geo_code, "documentary in-depth analysis")
+            video_items = []
+            
+            # TRƯỜNG HỢP 1: Tất cả xu hướng (Top Trending chung của quốc gia)
+            if cat == "all":
+                chart_url = (
+                    f"https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics"
+                    f"&chart=mostPopular&regionCode={geo_code}&maxResults=50&key={api_key}"
+                )
+                chart_res = requests.get(chart_url, timeout=10).json()
+                raw_items = chart_res.get("items", [])
+                
+                # Lọc theo khung thời gian (7d, 24h, 30d...)
+                for it in raw_items:
+                    pub_iso = it.get("snippet", {}).get("publishedAt", "")
+                    if cutoff_dt and pub_iso:
+                        try:
+                            p_dt = datetime.datetime.fromisoformat(pub_iso.replace("Z", "+00:00"))
+                            if p_dt < cutoff_dt:
+                                continue
+                        except Exception:
+                            pass
+                    video_items.append(it)
+            
+            # TRƯỜNG HỢP 2: Theo chủ đề / ngách cụ thể HOẶC nếu chart trả về quá ít
+            if cat != "all" or (len(video_items) < 5 and published_after_str):
+                v_dur_param = "medium"
+                if dur_filter == "deep_dive":
+                    v_dur_param = "long"
 
-            # videoDuration parameter cho YouTube API
-            # medium: 4-20 min, long: >20 min. Tránh short bằng cách không bao giờ dùng short.
-            v_dur_param = "medium"
-            if dur_filter == "deep_dive":
-                v_dur_param = "long"
+                niche_dict = NICHE_LOCALIZED_QUERIES.get(cat, {})
+                if cat != "all" and niche_dict:
+                    q_term = niche_dict.get(geo_code, niche_dict.get("DEFAULT", cat))
+                else:
+                    country_names = {
+                        "US": "documentary podcast trending viral",
+                        "GB": "documentary podcast trending",
+                        "JP": "ドキュメンタリー 話題の動画",
+                        "KR": "인기 급상승 다큐멘터리",
+                        "DE": "Dokumentation Podcast Trends",
+                        "VN": "phóng sự tài liệu podcast xu hướng"
+                    }
+                    q_term = country_names.get(geo_code, "trending viral video")
 
-            s_url = (
-                f"https://www.googleapis.com/youtube/v3/search?part=snippet&type=video"
-                f"&videoDuration={v_dur_param}&order=viewCount&regionCode={geo_code}"
-                f"&q={requests.utils.quote(q_term)}&maxResults=25&key={api_key}"
-            )
-            s_res = requests.get(s_url, timeout=10).json()
-            items = s_res.get("items", [])
-            v_ids = [it["id"]["videoId"] for it in items if it.get("id", {}).get("videoId")]
+                s_url = (
+                    f"https://www.googleapis.com/youtube/v3/search?part=snippet&type=video"
+                    f"&videoDuration={v_dur_param}&order=viewCount&regionCode={geo_code}"
+                    f"&q={requests.utils.quote(q_term)}&maxResults=35&key={api_key}"
+                )
+                if published_after_str:
+                    s_url += f"&publishedAfter={published_after_str}"
 
-            if v_ids:
-                # Lấy thông số chi tiết video (độ dài, lượt xem)
-                d_url = f"https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id={','.join(v_ids)}&key={api_key}"
-                d_res = requests.get(d_url, timeout=10).json()
-                video_items = d_res.get("items", [])
+                s_res = requests.get(s_url, timeout=10).json()
+                s_items = s_res.get("items", [])
+                v_ids = [it["id"]["videoId"] for it in s_items if it.get("id", {}).get("videoId")]
 
+                # Nếu tìm với thời gian hẹp bị rỗng, mở rộng sang 30 ngày
+                if not v_ids and published_after_str and t_range != "30d":
+                    alt_cutoff = (now - datetime.timedelta(days=30)).strftime('%Y-%m-%dT%H:%M:%SZ')
+                    alt_url = s_url.replace(f"publishedAfter={published_after_str}", f"publishedAfter={alt_cutoff}")
+                    s_res = requests.get(alt_url, timeout=10).json()
+                    s_items = s_res.get("items", [])
+                    v_ids = [it["id"]["videoId"] for it in s_items if it.get("id", {}).get("videoId")]
+
+                if v_ids:
+                    d_url = f"https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id={','.join(v_ids[:40])}&key={api_key}"
+                    d_res = requests.get(d_url, timeout=10).json()
+                    video_items = d_res.get("items", [])
+
+            if video_items:
                 # Lấy thông tin kênh để xác nhận kênh còn sống và có lượng sub ổn định
                 ch_ids = list(set([it["snippet"]["channelId"] for it in video_items if it.get("snippet", {}).get("channelId")]))
                 ch_map = {}
                 if ch_ids:
-                    ch_url = f"https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id={','.join(ch_ids)}&key={api_key}"
+                    ch_url = f"https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id={','.join(ch_ids[:50])}&key={api_key}"
                     ch_res = requests.get(ch_url, timeout=10).json()
                     for ch in ch_res.get("items", []):
                         ch_map[ch["id"]] = ch
@@ -542,18 +610,29 @@ def get_trending_feed(
                     subs_count = int(ch_stats.get("subscriberCount") or 0)
                     total_vids = int(ch_stats.get("videoCount") or 0)
                     
-                    # Xác định trạng thái kênh còn sống
-                    is_active_channel = subs_count >= 2000 and total_vids >= 10
-                    channel_badge_text = "🟢 Kênh Ổn Định" if is_active_channel else "📺 Đang Hoạt Động"
+                    is_active_channel = subs_count >= 1000 and total_vids >= 5
+                    is_very_stable = subs_count >= 10000 and total_vids >= 20
+                    
+                    if is_very_stable:
+                        channel_badge_text = "🟢 Kênh Ổn Định"
+                    elif is_active_channel:
+                        channel_badge_text = "🟢 Kênh Hoạt Động"
+                    else:
+                        channel_badge_text = "📺 Kênh Mới"
+                        
                     if subs_count > 0:
-                        channel_badge_text += f" • {subs_count // 1000}K Subs"
+                        if subs_count >= 1000000:
+                            channel_badge_text += f" • {subs_count / 1000000:.1f}M Subs"
+                        else:
+                            channel_badge_text += f" • {subs_count // 1000}K Subs"
 
                     if mode == "active_channels" and not is_active_channel:
                         continue
 
                     thumb = (snippet.get("thumbnails", {}).get("high") or snippet.get("thumbnails", {}).get("medium") or {}).get("url") or f"https://i.ytimg.com/vi/{v_id}/hqdefault.jpg"
                     pub_at = snippet.get("publishedAt", "")
-                    
+                    view_cnt = int(stats.get("viewCount", 0))
+
                     videos.append({
                         "video_id": v_id,
                         "id": v_id,
@@ -565,8 +644,8 @@ def get_trending_feed(
                         "channel_videos": total_vids,
                         "channel_badge": channel_badge_text,
                         "is_active_channel": is_active_channel,
-                        "view_count": int(stats.get("viewCount", 0)),
-                        "views": int(stats.get("viewCount", 0)),
+                        "view_count": view_cnt,
+                        "views": view_cnt,
                         "duration_seconds": dur_seconds,
                         "duration_formatted": format_duration_display(dur_seconds),
                         "published_at": pub_at[:10],
@@ -574,6 +653,10 @@ def get_trending_feed(
                         "url": f"https://www.youtube.com/watch?v={v_id}",
                         "thumbnail": thumb
                     })
+
+                # Sắp xếp theo view count giảm dần để top video bứt phá nhất lên đầu
+                videos.sort(key=lambda x: x["view_count"], reverse=True)
+
         except Exception as api_err:
             logger.warning(f"Lỗi truy vấn trending qua YouTube Data API: {api_err}")
 
@@ -590,9 +673,9 @@ def get_trending_feed(
             if cat in NICHE_LOCALIZED_QUERIES:
                 niche_dict = NICHE_LOCALIZED_QUERIES[cat]
                 q_term = niche_dict.get(geo_code, niche_dict.get("DEFAULT", cat))
-                search_query = f"{q_term}"
+                search_query = f"{q_term} 2026"
             else:
-                search_query = f"in-depth documentary {c_name}"
+                search_query = f"trending viral documentary {c_name} 2026"
 
             ydl_opts = {
                 'quiet': True,
@@ -608,7 +691,6 @@ def get_trending_feed(
                             continue
                         dur = e.get('duration') or 0
                         t = e.get('title', '')
-                        # Loại bỏ shorts
                         if dur > 0 and dur < 180:
                             continue
                         if dur_filter == "deep_dive" and dur > 0 and dur < 1200:
@@ -636,7 +718,7 @@ def get_trending_feed(
                             "views": e.get('view_count') or 0,
                             "duration_seconds": dur,
                             "duration_formatted": format_duration_display(dur),
-                            "published_age": "🏛️ Bền vững nhiều năm",
+                            "published_age": "🔥 Xu hướng tuần này",
                             "url": e.get('url') or f"https://www.youtube.com/watch?v={v_id}",
                             "thumbnail": thumb
                         })
@@ -648,11 +730,12 @@ def get_trending_feed(
         "geo": geo_code,
         "country": geo_code,
         "category": cat,
+        "time_range": t_range,
         "duration_filter": dur_filter,
         "mode": mode,
         "total": len(videos),
-        "videos": videos[:18],
-        "trending_videos": videos[:18]
+        "videos": videos[:24],
+        "trending_videos": videos[:24]
     }
 
 frontend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
