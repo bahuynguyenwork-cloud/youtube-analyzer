@@ -182,6 +182,87 @@ NICHE_PROFILES = {
             "serial killer documentary", "unsolved mystery crime", "điều tra phá án", "hồ sơ tội phạm",
             "사건 파일", "미제 사건", "未解決事件", "殺人事件"
         ]
+    },
+    "quotes_philosophy": {
+        "name_vi": "Danh ngôn / Triết lý sống / Động lực & Chữa lành",
+        "upload_1_start": 5.0,
+        "upload_1_end": 6.5,
+        "upload_1_label": "Khung chính: Sáng sớm nạp năng lượng & suy ngẫm",
+        "upload_2_start": 19.5,
+        "upload_2_end": 21.0,
+        "upload_2_label": "Khung phụ: Tối thư giãn, chữa lành trước khi ngủ",
+        "best_weekdays": ["Chủ Nhật", "Thứ 2", "Thứ 5", "Thứ 6"],
+        "behavior_insight": "Khán giả nghe danh ngôn & triết lý sống vào sáng sớm thức dậy hoặc tối muộn trước khi ngủ để chữa lành và tìm động lực.",
+        "keywords": [
+            "명언", "인생", "인생철학", "철학", "지혜", "동기부여", "위로", "힐링", "인생 조언", "자기계발", "성공명언", "좋은글", "마인드셋",
+            "danh ngôn", "triết lý", "triết lý sống", "châm ngôn", "bài học cuộc sống", "chữa lành", "động lực", "đạo lý", "phát triển bản thân", "nhân sinh", "sách nói",
+            "quotes", "life quotes", "philosophy", "stoic", "stoicism", "wisdom", "motivation", "motivational", "healing", "life lessons", "mindset", "self improvement", "deep quotes",
+            "名言", "人生の教訓", "哲学"
+        ]
+    },
+    "health_wellness": {
+        "name_vi": "Sức khỏe / Y học / Dinh dưỡng & Trường thọ",
+        "upload_1_start": 6.0,
+        "upload_1_end": 7.5,
+        "upload_1_label": "Khung chính: Sáng sớm khởi động ngày mới",
+        "upload_2_start": 17.0,
+        "upload_2_end": 18.5,
+        "upload_2_label": "Khung phụ: Chiều tối chuẩn bị bữa ăn",
+        "best_weekdays": ["Thứ 2", "Thứ 3", "Thứ 7", "Chủ Nhật"],
+        "behavior_insight": "Người quan tâm sức khỏe thường tìm kiếm kiến thức vào sáng sớm hoặc chiều tối trước bữa cơm gia đình.",
+        "keywords": [
+            "건강", "장수", "의학", "의사", "영양", "면역력", "당뇨", "혈압", "암예방", "운동", "다이어트", "무병장수",
+            "sức khỏe", "y học", "dinh dưỡng", "bác sĩ", "chữa bệnh", "sống khỏe", "trường thọ", "bài thuốc", "giảm cân", "thực phẩm chức năng", "yoga", "thể hình",
+            "health", "wellness", "longevity", "nutrition", "medical", "doctor", "healthy diet", "weight loss", "fitness", "immune system", "healthy lifestyle"
+        ]
+    },
+    "music_relaxation": {
+        "name_vi": "Âm nhạc / Lofi / Nhạc ngủ & ASMR",
+        "upload_1_start": 17.0,
+        "upload_1_end": 18.5,
+        "upload_1_label": "Khung chính: Chiều tối thư giãn sau giờ làm",
+        "upload_2_start": 21.0,
+        "upload_2_end": 22.5,
+        "upload_2_label": "Khung phụ: Đêm khuya ngủ ngon & ASMR",
+        "best_weekdays": ["Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+        "behavior_insight": "Khán giả nghe nhạc thư giãn/ASMR tập trung cao độ vào buổi tối và đêm khuya trước khi ngủ.",
+        "keywords": [
+            "음악", "수면", "명상", "수면음악", "힐링음악", "노래", "playlist", "플레이리스트",
+            "nhạc thư giãn", "nhạc ngủ ngon", "nhạc không lời", "nhạc lofi", "nhạc thiền", "nhạc chill", "asmr", "playlist nhạc",
+            "relaxing music", "sleep music", "lofi hip hop", "chill beats", "meditation music", "ambient music", "piano music", "asmr", "deep sleep"
+        ]
+    },
+    "food_cooking": {
+        "name_vi": "Ẩm thực / Nấu ăn & Mukbang",
+        "upload_1_start": 10.3,
+        "upload_1_end": 11.8,
+        "upload_1_label": "Khung chính: Trưa đón giờ thèm ăn",
+        "upload_2_start": 17.0,
+        "upload_2_end": 18.3,
+        "upload_2_label": "Khung phụ: Chiều tối chuẩn bị bữa ăn",
+        "best_weekdays": ["Thứ 6", "Thứ 7", "Chủ Nhật"],
+        "behavior_insight": "Khán giả ẩm thực xem nhiều nhất ngay trước giờ cơm trưa hoặc chiều tối để tìm cảm hứng ăn uống/nấu nướng.",
+        "keywords": [
+            "요리", "먹방", "레시피", "맛집", "음식", "집밥",
+            "món ngon", "nấu ăn", "công thức nấu", "ẩm thực", "hướng dẫn nấu ăn", "mukbang", "quán ăn ngon", "món ăn gia đình",
+            "cooking", "recipe", "recipes", "food", "street food", "mukbang", "delicious food", "chef", "baking", "tasty"
+        ]
+    },
+    "tech_gadgets": {
+        "name_vi": "Công nghệ / Review thiết bị & Hướng dẫn AI",
+        "upload_1_start": 11.5,
+        "upload_1_end": 12.5,
+        "upload_1_label": "Khung chính: Nghỉ trưa lướt tin công nghệ",
+        "upload_2_start": 18.5,
+        "upload_2_end": 20.0,
+        "upload_2_label": "Khung phụ: Tối sau giờ làm",
+        "best_weekdays": ["Thứ 3", "Thứ 4", "Thứ 5", "Thứ 7"],
+        "behavior_insight": "Dân công nghệ thích theo dõi tin tức sản phẩm mới vào giờ nghỉ trưa và tối sau giờ làm.",
+        "keywords": [
+            "테크", "스마트폰", "리뷰", "인공지능", "it리뷰", "가젯",
+            "công nghệ", "đánh giá điện thoại", "review công nghệ", "trí tuệ nhân tạo", "mở hộp", "hướng dẫn phần mềm", "laptop review", "thủ thuật",
+            "technology", "tech review", "smartphone review", "unboxing", "gadgets", "artificial intelligence", "software tutorial", "pc build"
+        ]
     }
 }
 
@@ -216,20 +297,13 @@ class TimeService:
         channel_title: str = "",
         channel_description: str = ""
     ) -> str:
-        """Tự động phân tích và nhận diện ngách nội dung của kênh từ từ khóa, tiêu đề và mô tả.
-        Chỉ phân loại khi có bằng chứng rõ ràng (cụm từ cụ thể), mặc định luôn là general (đại chúng).
-        """
-        corpus = [channel_title, channel_description]
-        if channel_keywords:
-            corpus.extend(channel_keywords)
-
-        for v in (videos or [])[:30]:
-            corpus.append(v.get("title", ""))
-            desc = v.get("description", "")
-            if desc:
-                corpus.append(desc[:200])
-
-        full_text = " ".join(corpus).lower()
+        """Tự động phân tích và nhận diện ngách nội dung của kênh từ từ khóa, tiêu đề và mô tả."""
+        title_text = (channel_title or "").lower()
+        desc_text = (channel_description or "").lower()
+        kw_list = [str(k).lower().strip().lstrip("#") for k in (channel_keywords or []) if str(k).strip()]
+        
+        video_titles = " ".join([v.get("title", "").lower() for v in (videos or [])[:30]])
+        video_descs = " ".join([(v.get("description", "") or "")[:200].lower() for v in (videos or [])[:30]])
 
         scores = {}
         for niche_key, niche_info in NICHE_PROFILES.items():
@@ -240,18 +314,28 @@ class TimeService:
                 kw_clean = kw.strip().lower()
                 if not kw_clean:
                     continue
-                # Đếm số lần xuất hiện của cụm từ chính xác
-                count = full_text.count(kw_clean)
-                if count > 0:
-                    score += count * 3
+                # 1. Trùng trong tên kênh (Trọng số cực cao: 12đ)
+                if kw_clean in title_text:
+                    score += 12
+                # 2. Trùng trong từ khóa / hashtag kênh (Trọng số cao: 8đ)
+                if any(kw_clean in k or k in kw_clean for k in kw_list):
+                    score += 8
+                # 3. Trùng trong tiêu đề video (Trọng số: 4đ mỗi lần xuất hiện, tối đa 24đ)
+                v_count = video_titles.count(kw_clean)
+                if v_count > 0:
+                    score += min(24, v_count * 4)
+                # 4. Trùng trong mô tả kênh hoặc mô tả video (Trọng số: 2đ)
+                if kw_clean in desc_text or kw_clean in video_descs:
+                    score += 2
+                    
             scores[niche_key] = score
 
         if not scores:
             return "general"
 
         best_niche = max(scores, key=scores.get)
-        # Yêu cầu điểm số tối thiểu là 6 (ít nhất 2 lần xuất hiện cụm từ ngách đặc thù)
-        if scores.get(best_niche, 0) < 6:
+        # Ngưỡng tin cậy: >= 5 điểm (chỉ cần trùng tên kênh, hashtag kênh hoặc 2 tiêu đề video)
+        if scores.get(best_niche, 0) < 5:
             return "general"
         return best_niche
 

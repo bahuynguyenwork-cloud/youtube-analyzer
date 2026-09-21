@@ -198,11 +198,16 @@ def analyze_channel(req: ChannelAnalysisRequest):
         )
 
         extracted_kw = [k.get("keyword", "") for k in keyword_data.get("top_keywords", [])] if isinstance(keyword_data, dict) else []
+        ch_raw_kw = channel_meta.get("keywords") or channel_meta.get("channel_keywords") or []
+        if isinstance(ch_raw_kw, str):
+            ch_raw_kw = [k.strip() for k in ch_raw_kw.split(",") if k.strip()]
+        all_channel_kws = list(dict.fromkeys(extracted_kw + list(ch_raw_kw)))
+
         time_data = time_service.analyze_upload_times(
             videos=videos, 
             target_geo=geo,
-            channel_keywords=extracted_kw,
-            channel_title=channel_meta.get("channel_title", ""),
+            channel_keywords=all_channel_kws,
+            channel_title=channel_meta.get("channel_title", "") or channel_meta.get("title", ""),
             channel_description=channel_meta.get("description", "")
         )
 
