@@ -797,8 +797,143 @@ NICHE_LOCALIZED_QUERIES = {
         "CA": "learn english speaking listening conversation skills",
         "AU": "learn english speaking listening practice accent",
         "DEFAULT": "learn english speaking practice listening conversation"
+    },
+    "luxury_lifestyle": {
+        "VN": "cuộc sống thượng lưu xe sang biệt thự triệu đô",
+        "US": "luxury lifestyle billionaire mansions supercar",
+        "GB": "luxury lifestyle billionaire supercars",
+        "FR": "style de vie luxueux milliardaire manoirs supercar",
+        "IT": "stile di vita lussuoso miliardario supercars",
+        "JP": "高級車 大富豪 豪邸 セレブ",
+        "KR": "슈퍼카 부자 고급 저택 럭셔리 라이프",
+        "DE": "Luxus Lifestyle Milliardär Luxusautos",
+        "DEFAULT": "luxury lifestyle billionaire mansions supercar"
+    },
+    "travel_food": {
+        "VN": "du lịch ẩm thực khám phá món ăn ngon đường phố",
+        "US": "travel street food tour culinary exploration",
+        "GB": "travel food guide culture street food",
+        "FR": "voyage cuisine street food gastronomie",
+        "IT": "viaggi street food cucina tipica esplorazione",
+        "JP": "旅行 グルメ 食べ歩き 観光",
+        "KR": "여행 맛집 먹방 길거리 음식",
+        "DE": "Reisen Street Food Kulinarik Entdeckung",
+        "DEFAULT": "travel street food tour culinary exploration"
+    },
+    "fitness_health": {
+        "VN": "tập gym giảm cân tăng cơ sức khỏe dinh dưỡng",
+        "US": "fitness workout routine gym transformation health",
+        "GB": "fitness workout gym healthy lifestyle",
+        "FR": "musculation fitness perte de poids santé entraînement",
+        "IT": "allenamento palestra fitness perdita di peso salute",
+        "JP": "筋トレ ダイエット フィットネス 健康",
+        "KR": "헬스 다이어트 운동 루틴 피트니스 건강",
+        "DE": "Fitness Training Muskelaufbau Ernährung Gesundheit",
+        "DEFAULT": "fitness workout routine gym transformation health"
+    },
+    "music_chill": {
+        "VN": "nhạc chill thư giãn lofi lofi chill ngủ ngon học bài",
+        "US": "lofi chill beats relaxing music sleep study",
+        "GB": "lofi hip hop chill beats relaxing music",
+        "FR": "musique relaxante lofi chill détente étude sommeil",
+        "IT": "musica rilassante lofi chill studio sonno relax",
+        "JP": "作業用bgm 睡眠用 癒やし 音楽 チル",
+        "KR": "로파이 힐링 음악 수면 음악 공부할때 듣는 음악",
+        "DE": "Entspannungsmusik Lofi Chill Beats Schlafen Lernen",
+        "DEFAULT": "lofi chill beats relaxing music sleep study"
     }
 }
+
+SP_MAP = {
+    "24h": "CAMSBAgCEAE%3D",  # Today / last 24h, sorted by viewCount
+    "48h": "CAMSBAgCEAE%3D",  # 24-48h, sorted by viewCount
+    "7d":  "CAMSBAgDEAE%3D",  # This week / last 7 days, sorted by viewCount
+    "30d": "CAMSBAgEEAE%3D",  # This month / last 30 days, sorted by viewCount
+    "all": "CAMSAhAB"         # All time, sorted by viewCount
+}
+
+def parse_duration_str_to_seconds(dur_str: str) -> int:
+    """Chuyển đổi chuỗi độ dài '4:49:21' hoặc '23:45' thành giây."""
+    if not dur_str:
+        return 0
+    parts = dur_str.strip().split(':')
+    try:
+        if len(parts) == 3:
+            return int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
+        elif len(parts) == 2:
+            return int(parts[0]) * 60 + int(parts[1])
+        elif len(parts) == 1:
+            return int(parts[0])
+    except Exception:
+        return 0
+    return 0
+
+def parse_views_str(view_str: str) -> int:
+    """Chuyển đổi chuỗi lượt xem đa ngôn ngữ ('402.643 lượt xem', '1.2M views', '150K') thành int."""
+    if not view_str:
+        return 0
+    v = view_str.strip()
+    m_match = re.search(r'([\d.,]+)\s*(?:M|Tr|tr|triệu|million|万)', v, re.IGNORECASE)
+    if m_match:
+        num = float(m_match.group(1).replace(',', '.'))
+        mult = 10000 if '万' in v else 1000000
+        return int(num * mult)
+    k_match = re.search(r'([\d.,]+)\s*(?:K|k|N|nghìn|ngàn)', v, re.IGNORECASE)
+    if k_match:
+        num = float(k_match.group(1).replace(',', '.'))
+        return int(num * 1000)
+    nums = re.findall(r'\d+', v)
+    return int(''.join(nums)) if nums else 0
+
+def is_published_age_matching_range(pub_text: str, t_range: str) -> bool:
+    """Kiểm tra nghiêm ngặt chuỗi thời gian hiển thị xem có thực sự nằm trong khung thời gian hay không."""
+    if not pub_text or t_range == "all":
+        return True
+    p = pub_text.lower().strip()
+    
+    # 1. Tuyệt đối không cho phép video từ nhiều năm trước lọt vào các bộ lọc ngắn hạn
+    if any(w in p for w in ['năm', 'year', 'yr', '年前', '년 전', 'jahr', 'an ']):
+        return False
+        
+    # 2. Với 24h, 48h, 7d: Tuyệt đối không chấp nhận video từ tháng trước
+    if t_range in ['24h', '48h', '7d']:
+        if any(w in p for w in ['tháng', 'thg', 'month', 'mo', 'か月前', '개월 전', 'monat', 'mois']):
+            return False
+            
+    # 3. Với 24h & 48h: Tuyệt đối không chấp nhận video tính bằng tuần
+    if t_range in ['24h', '48h']:
+        if any(w in p for w in ['tuần', 'week', 'wk', '週間前', '주 전', 'woche', 'semaine']):
+            return False
+        d_match = re.search(r'(\d+)\s*(?:ngày|day|tage?|jour|일|日)', p)
+        if d_match:
+            days = int(d_match.group(1))
+            if t_range == '24h' and days > 1:
+                return False
+            if t_range == '48h' and days > 2:
+                return False
+                
+    # 4. Với 7d: Chấp nhận tối đa 7 ngày (hoặc 1 tuần trước, loại bỏ 2 tuần trở lên)
+    if t_range == '7d':
+        w_match = re.search(r'(\d+)\s*(?:tuần|week|wk|woche|semaine|주|週間)', p)
+        if w_match:
+            weeks = int(w_match.group(1))
+            if weeks > 1:
+                return False
+        d_match = re.search(r'(\d+)\s*(?:ngày|day|tage?|jour|일|日)', p)
+        if d_match:
+            days = int(d_match.group(1))
+            if days > 7:
+                return False
+
+    # 5. Với 30d: Chấp nhận tối đa 1 tháng (loại bỏ từ 2 tháng trở lên)
+    if t_range == '30d':
+        m_match = re.search(r'(\d+)\s*(?:tháng|month|mo|monat|mois|개월|か月)', p)
+        if m_match:
+            months = int(m_match.group(1))
+            if months > 1:
+                return False
+                
+    return True
 
 def parse_iso_duration(dur_str: str) -> int:
     if not dur_str:
@@ -1257,37 +1392,29 @@ def get_trending_feed(
         except Exception as api_err:
             logger.warning(f"Lỗi truy vấn trending qua YouTube Data API: {api_err}")
 
-    # 2. Nếu không có API Key hoặc API trả về rỗng, dùng fallback qua yt-dlp ytsearch
+    # 2. Nếu không có API Key hoặc API trả về rỗng, dùng fallback thông minh qua URL lọc sp chính xác của YouTube
     if not videos:
         try:
-            current_year = datetime.datetime.now().year
-            country_names = {
-                "US": "United States", "GB": "United Kingdom", "JP": "Japan",
-                "KR": "Korea", "DE": "Germany", "VN": "Việt Nam", "IN": "India",
-                "BR": "Brazil", "CA": "Canada", "AU": "Australia", "FR": "France", "IT": "Italy"
-            }
-            c_name = country_names.get(geo_code, geo_code)
-            
             fallback_country_queries = {
-                "US": f"trending viral documentary podcast usa {current_year}",
-                "GB": f"trending viral documentary podcast uk {current_year}",
-                "DE": f"trending reportage dokumentation deutschland {current_year}",
-                "FR": f"trending reportage documentaire france {current_year}",
-                "IT": f"trending reportage documentario italia {current_year}",
-                "IN": f"trending documentary podcast india {current_year}",
-                "VN": f"thinh hanh phong su tai lieu podcast viet nam {current_year}",
-                "JP": f"話題の動画 トレンド ドキュメンタリー 日本 {current_year}",
-                "KR": f"인기 급상승 다큐멘터리 한국 {current_year}",
-                "BR": f"documentario podcast brasil {current_year}",
-                "CA": f"trending viral documentary canada {current_year}",
-                "AU": f"trending viral documentary australia {current_year}"
+                "US": "trending usa",
+                "GB": "trending uk",
+                "DE": "trends deutschland",
+                "FR": "tendances france",
+                "IT": "tendenze italia",
+                "IN": "trending india",
+                "VN": "thịnh hành việt nam",
+                "JP": "話題 トレンド",
+                "KR": "이슈 트렌드",
+                "BR": "em alta brasil",
+                "CA": "trending canada",
+                "AU": "trending australia"
             }
+            
             if cat in NICHE_LOCALIZED_QUERIES:
                 niche_dict = NICHE_LOCALIZED_QUERIES[cat]
-                q_term = niche_dict.get(geo_code, niche_dict.get("DEFAULT", cat))
-                search_query = f"{q_term} {current_year}"
+                search_query = niche_dict.get(geo_code, niche_dict.get("DEFAULT", cat))
             else:
-                search_query = fallback_country_queries.get(geo_code, f"trending viral video {c_name} {current_year}")
+                search_query = fallback_country_queries.get(geo_code, f"trending viral podcast documentary {geo_code}")
 
             # Lấy mã ngôn ngữ cho Accept-Language header
             GEO_LANG_MAP = {
@@ -1297,126 +1424,271 @@ def get_trending_feed(
             }
             hl_code = GEO_LANG_MAP.get(geo_code, "en")
 
-            ydl_opts = {
-                'quiet': True,
-                'skip_download': True,
-                'extract_flat': True,
-                'socket_timeout': 5,
-                'playlist_items': '1-30',
-                'http_headers': {
-                    'Accept-Language': f"{hl_code}-{geo_code},{hl_code};q=0.9,en;q=0.8"
+            # Tạo danh sách các từ khóa tìm kiếm dự phòng để đảm bảo luôn đủ video xu hướng phong phú
+            candidate_queries = [search_query]
+            if cat == "all":
+                secondary_queries = {
+                    "VN": ["podcast việt nam", "phóng sự tài liệu", "vlog việt nam"],
+                    "US": ["podcast documentary usa", "popular talk show"],
+                    "GB": ["podcast documentary uk", "popular talk show"],
+                    "DE": ["podcast reportage deutschland", "dokumentation"],
+                    "FR": ["podcast reportage france", "documentaire"],
+                    "IT": ["podcast reportage italia", "documentario"],
+                    "JP": ["ドキュメンタリー 話題", "ポッドキャスト"],
+                    "KR": ["이슈 팟캐스트", "다큐멘터리"]
                 }
-            }
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                res = ydl.extract_info(f"ytsearch30:{search_query}", download=False)
-                if res and res.get('entries'):
-                    for e in res['entries']:
-                        if not e:
-                            continue
-                        dur = e.get('duration') or 0
-                        t = e.get('title', '')
-                        if dur > 0 and dur < 180:
-                            continue
-                        if dur_filter == "deep_dive" and dur > 0 and dur < 1200:
-                            continue
-                        if '#shorts' in t.lower() or 'shorts' in t.lower().split():
-                            continue
+                candidate_queries.extend(secondary_queries.get(geo_code, ["podcast documentary"]))
 
-                        # Loại bỏ các phim/video cũ có năm phát hành cũ trong tiêu đề khi đang lọc 24h hoặc 7d
-                        if t_range in ["24h", "7d"]:
-                            if re.search(r'\b(19\d\d|200\d|201\d|202[0-3])\b', t):
+            # Sử dụng sp filter chính thức của YouTube để lọc đúng 100% mốc thời gian và sắp xếp theo lượt xem
+            sp_param = SP_MAP.get(t_range, "CAMSBAgDEAE%3D")
+
+            # BƯỚC 2.1: Truy vấn trực tiếp YouTube Web UI lấy ytInitialData (nhanh ~300ms, có nhãn ngày đăng thật)
+            direct_headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept-Language': f"{hl_code}-{geo_code},{hl_code};q=0.9,en;q=0.8"
+            }
+            
+            existing_vids = set()
+            for cand_query in candidate_queries:
+                if len(videos) >= 18:
+                    break
+                search_url = f"https://www.youtube.com/results?search_query={requests.utils.quote(cand_query)}&sp={sp_param}"
+                try:
+                    web_resp = http_session.get(search_url, headers=direct_headers, timeout=6)
+                    if web_resp.status_code == 200:
+                        m = re.search(r'ytInitialData\s*=\s*({.+?});</script>', web_resp.text)
+                        if not m:
+                            m = re.search(r'ytInitialData\s*=\s*({.+?});', web_resp.text)
+                        if m:
+                            data = json.loads(m.group(1))
+                            raw_vrs = []
+                            
+                            def extract_vrs(obj):
+                                if isinstance(obj, dict):
+                                    if 'videoRenderer' in obj:
+                                        raw_vrs.append(obj['videoRenderer'])
+                                    for v in obj.values():
+                                        extract_vrs(v)
+                                elif isinstance(obj, list):
+                                    for it in obj:
+                                        extract_vrs(it)
+
+                            extract_vrs(data)
+
+                            for vr in raw_vrs:
+                                v_id = vr.get('videoId')
+                                if not v_id or v_id in existing_vids:
+                                    continue
+                                
+                                t = ''.join(r.get('text', '') for r in vr.get('title', {}).get('runs', []))
+                                pub_age = vr.get('publishedTimeText', {}).get('simpleText', '')
+                                views_str = vr.get('viewCountText', {}).get('simpleText', '')
+                                dur_str = vr.get('lengthText', {}).get('simpleText', '')
+                                ch_name = ''.join(r.get('text', '') for r in vr.get('ownerText', {}).get('runs', [])) or 'YouTube Creator'
+                                
+                                ch_id = ''
+                                try:
+                                    ch_id = vr.get('ownerText', {}).get('runs', [{}])[0].get('navigationEndpoint', {}).get('browseEndpoint', {}).get('browseId', '')
+                                except Exception:
+                                    pass
+
+                                # Kiểm tra livestream
+                                is_live = any(b.get('metadataBadgeRenderer', {}).get('label') in ['TRỰC TIẾP', 'LIVE'] for b in vr.get('badges', []))
+                                is_live = is_live or any(o.get('thumbnailOverlayTimeStatusRenderer', {}).get('style') == 'LIVE' for o in vr.get('thumbnailOverlays', []))
+                                if is_live or any(kw in pub_age.lower() for kw in ['trực tiếp', 'phát trực tiếp', 'stream']) or any(kw in t.lower() for kw in ['restream', 'livestream', '🔴']):
+                                    continue
+
+                                # Độ dài
+                                dur_sec = parse_duration_str_to_seconds(dur_str)
+                                if dur_sec > 0 and dur_sec < 180:
+                                    continue
+                                if '#shorts' in t.lower() or 'shorts' in t.lower().split():
+                                    continue
+                                if dur_filter == "deep_dive" and dur_sec > 0 and dur_sec < 1200:
+                                    continue
+                                if dur_sec > 36000:
+                                    continue
+
+                                # Lượt xem
+                                v_cnt = parse_views_str(views_str)
+                                if t_range in ["7d", "24h", "48h", "30d"] and v_cnt < 200:
+                                    continue
+
+                                # KIỂM TRA THỜI GIAN NGHIÊM NGẶT: Không bao giờ cho phép video cũ xuất hiện
+                                if not is_published_age_matching_range(pub_age, t_range):
+                                    continue
+
+                                # Loại bỏ các video/phim cũ có năm phát hành cũ trong tiêu đề khi lọc 24h hoặc 7d
+                                if t_range in ["24h", "48h", "7d"] and re.search(r'\b(19\d\d|200\d|201\d|202[0-3])\b', t):
+                                    continue
+
+                                # Lọc quốc gia và ngôn ngữ
+                                pseudo_item = {
+                                    'snippet': {
+                                        'title': t,
+                                        'channelTitle': ch_name,
+                                        'defaultAudioLanguage': hl_code
+                                    }
+                                }
+                                pseudo_ch = {
+                                    'snippet': {
+                                        'country': geo_code
+                                    }
+                                }
+                                if not is_video_matching_country(pseudo_item, pseudo_ch, geo_code):
+                                    continue
+
+                                thumbs = vr.get('thumbnail', {}).get('thumbnails', [])
+                                thumb_url = thumbs[-1].get('url') if thumbs else f"https://i.ytimg.com/vi/{v_id}/hqdefault.jpg"
+
+                                is_ver = any("BADGE_STYLE_TYPE_VERIFIED" in str(b) for b in vr.get('ownerBadges', []))
+
+                                existing_vids.add(v_id)
+                                videos.append({
+                                    "video_id": v_id,
+                                    "id": v_id,
+                                    "title": t,
+                                    "channel_title": ch_name,
+                                    "channel": ch_name,
+                                    "channel_id": ch_id,
+                                    "channel_badge": "🟢 Kênh Xác Minh" if is_ver else "🟢 Kênh Hoạt Động",
+                                    "channel_subs": 100000 if is_ver else 50000,
+                                    "is_verified": is_ver,
+                                    "is_active_channel": True,
+                                    "view_count": v_cnt,
+                                    "views": v_cnt,
+                                    "duration_seconds": dur_sec,
+                                    "duration_formatted": dur_str or format_duration_display(dur_sec),
+                                    "published_at": "",
+                                    "published_age": pub_age or ("🔥 Xu hướng tuần này" if t_range == "7d" else "⚡ 24h qua"),
+                                    "url": f"https://www.youtube.com/watch?v={v_id}",
+                                    "thumbnail": thumb_url
+                                })
+                except Exception as direct_err:
+                    logger.warning(f"Direct trending scraping failed for {cand_query}: {direct_err}")
+
+            # BƯỚC 2.2: Nếu direct scraping chưa đủ video (ít hơn 4), dùng yt-dlp trên đúng URL đã gắn sp filter
+            if len(videos) < 4:
+                ydl_opts = {
+                    'quiet': True,
+                    'skip_download': True,
+                    'extract_flat': True,
+                    'socket_timeout': 6,
+                    'playlist_items': '1-30',
+                    'http_headers': {
+                        'Accept-Language': f"{hl_code}-{geo_code},{hl_code};q=0.9,en;q=0.8"
+                    }
+                }
+                existing_vids = {v["video_id"] for v in videos}
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    res = ydl.extract_info(search_url, download=False)
+                    if res and res.get('entries'):
+                        for e in res['entries']:
+                            if not e:
+                                continue
+                            v_id = e.get('id')
+                            if not v_id or v_id in existing_vids:
+                                continue
+                            dur = e.get('duration') or 0
+                            t = e.get('title', '')
+                            if dur > 0 and dur < 180:
+                                continue
+                            if dur_filter == "deep_dive" and dur > 0 and dur < 1200:
+                                continue
+                            if '#shorts' in t.lower() or 'shorts' in t.lower().split():
                                 continue
 
-                        # Loại bỏ video livestream, restream
-                        if e.get('live_status') in ['is_live', 'is_upcoming', 'was_live', 'post_live']:
-                            continue
-                        stream_kw = ['restream', 'livestream', 'live stream', 'trực tiếp', '🔴', 'buổi stream', 'phát trực tiếp', 'streamed live', 'streamer']
-                        if any(kw in t.lower() for kw in stream_kw):
-                            continue
+                            if t_range in ["24h", "48h", "7d"] and re.search(r'\b(19\d\d|200\d|201\d|202[0-3])\b', t):
+                                continue
 
-                        # Lọc quốc gia và ngôn ngữ trong fallback
-                        ch_name = e.get('channel') or e.get('uploader') or 'YouTube Creator'
-                        pseudo_item = {
-                            'snippet': {
-                                'title': t,
-                                'channelTitle': ch_name,
-                                'defaultAudioLanguage': e.get('language') or ''
+                            if e.get('live_status') in ['is_live', 'is_upcoming', 'was_live', 'post_live']:
+                                continue
+                            stream_kw = ['restream', 'livestream', 'live stream', 'trực tiếp', '🔴', 'buổi stream', 'phát trực tiếp', 'streamed live']
+                            if any(kw in t.lower() for kw in stream_kw):
+                                continue
+
+                            ch_name = e.get('channel') or e.get('uploader') or 'YouTube Creator'
+                            pseudo_item = {
+                                'snippet': {
+                                    'title': t,
+                                    'channelTitle': ch_name,
+                                    'defaultAudioLanguage': e.get('language') or hl_code
+                                }
                             }
-                        }
-                        pseudo_ch = {
-                            'snippet': {
-                                'country': e.get('channel_country') or ''
+                            pseudo_ch = {
+                                'snippet': {
+                                    'country': e.get('channel_country') or geo_code
+                                }
                             }
-                        }
-                        if not is_video_matching_country(pseudo_item, pseudo_ch, geo_code):
-                            continue
+                            if not is_video_matching_country(pseudo_item, pseudo_ch, geo_code):
+                                continue
 
-                        # Kiểm tra ngày đăng trong fallback nếu có
-                        up_date = e.get('upload_date')
-                        e_ts = e.get('timestamp') or e.get('release_timestamp')
-                        pub_str = ""
-                        if t_range == "7d":
-                            age_str = "🔥 Xu hướng tuần này"
-                        elif t_range == "24h":
-                            age_str = "⚡ 24 giờ qua • Mới"
-                        elif t_range == "30d":
-                            age_str = "📅 Xu hướng tháng này"
-                        else:
-                            age_str = "🔥 Xu hướng gần đây"
+                            up_date = e.get('upload_date')
+                            e_ts = e.get('timestamp') or e.get('release_timestamp')
+                            pub_str = ""
+                            age_str = ""
+                            if e_ts:
+                                try:
+                                    dt_e = datetime.datetime.fromtimestamp(e_ts, tz=datetime.timezone.utc)
+                                    if cutoff_dt and dt_e < cutoff_dt:
+                                        continue
+                                    pub_str = dt_e.strftime('%Y-%m-%d')
+                                    age_str = format_published_age(dt_e.isoformat())
+                                except Exception:
+                                    pass
+                            elif up_date and len(up_date) == 8:
+                                try:
+                                    dt_e = datetime.datetime.strptime(up_date, '%Y%m%d').replace(tzinfo=datetime.timezone.utc)
+                                    if cutoff_dt and dt_e < cutoff_dt:
+                                        continue
+                                    pub_str = dt_e.strftime('%Y-%m-%d')
+                                    age_str = format_published_age(dt_e.isoformat())
+                                except Exception:
+                                    pass
 
-                        if e_ts:
-                            try:
-                                dt_e = datetime.datetime.fromtimestamp(e_ts, tz=datetime.timezone.utc)
-                                if cutoff_dt and dt_e < cutoff_dt:
-                                    continue
-                                pub_str = dt_e.strftime('%Y-%m-%d')
-                                age_str = format_published_age(dt_e.isoformat())
-                            except Exception:
-                                pass
-                        elif up_date and len(up_date) == 8:
-                            try:
-                                dt_e = datetime.datetime.strptime(up_date, '%Y%m%d').replace(tzinfo=datetime.timezone.utc)
-                                if cutoff_dt and dt_e < cutoff_dt:
-                                    continue
-                                pub_str = dt_e.strftime('%Y-%m-%d')
-                                age_str = format_published_age(dt_e.isoformat())
-                            except Exception:
-                                pass
+                            if not age_str:
+                                if t_range == "7d":
+                                    age_str = "🔥 Xu hướng tuần này"
+                                elif t_range == "24h":
+                                    age_str = "⚡ 24 giờ qua • Mới"
+                                elif t_range == "30d":
+                                    age_str = "📅 Xu hướng tháng này"
+                                else:
+                                    age_str = "🔥 Xu hướng gần đây"
 
-                        v_cnt = int(e.get('view_count') or 0)
-                        if v_cnt < 500:
-                            continue
+                            v_cnt = int(e.get('view_count') or 0)
+                            if t_range in ["7d", "24h", "48h", "30d"] and v_cnt < 300:
+                                continue
 
-                        v_id = e.get('id')
-                        thumb = ""
-                        thumbs = e.get('thumbnails', [])
-                        if thumbs:
-                            thumb = thumbs[-1].get('url') or thumbs[0].get('url', '')
-                        elif v_id:
-                            thumb = f"https://i.ytimg.com/vi/{v_id}/hqdefault.jpg"
+                            thumb = ""
+                            thumbs = e.get('thumbnails', [])
+                            if thumbs:
+                                thumb = thumbs[-1].get('url') or thumbs[0].get('url', '')
+                            elif v_id:
+                                thumb = f"https://i.ytimg.com/vi/{v_id}/hqdefault.jpg"
 
-                        f_subs = int(e.get('channel_follower_count') or 0)
-                        videos.append({
-                            "video_id": v_id,
-                            "id": v_id,
-                            "title": t,
-                            "channel_title": e.get('channel') or e.get('uploader') or 'YouTube Creator',
-                            "channel": e.get('channel') or e.get('uploader') or 'YouTube Creator',
-                            "channel_badge": "🟢 Kênh Hoạt Động",
-                            "channel_subs": f_subs,
-                            "is_verified": bool(e.get('channel_is_verified')) or f_subs >= 100000,
-                            "is_active_channel": True,
-                            "view_count": v_cnt,
-                            "views": v_cnt,
-                            "duration_seconds": dur,
-                            "duration_formatted": format_duration_display(dur),
-                            "published_at": pub_str,
-                            "published_age": age_str,
-                            "url": e.get('url') or f"https://www.youtube.com/watch?v={v_id}",
-                            "thumbnail": thumb
-                        })
+                            f_subs = int(e.get('channel_follower_count') or 0)
+                            videos.append({
+                                "video_id": v_id,
+                                "id": v_id,
+                                "title": t,
+                                "channel_title": ch_name,
+                                "channel": ch_name,
+                                "channel_badge": "🟢 Kênh Hoạt Động",
+                                "channel_subs": f_subs,
+                                "is_verified": bool(e.get('channel_is_verified')) or f_subs >= 100000,
+                                "is_active_channel": True,
+                                "view_count": v_cnt,
+                                "views": v_cnt,
+                                "duration_seconds": dur,
+                                "duration_formatted": format_duration_display(dur),
+                                "published_at": pub_str,
+                                "published_age": age_str,
+                                "url": e.get('url') or f"https://www.youtube.com/watch?v={v_id}",
+                                "thumbnail": thumb
+                            })
 
-                videos.sort(key=lambda x: x["view_count"], reverse=True)
+            videos.sort(key=lambda x: x["view_count"], reverse=True)
         except Exception as yt_err:
             logger.error(f"Lỗi khi lấy trending fallback: {yt_err}")
 

@@ -767,6 +767,10 @@
             <option value="recap_stories">🎬 Tóm Tắt Phim & Truyện</option>
             <option value="gaming">🎮 Gaming & Esports</option>
             <option value="entertainment">🎉 Giải Trí & Hài Hước</option>
+            <option value="luxury_lifestyle">💎 Lối Sống Thượng Lưu & Xe Sang</option>
+            <option value="travel_food">✈️ Du Lịch & Ẩm Thực Đường Phố</option>
+            <option value="fitness_health">🏋️ Thể Hình & Sức Khỏe Dinh Dưỡng</option>
+            <option value="music_chill">🎧 Nhạc Chill & Lofi Thư Giãn</option>
           </select>
           <select id="feed-time-range" onchange="loadTrendingFeed()" class="px-3.5 py-2.5 bg-slate-900/90 border border-amber-500/40 text-amber-300 rounded-xl text-xs focus:ring-2 focus:ring-amber-500 font-semibold">
             <option value="7d" selected>🔥 Xu Hướng Tuần Này (7 Ngày Qua)</option>
@@ -782,6 +786,10 @@
             <option value="active_channels" selected>🟢 Ưu Tiên Kênh Ổn Định & Còn Sống</option>
             <option value="all_channels">🌐 Tất Cả Kênh Xu Hướng</option>
           </select>
+          <button onclick="loadTrendingFeed(true)" title="Làm mới dữ liệu xu hướng ngay" class="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 border border-white/10 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center space-x-1.5 transition">
+            <svg class="w-3.5 h-3.5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            <span class="hidden sm:inline">Làm Mới</span>
+          </button>
         </div>
       </section>
 
@@ -2482,7 +2490,7 @@
     // ==========================================
     // 4. View 3: Top Thịnh Hành
     // ==========================================
-    async function loadTrendingFeed() {
+    async function loadTrendingFeed(isRefresh = false) {
       const countryEl = document.getElementById('feed-country');
       const categoryEl = document.getElementById('feed-category');
       const timeRangeEl = document.getElementById('feed-time-range');
@@ -2497,10 +2505,19 @@
 
       const el = document.getElementById('trending-feed-list');
       if (!el) return;
-      el.innerHTML = '<div class="col-span-3 text-center py-16 text-slate-400 text-xs space-y-3"><div class="w-8 h-8 rounded-full border-2 border-rose-500/20 border-t-rose-500 animate-spin mx-auto"></div><p class="font-medium text-slate-300">Đang quét video xu hướng trong 7 ngày qua...</p><p class="text-[11px] text-slate-500">Tự động loại bỏ video Shorts, ưu tiên các kênh ổn định</p></div>';
+      
+      const timeRangeText = {
+        '24h': '24 - 48 giờ qua',
+        '7d': '7 ngày qua',
+        '30d': '30 ngày qua',
+        'all': 'mọi thời đại'
+      }[timeRange] || '7 ngày qua';
+
+      el.innerHTML = `<div class="col-span-3 text-center py-16 text-slate-400 text-xs space-y-3"><div class="w-8 h-8 rounded-full border-2 border-rose-500/20 border-t-rose-500 animate-spin mx-auto"></div><p class="font-medium text-slate-300">Đang quét video xu hướng trong ${timeRangeText}...</p><p class="text-[11px] text-slate-500">Tự động loại bỏ video Shorts, ưu tiên các kênh ổn định</p></div>`;
 
       try {
-        const res = await fetch(`/api/trending/feed?country=${country}&category=${category}&time_range=${timeRange}&duration=${duration}&feed_mode=${mode}`);
+        const refreshParam = isRefresh ? '&refresh=true' : '';
+        const res = await fetch(`/api/trending/feed?country=${country}&category=${category}&time_range=${timeRange}&duration=${duration}&feed_mode=${mode}${refreshParam}`);
         const data = await res.json();
         const videos = data.videos || data.trending_videos || [];
         el.innerHTML = '';
