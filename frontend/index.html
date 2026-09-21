@@ -297,19 +297,25 @@
             <div class="flex items-center space-x-2 shrink-0 self-start sm:self-center">
               <span class="text-slate-400 font-medium">Chủ đề ngách:</span>
               <select id="niche-selector" onchange="onNicheChanged(this.value)" class="bg-slate-900 border border-white/10 text-white text-xs font-semibold rounded-xl px-3 py-1.5 focus:outline-none focus:border-rose-500">
-                <option value="general">🎬 Giải trí đại chúng / Vlog</option>
-                <option value="quotes_philosophy">📜 Danh ngôn / Triết lý sống / Chữa lành</option>
-                <option value="health_wellness">🌿 Sức khỏe / Y học / Dinh dưỡng</option>
-                <option value="music_relaxation">🎵 Âm nhạc / Lofi / Nhạc ngủ & ASMR</option>
-                <option value="food_cooking">🍲 Ẩm thực / Nấu ăn & Mukbang</option>
-                <option value="tech_gadgets">💻 Công nghệ / Review thiết bị & AI</option>
-                <option value="horror">👻 Kinh dị & Truyện ma / Quái đàm</option>
-                <option value="education">📚 Kiến thức & Giáo dục / Podcast</option>
-                <option value="drama_story">🎭 Drama, Tâm sự & Kể chuyện</option>
-                <option value="finance_biz">💰 Tài chính, Đầu tư & Kinh doanh</option>
-                <option value="gaming">🎮 Gaming & Livestream</option>
-                <option value="kids">👶 Trẻ em & Thiếu nhi (Kids)</option>
-                <option value="true_crime">🔍 Vụ án & Trinh thám (True Crime)</option>
+                <option value="entertainment">🎉 Giải Trí & Hài Hước</option>
+                <option value="learn_english">🎓 Học Tiếng Anh (English Learning & Speaking)</option>
+                <option value="spicy_18_drama">🔞 18+ & Tâm Sự Thầm Kín Đêm Muộn</option>
+                <option value="father_inlaw_drama">🏡 Bố Chồng Nàng Dâu (Gia Đình Cay Đắng)</option>
+                <option value="mother_inlaw_drama">⚡ Mẹ Vợ Con Rể (Xung Đột & Trớ Trêu)</option>
+                <option value="infidelity_revenge">💔 Ngoại Tình & Bắt Gian Trả Thù (Revenge Drama)</option>
+                <option value="philosophy">📜 Triết Lý & Khắc Kỷ (Stoicism)</option>
+                <option value="buddhism">🪷 Phật Pháp & Chữa Lành</option>
+                <option value="elderly_wisdom">👴 Tâm Sự & Lời Khuyên Người Già</option>
+                <option value="reddit_stories">💬 Truyện Reddit & Confessions (AITA)</option>
+                <option value="drama_expose">🎭 Drama & Bóc Phốt (Exposé)</option>
+                <option value="true_crime">🕵️ Vụ Án Có Thật & Bí Ẩn</option>
+                <option value="horror_stories">👻 Kinh Dị & Truyện Đêm Muộn</option>
+                <option value="history_geopolitics">⚔️ Lịch Sử & Địa Chính Trị</option>
+                <option value="space_science">🌌 Bí Ẩn Vũ Trụ & Khoa Học</option>
+                <option value="finance_money">💰 Tài Chính & Kiếm Tiền Online</option>
+                <option value="tech_ai">🤖 Công Nghệ & Trí Tuệ Nhân Tạo (AI)</option>
+                <option value="recap_stories">🎬 Tóm Tắt Phim & Truyện</option>
+                <option value="gaming">🎮 Gaming & Esports</option>
               </select>
             </div>
           </div>
@@ -1457,30 +1463,8 @@
     }
 
     const NICHE_CLIENT_PROFILES = {
-      general: {
-        name_vi: "Giải trí đại chúng / Vlog / Đời sống",
-        upload_1_start: 16.5,
-        upload_1_end: 18.5,
-        upload_1_label: "Khung chính: Chiều tối ngày thường",
-        upload_2_start: 10.5,
-        upload_2_end: 12.0,
-        upload_2_label: "Khung phụ: Trưa & Cuối tuần",
-        best_weekdays: ["Thứ 6", "Thứ 7", "Chủ Nhật"],
-        behavior_insight: "Khán giả đại chúng xem nhiều nhất vào các buổi tối sau giờ tan làm và trưa cuối tuần."
-      },
-      horror: {
-        name_vi: "Kinh dị & Truyện ma / Quái đàm",
-        upload_1_start: 19.5,
-        upload_1_end: 21.0,
-        upload_1_label: "Khung chính: Đầu tối trước giờ ngủ",
-        upload_2_start: 21.5,
-        upload_2_end: 23.0,
-        upload_2_label: "Khung phụ: Đêm khuya cho cú đêm",
-        best_weekdays: ["Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
-        behavior_insight: "Khán giả truyện ma & kinh dị có thói quen nghe vào đêm khuya trước khi đi ngủ. Nên đăng từ đầu tối đến đêm muộn."
-      },
-      education: {
-        name_vi: "Học tập / Ngoại ngữ / Giáo dục",
+      learn_english: {
+        name_vi: "🎓 Học Tiếng Anh (English Learning & Speaking)",
         upload_1_start: 5.5,
         upload_1_end: 7.0,
         upload_1_label: "Khung chính: Sáng sớm trước giờ học/làm",
@@ -1488,54 +1472,109 @@
         upload_2_end: 19.0,
         upload_2_label: "Khung phụ: Tối học bài sau giờ làm",
         best_weekdays: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5"],
-        behavior_insight: "Người học tập trung nghe bài vào sáng sớm thức dậy hoặc tối sau giờ làm. Ngày trong tuần xem nhiều hơn cuối tuần."
+        behavior_insight: "Người học tập trung nghe và luyện phản xạ vào sáng sớm thức dậy hoặc tối sau giờ làm."
       },
-      drama_story: {
-        name_vi: "Drama / Bắt gian / Hóng biến / Gia đình",
+      spicy_18_drama: {
+        name_vi: "🔞 18+ & Tâm Sự Thầm Kín Đêm Muộn",
+        upload_1_start: 20.5,
+        upload_1_end: 22.0,
+        upload_1_label: "Khung chính: Đêm muộn giờ riêng tư",
+        upload_2_start: 22.5,
+        upload_2_end: 23.8,
+        upload_2_label: "Khung phụ: Nửa đêm cho cú đêm",
+        best_weekdays: ["Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+        behavior_insight: "Khán giả nghe tâm sự thầm kín tập trung vào đêm muộn khi ở một mình hoặc trước khi ngủ."
+      },
+      father_inlaw_drama: {
+        name_vi: "🏡 Bố Chồng Nàng Dâu (Gia Đình Cay Đắng)",
         upload_1_start: 10.5,
         upload_1_end: 11.5,
-        upload_1_label: "Khung chính: Đón giờ nghỉ trưa ăn cơm",
-        upload_2_start: 18.5,
-        upload_2_end: 20.0,
-        upload_2_label: "Khung phụ: Đón ca tối sau bữa cơm",
+        upload_1_label: "Khung chính: Trưa nghỉ ngơi ăn cơm",
+        upload_2_start: 19.0,
+        upload_2_end: 20.3,
+        upload_2_label: "Khung phụ: Tối sau bữa cơm gia đình",
         best_weekdays: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Chủ Nhật"],
-        behavior_insight: "Khán giả drama hóng biến mạnh nhất lúc ăn trưa và tối thư giãn."
+        behavior_insight: "Nội dung gia đình cay đắng hóng biến mạnh nhất lúc nghỉ trưa và tối thư giãn."
       },
-      finance_biz: {
-        name_vi: "Tài chính / Crypto / MMO / Đầu tư",
-        upload_1_start: 6.5,
-        upload_1_end: 7.5,
-        upload_1_label: "Khung chính: Sáng trước giờ mở phiên",
-        upload_2_start: 15.5,
-        upload_2_end: 16.5,
-        upload_2_label: "Khung phụ: Chiều trước khi đóng phiên",
-        best_weekdays: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5"],
-        behavior_insight: "Khán giả tài chính theo sát lịch làm việc và phiên giao dịch từ Thứ 2 đến Thứ 5."
+      mother_inlaw_drama: {
+        name_vi: "⚡ Mẹ Vợ Con Rể (Xung Đột & Trớ Trêu)",
+        upload_1_start: 10.5,
+        upload_1_end: 11.5,
+        upload_1_label: "Khung chính: Trưa ăn cơm hóng biến",
+        upload_2_start: 19.0,
+        upload_2_end: 20.3,
+        upload_2_label: "Khung phụ: Tối thư giãn gia đình",
+        best_weekdays: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Chủ Nhật"],
+        behavior_insight: "Khán giả thích nghe chuyện xung đột mẹ vợ con rể / mẹ chồng vào giờ trưa và tối."
       },
-      gaming: {
-        name_vi: "Gaming / Trò chơi / Esports",
-        upload_1_start: 14.0,
-        upload_1_end: 15.5,
-        upload_1_label: "Khung chính: Chiều đón tan học",
+      infidelity_revenge: {
+        name_vi: "💔 Ngoại Tình & Bắt Gian Trả Thù (Revenge Drama)",
+        upload_1_start: 11.0,
+        upload_1_end: 12.5,
+        upload_1_label: "Khung chính: Trưa hóng drama bắt gian",
+        upload_2_start: 19.5,
+        upload_2_end: 21.0,
+        upload_2_label: "Khung phụ: Tối xem trả thù sướng mắt",
+        best_weekdays: ["Thứ 3", "Thứ 4", "Thứ 5", "Chủ Nhật"],
+        behavior_insight: "Drama ngoại tình và trả thù bắt gian thu hút người xem cao điểm lúc trưa và tối."
+      },
+      philosophy: {
+        name_vi: "📜 Triết Lý & Khắc Kỷ (Stoicism)",
+        upload_1_start: 5.0,
+        upload_1_end: 6.5,
+        upload_1_label: "Khung chính: Sáng sớm nạp năng lượng & suy ngẫm",
+        upload_2_start: 19.5,
+        upload_2_end: 21.0,
+        upload_2_label: "Khung phụ: Tối chiêm nghiệm, chữa lành trước khi ngủ",
+        best_weekdays: ["Chủ Nhật", "Thứ 2", "Thứ 5", "Thứ 6"],
+        behavior_insight: "Khán giả nghe danh ngôn, triết lý & khắc kỷ vào sáng sớm thức dậy hoặc tối muộn trước khi ngủ để chữa lành và tìm động lực."
+      },
+      buddhism: {
+        name_vi: "🪷 Phật Pháp & Chữa Lành",
+        upload_1_start: 5.0,
+        upload_1_end: 6.5,
+        upload_1_label: "Khung chính: Sáng sớm nghe kinh & tĩnh tâm",
+        upload_2_start: 20.0,
+        upload_2_end: 21.5,
+        upload_2_label: "Khung phụ: Tối nghe pháp, chữa lành tâm hồn",
+        best_weekdays: ["Thứ 7", "Chủ Nhật", "Thứ 2", "Thứ 6"],
+        behavior_insight: "Phật tử và người tìm kiếm sự an yên nghe giảng pháp vào sáng sớm hoặc tối trước khi ngủ."
+      },
+      elderly_wisdom: {
+        name_vi: "👴 Tâm Sự & Lời Khuyên Người Già",
+        upload_1_start: 5.3,
+        upload_1_end: 6.8,
+        upload_1_label: "Khung chính: Sáng sớm dậy sớm ngẫm sự đời",
         upload_2_start: 18.5,
         upload_2_end: 20.0,
-        upload_2_label: "Khung phụ: Tối cày game & Cuối tuần",
-        best_weekdays: ["Thứ 6", "Thứ 7", "Chủ Nhật"],
-        behavior_insight: "Khán giả game xem nhiều từ chiều tan học và bùng nổ tối cuối tuần."
+        upload_2_label: "Khung phụ: Đầu tối thư giãn nhẹ nhàng",
+        best_weekdays: ["Thứ 7", "Chủ Nhật", "Thứ 2"],
+        behavior_insight: "Người trung niên và cao tuổi thường dậy từ rất sớm và nghe tâm sự cuộc sống vào đầu ngày hoặc đầu tối."
       },
-      kids: {
-        name_vi: "Trẻ em / Hoạt hình thiếu nhi",
-        upload_1_start: 5.5,
-        upload_1_end: 6.5,
-        upload_1_label: "Khung chính: Sáng trước giờ đi học",
-        upload_2_start: 15.5,
-        upload_2_end: 16.5,
-        upload_2_label: "Khung phụ: Chiều cơm nước & Sáng cuối tuần",
-        best_weekdays: ["Thứ 7", "Chủ Nhật", "Thứ 6"],
-        behavior_insight: "Phụ huynh mở cho con xem sáng trước giờ đi học, chiều tắm rửa cơm nước và sáng cuối tuần."
+      reddit_stories: {
+        name_vi: "💬 Truyện Reddit & Confessions (AITA)",
+        upload_1_start: 11.5,
+        upload_1_end: 13.0,
+        upload_1_label: "Khung chính: Nghỉ trưa lướt đọc tâm sự",
+        upload_2_start: 19.0,
+        upload_2_end: 20.3,
+        upload_2_label: "Khung phụ: Tối nghe kể chuyện thư giãn",
+        best_weekdays: ["Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+        behavior_insight: "Khán giả truyện Reddit thích nghe câu chuyện đời thực nhiều phần vào giờ nghỉ trưa và tối."
+      },
+      drama_expose: {
+        name_vi: "🎭 Drama & Bóc Phốt (Exposé)",
+        upload_1_start: 11.5,
+        upload_1_end: 12.8,
+        upload_1_label: "Khung chính: Trưa hóng tin tức nóng",
+        upload_2_start: 18.5,
+        upload_2_end: 20.0,
+        upload_2_label: "Khung phụ: Tối bàn tán xôn xao mạng xã hội",
+        best_weekdays: ["Thứ 6", "Thứ 7", "Chủ Nhật", "Thứ 2"],
+        behavior_insight: "Drama bóc phốt lan truyền với tốc độ chóng mặt vào giờ tan tầm và cuối tuần."
       },
       true_crime: {
-        name_vi: "Vụ án có thật / Kỳ án / Trinh thám",
+        name_vi: "🕵️ Vụ Án Có Thật & Bí Ẩn",
         upload_1_start: 18.0,
         upload_1_end: 19.5,
         upload_1_label: "Khung chính: Đầu tối sau giờ làm",
@@ -1545,62 +1584,102 @@
         best_weekdays: ["Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
         behavior_insight: "Kỳ án và phim tài liệu điều tra đòi hỏi tập trung cao, xem nhiều vào tối cuối tuần."
       },
-      quotes_philosophy: {
-        name_vi: "Danh ngôn / Triết lý sống / Động lực & Chữa lành",
-        upload_1_start: 5.0,
-        upload_1_end: 6.5,
-        upload_1_label: "Khung chính: Sáng sớm nạp năng lượng & suy ngẫm",
-        upload_2_start: 19.5,
-        upload_2_end: 21.0,
-        upload_2_label: "Khung phụ: Tối thư giãn, chữa lành trước khi ngủ",
-        best_weekdays: ["Chủ Nhật", "Thứ 2", "Thứ 5", "Thứ 6"],
-        behavior_insight: "Khán giả nghe danh ngôn & triết lý sống vào sáng sớm thức dậy hoặc tối muộn trước khi ngủ để chữa lành và tìm động lực."
-      },
-      health_wellness: {
-        name_vi: "Sức khỏe / Y học / Dinh dưỡng & Trường thọ",
-        upload_1_start: 6.0,
-        upload_1_end: 7.5,
-        upload_1_label: "Khung chính: Sáng sớm khởi động ngày mới",
-        upload_2_start: 17.0,
-        upload_2_end: 18.5,
-        upload_2_label: "Khung phụ: Chiều tối chuẩn bị bữa ăn",
-        best_weekdays: ["Thứ 2", "Thứ 3", "Thứ 7", "Chủ Nhật"],
-        behavior_insight: "Người quan tâm sức khỏe thường tìm kiếm kiến thức vào sáng sớm hoặc chiều tối trước bữa cơm gia đình."
-      },
-      music_relaxation: {
-        name_vi: "Âm nhạc / Lofi / Nhạc ngủ & ASMR",
-        upload_1_start: 17.0,
-        upload_1_end: 18.5,
-        upload_1_label: "Khung chính: Chiều tối thư giãn sau giờ làm",
-        upload_2_start: 21.0,
-        upload_2_end: 22.5,
-        upload_2_label: "Khung phụ: Đêm khuya ngủ ngon & ASMR",
+      horror_stories: {
+        name_vi: "👻 Kinh Dị & Truyện Đêm Muộn",
+        upload_1_start: 19.5,
+        upload_1_end: 21.0,
+        upload_1_label: "Khung chính: Đầu tối trước giờ ngủ",
+        upload_2_start: 21.5,
+        upload_2_end: 23.0,
+        upload_2_label: "Khung phụ: Nửa đêm cho cú đêm",
         best_weekdays: ["Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
-        behavior_insight: "Khán giả nghe nhạc thư giãn/ASMR tập trung cao độ vào buổi tối và đêm khuya trước khi ngủ."
+        behavior_insight: "Khán giả truyện ma & kinh dị có thói quen nghe vào đêm khuya trước khi đi ngủ."
       },
-      food_cooking: {
-        name_vi: "Ẩm thực / Nấu ăn & Mukbang",
-        upload_1_start: 10.3,
-        upload_1_end: 11.8,
-        upload_1_label: "Khung chính: Trưa đón giờ thèm ăn",
-        upload_2_start: 17.0,
-        upload_2_end: 18.3,
-        upload_2_label: "Khung phụ: Chiều tối chuẩn bị bữa ăn",
-        best_weekdays: ["Thứ 6", "Thứ 7", "Chủ Nhật"],
-        behavior_insight: "Khán giả ẩm thực xem nhiều nhất ngay trước giờ cơm trưa hoặc chiều tối để tìm cảm hứng ăn uống/nấu nướng."
+      history_geopolitics: {
+        name_vi: "⚔️ Lịch Sử & Địa Chính Trị",
+        upload_1_start: 11.5,
+        upload_1_end: 12.8,
+        upload_1_label: "Khung chính: Nghỉ trưa theo dõi tư liệu",
+        upload_2_start: 19.0,
+        upload_2_end: 20.3,
+        upload_2_label: "Khung phụ: Tối xem tư liệu chuyên sâu",
+        best_weekdays: ["Thứ 3", "Thứ 4", "Thứ 5", "Thứ 7"],
+        behavior_insight: "Khán giả lịch sử và địa chính trị thường theo dõi tư liệu dài vào buổi tối các ngày trong tuần."
       },
-      tech_gadgets: {
-        name_vi: "Công nghệ / Review thiết bị & Hướng dẫn AI",
+      space_science: {
+        name_vi: "🌌 Bí Ẩn Vũ Trụ & Khoa Học",
+        upload_1_start: 18.0,
+        upload_1_end: 19.3,
+        upload_1_label: "Khung chính: Tối giải trí khám phá",
+        upload_2_start: 20.5,
+        upload_2_end: 22.0,
+        upload_2_label: "Khung phụ: Đêm suy ngẫm về vũ trụ",
+        best_weekdays: ["Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+        behavior_insight: "Khán giả yêu thích vũ trụ và khoa học xem nhiều vào buổi tối và đêm cuối tuần."
+      },
+      finance_money: {
+        name_vi: "💰 Tài Chính & Kiếm Tiền Online",
+        upload_1_start: 6.5,
+        upload_1_end: 7.5,
+        upload_1_label: "Khung chính: Sáng trước giờ mở phiên",
+        upload_2_start: 15.5,
+        upload_2_end: 16.5,
+        upload_2_label: "Khung phụ: Chiều trước khi đóng phiên",
+        best_weekdays: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5"],
+        behavior_insight: "Khán giả tài chính theo sát lịch làm việc và phiên giao dịch từ Thứ 2 đến Thứ 5."
+      },
+      tech_ai: {
+        name_vi: "🤖 Công Nghệ & Trí Tuệ Nhân Tạo (AI)",
         upload_1_start: 11.5,
         upload_1_end: 12.5,
         upload_1_label: "Khung chính: Nghỉ trưa lướt tin công nghệ",
         upload_2_start: 18.5,
         upload_2_end: 20.0,
-        upload_2_label: "Khung phụ: Tối sau giờ làm",
+        upload_2_label: "Khung phụ: Tối sau giờ làm việc",
         best_weekdays: ["Thứ 3", "Thứ 4", "Thứ 5", "Thứ 7"],
-        behavior_insight: "Dân công nghệ thích theo dõi tin tức sản phẩm mới vào giờ nghỉ trưa và tối sau giờ làm."
+        behavior_insight: "Dân công nghệ thích theo dõi tin tức công nghệ và AI vào giờ nghỉ trưa và tối sau giờ làm."
+      },
+      recap_stories: {
+        name_vi: "🎬 Tóm Tắt Phim & Truyện",
+        upload_1_start: 11.3,
+        upload_1_end: 12.5,
+        upload_1_label: "Khung chính: Trưa vừa ăn cơm vừa xem tóm tắt",
+        upload_2_start: 18.5,
+        upload_2_end: 20.0,
+        upload_2_label: "Khung phụ: Tối thư giãn xem phim ngắn gọn",
+        best_weekdays: ["Thứ 6", "Thứ 7", "Chủ Nhật"],
+        behavior_insight: "Khán giả tóm tắt phim xem bùng nổ vào giờ ăn trưa và tối cuối tuần."
+      },
+      gaming: {
+        name_vi: "🎮 Gaming & Esports",
+        upload_1_start: 14.0,
+        upload_1_end: 15.5,
+        upload_1_label: "Khung chính: Chiều đón tan học",
+        upload_2_start: 18.5,
+        upload_2_end: 20.0,
+        upload_2_label: "Khung phụ: Tối cày game & Cuối tuần",
+        best_weekdays: ["Thứ 6", "Thứ 7", "Chủ Nhật"],
+        behavior_insight: "Khán giả game xem nhiều từ chiều tan học và bùng nổ tối cuối tuần."
+      },
+      entertainment: {
+        name_vi: "🎉 Giải Trí & Hài Hước",
+        upload_1_start: 16.5,
+        upload_1_end: 18.5,
+        upload_1_label: "Khung chính: Chiều tối tan ca giải trí",
+        upload_2_start: 10.5,
+        upload_2_end: 12.0,
+        upload_2_label: "Khung phụ: Trưa & Cuối tuần xả stress",
+        best_weekdays: ["Thứ 6", "Thứ 7", "Chủ Nhật"],
+        behavior_insight: "Khán giả giải trí xem nhiều nhất vào các buổi tối sau giờ tan làm và trưa cuối tuần."
       }
     };
+
+    NICHE_CLIENT_PROFILES.general = NICHE_CLIENT_PROFILES.entertainment;
+    NICHE_CLIENT_PROFILES.horror = NICHE_CLIENT_PROFILES.horror_stories;
+    NICHE_CLIENT_PROFILES.education = NICHE_CLIENT_PROFILES.learn_english;
+    NICHE_CLIENT_PROFILES.drama_story = NICHE_CLIENT_PROFILES.infidelity_revenge;
+    NICHE_CLIENT_PROFILES.finance_biz = NICHE_CLIENT_PROFILES.finance_money;
+    NICHE_CLIENT_PROFILES.quotes_philosophy = NICHE_CLIENT_PROFILES.philosophy;
 
     const COUNTRY_OFFSETS = {
       US: -5,
