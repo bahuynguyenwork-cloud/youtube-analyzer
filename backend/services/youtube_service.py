@@ -156,6 +156,7 @@ class YouTubeService:
 
                         videos.append({
                             'id': vid,
+                            'video_id': vid,
                             'title': d_snip.get('title', ''),
                             'url': f'https://www.youtube.com/watch?v={vid}',
                             'view_count': int(d_stats.get('viewCount') or 0),
@@ -289,6 +290,7 @@ class YouTubeService:
 
                         videos.append({
                             'id': v_id,
+                            'video_id': v_id,
                             'title': v_title,
                             'url': entry.get('url') or f'https://www.youtube.com/watch?v={v_id}',
                             'view_count': int(v_views),
@@ -430,6 +432,8 @@ class YouTubeService:
             if v['view_count'] >= outlier_threshold and v['view_count'] > 500:
                 outliers.append({
                     'id': v['id'],
+                    'video_id': v.get('video_id') or v['id'],
+                    'url': v.get('url') or f"https://www.youtube.com/watch?v={v['id']}",
                     'title': v['title'],
                     'view_count': v['view_count'],
                     'thumbnail': v['thumbnail'],
