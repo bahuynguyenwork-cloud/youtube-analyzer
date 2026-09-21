@@ -1277,25 +1277,26 @@ def get_trending_feed(
             else:
                 search_query = fallback_country_queries.get(geo_code, f"trending viral video {c_name} {current_year}")
 
-            sp_param = ""
-            if t_range == "24h":
-                sp_param = "&sp=CAISAhAA"
-            elif t_range == "7d":
-                sp_param = "&sp=CAISAhAB"
-            elif t_range == "30d":
-                sp_param = "&sp=CAISAhAC"
-
-            encoded_q = requests.utils.quote(search_query)
-            search_target = f"https://www.youtube.com/results?search_query={encoded_q}{sp_param}" if sp_param else f"ytsearch30:{search_query}"
+            # Lấy mã ngôn ngữ cho Accept-Language header
+            GEO_LANG_MAP = {
+                "US": "en", "GB": "en", "CA": "en", "AU": "en",
+                "VN": "vi", "JP": "ja", "KR": "ko", "DE": "de",
+                "BR": "pt", "IN": "en", "FR": "fr", "IT": "it"
+            }
+            hl_code = GEO_LANG_MAP.get(geo_code, "en")
 
             ydl_opts = {
                 'quiet': True,
                 'skip_download': True,
                 'extract_flat': True,
-                'socket_timeout': 10
+                'socket_timeout': 5,
+                'playlist_items': '1-30',
+                'http_headers': {
+                    'Accept-Language': f"{hl_code}-{geo_code},{hl_code};q=0.9,en;q=0.8"
+                }
             }
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                res = ydl.extract_info(search_target, download=False)
+                res = ydl.extract_info(f"ytsearch30:{search_query}", download=False)
                 if res and res.get('entries'):
                     for e in res['entries']:
                         if not e:
