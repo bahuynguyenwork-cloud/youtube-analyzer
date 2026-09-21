@@ -664,56 +664,6 @@
             <span class="text-slate-400 text-[10px] hidden sm:inline">Thích ứng theo từng quốc gia</span>
           </div>
           <div id="quick-niche-tags" class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs"></div>
-
-          <!-- Khuyến nghị tần suất đo Trend từ khóa (Tips & Best Practices) -->
-          <div class="mt-4 p-3.5 rounded-2xl bg-gradient-to-r from-rose-950/30 via-slate-900/80 to-amber-950/20 border border-rose-500/20 text-left">
-            <div class="flex items-center justify-between cursor-pointer" onclick="toggleTrendAdvice()">
-              <div class="flex items-center space-x-2 text-xs font-bold text-rose-300">
-                <i data-lucide="clock" class="w-4 h-4 text-amber-400"></i>
-                <span>Bao lâu nên quét Trend từ khóa 1 lần? (Khuyến nghị chuyên gia)</span>
-              </div>
-              <span class="text-slate-400 text-xs flex items-center space-x-1 hover:text-white transition">
-                <span id="trend-advice-toggle-text">Thu gọn</span>
-                <i data-lucide="chevron-up" class="w-3.5 h-3.5 transition-transform duration-200" id="trend-advice-arrow"></i>
-              </span>
-            </div>
-            
-            <div id="trend-advice-content" class="mt-3 pt-3 border-t border-white/10 grid grid-cols-1 md:grid-cols-3 gap-2.5 text-xs">
-              <!-- Card 1: Chu kỳ biến động -->
-              <div class="p-3 rounded-xl bg-slate-900/90 border border-white/5 space-y-1.5">
-                <div class="flex items-center space-x-1.5 text-amber-400 font-semibold text-[11px]">
-                  <i data-lucide="activity" class="w-3.5 h-3.5"></i>
-                  <span>Chu kỳ biến động thực tế</span>
-                </div>
-                <p class="text-[11px] text-slate-300 leading-relaxed">
-                  Dữ liệu tìm kiếm & xu hướng ngách không nhảy từng phút mà biến động theo chu kỳ <strong class="text-white font-semibold">12 – 24 giờ</strong> (nhịp sinh hoạt ngày/đêm của khán giả từng nước).
-                </p>
-              </div>
-
-              <!-- Card 2: Tần suất tối ưu -->
-              <div class="p-3 rounded-xl bg-slate-900/90 border border-white/5 space-y-1.5">
-                <div class="flex items-center space-x-1.5 text-emerald-400 font-semibold text-[11px]">
-                  <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
-                  <span>Tần suất khuyến nghị: 1–2 lần/ngày</span>
-                </div>
-                <p class="text-[11px] text-slate-300 leading-relaxed">
-                  • <strong class="text-emerald-300">Sáng (7h–9h):</strong> Quét bắt trend, lấy ý tưởng & lên kịch bản video.<br>
-                  • <strong class="text-emerald-300">Chiều (17h–19h):</strong> Tối ưu tiêu đề & thẻ tag trước giờ vàng (Prime-Time).
-                </p>
-              </div>
-
-              <!-- Card 3: Ngách nóng & Lưu ý -->
-              <div class="p-3 rounded-xl bg-slate-900/90 border border-white/5 space-y-1.5">
-                <div class="flex items-center space-x-1.5 text-rose-400 font-semibold text-[11px]">
-                  <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
-                  <span>Ngách nóng Drama & Lưu ý</span>
-                </div>
-                <p class="text-[11px] text-slate-300 leading-relaxed">
-                  Nếu làm ngách tin nóng hổi: Tối đa <strong class="text-rose-300 font-semibold">3 – 6 tiếng / lần</strong>. Tránh quét liên tục từng phút để không bị Google/YouTube chặn IP (HTTP 429).
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -1961,22 +1911,6 @@
         container.appendChild(btn);
       });
       lucide.createIcons();
-    }
-
-    function toggleTrendAdvice() {
-      const content = document.getElementById('trend-advice-content');
-      const text = document.getElementById('trend-advice-toggle-text');
-      const arrow = document.getElementById('trend-advice-arrow');
-      if (!content) return;
-      if (content.classList.contains('hidden')) {
-        content.classList.remove('hidden');
-        if (text) text.innerText = 'Thu gọn';
-        if (arrow) arrow.style.transform = 'rotate(0deg)';
-      } else {
-        content.classList.add('hidden');
-        if (text) text.innerText = 'Xem chi tiết';
-        if (arrow) arrow.style.transform = 'rotate(180deg)';
-      }
     }
 
     function quickSearchKw(tag) {
