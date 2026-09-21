@@ -494,6 +494,97 @@ def format_published_age(pub_iso: str) -> str:
     except Exception:
         return pub_iso[:10]
 
+def is_video_matching_country(item: dict, ch_info: dict, target_geo: str) -> bool:
+    """Kiểm tra nghiêm ngặt ngôn ngữ, bảng chữ cái và quốc gia kênh để ngăn chặn video ngoại lai."""
+    geo = (target_geo or 'US').upper().strip()
+    snippet = item.get('snippet', {})
+    title = snippet.get('title', '')
+    ch_title = snippet.get('channelTitle', '')
+    combined_title = f"{title} {ch_title}"
+
+    audio_lang = (snippet.get('defaultAudioLanguage') or '').lower()
+    default_lang = (snippet.get('defaultLanguage') or '').lower()
+    ch_country = (ch_info.get('snippet', {}).get('country') or '').upper()
+
+    # Bảng chữ cái đặc thù của các ngôn ngữ
+    has_thai = bool(re.search(r'[\u0e00-\u0e7f]', combined_title))
+    has_south_asian = bool(re.search(r'[\u0900-\u097f\u0980-\u09ff\u0a00-\u0a7f\u0a80-\u0aff\u0b80-\u0bff\u0c00-\u0c7f\u0c80-\u0cff\u0d00-\u0d7f]', combined_title))
+    has_hangul = bool(re.search(r'[\uac00-\ud7a3\u1100-\u11ff\u3130-\u318f]', combined_title))
+    has_kana = bool(re.search(r'[\u3040-\u30ff]', combined_title))
+    has_cyrillic = bool(re.search(r'[\u0400-\u04ff]', combined_title))
+    has_arabic = bool(re.search(r'[\u0600-\u06ff]', combined_title))
+    
+    # Tiếng Việt đặc thù (tránh nhầm với từ mượn Pháp/Tây Ban Nha như Pokémon, café)
+    has_vn = bool(re.search(r'[đươĐƯƠ]', combined_title)) or len(re.findall(r'[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵ]', combined_title, re.I)) >= 3
+
+    # 1. Video tiếng Thái: TUYỆT ĐỐI KHÔNG xuất hiện ở bất kỳ quốc gia nào ngoài Thái Lan (TH)
+    if has_thai or audio_lang.startswith('th') or default_lang.startswith('th') or ch_country == 'TH':
+        if geo != 'TH':
+            return False
+
+    # 2. Thị trường Mỹ & tiếng Anh (US, GB, CA, AU)
+    if geo in ['US', 'GB', 'CA', 'AU']:
+        if has_south_asian or has_hangul or has_kana or has_cyrillic or has_arabic or has_vn:
+            return False
+        if audio_lang and not audio_lang.startswith(('en', 'es', 'zxx')):
+            return False
+        if ch_country in ['IN', 'VN', 'RU', 'PK', 'BD', 'ID', 'KR', 'JP', 'TH']:
+            return False
+
+    # 3. Thị trường Đức (DE)
+    elif geo == 'DE':
+        if has_south_asian or has_hangul or has_kana or has_cyrillic or has_arabic or has_vn:
+            return False
+        if audio_lang and not audio_lang.startswith(('de', 'en', 'zxx')):
+            return False
+        if ch_country in ['IN', 'VN', 'RU', 'PK', 'BD', 'ID', 'KR', 'JP', 'TH']:
+            return False
+
+    # 4. Thị trường Ấn Độ (IN)
+    elif geo == 'IN':
+        if has_hangul or has_kana or has_vn or has_cyrillic:
+            return False
+        if ch_country in ['VN', 'RU', 'JP', 'KR', 'DE', 'TH']:
+            return False
+
+    # 5. Thị trường Việt Nam (VN)
+    elif geo == 'VN':
+        if has_south_asian or has_hangul or has_kana or has_cyrillic or has_arabic:
+            return False
+        if audio_lang and not audio_lang.startswith(('vi', 'en', 'zxx')):
+            return False
+        if ch_country in ['IN', 'RU', 'PK', 'BD', 'ID', 'TH']:
+            return False
+
+    # 6. Thị trường Nhật Bản (JP)
+    elif geo == 'JP':
+        if has_south_asian or has_hangul or has_vn or has_cyrillic or has_arabic:
+            return False
+        if audio_lang and not audio_lang.startswith(('ja', 'en', 'zxx')):
+            return False
+        if ch_country in ['IN', 'VN', 'RU', 'PK', 'TH']:
+            return False
+
+    # 7. Thị trường Hàn Quốc (KR)
+    elif geo == 'KR':
+        if has_south_asian or has_kana or has_vn or has_cyrillic or has_arabic:
+            return False
+        if audio_lang and not audio_lang.startswith(('ko', 'en', 'zxx')):
+            return False
+        if ch_country in ['IN', 'VN', 'RU', 'PK', 'TH']:
+            return False
+
+    # 8. Thị trường Brazil (BR)
+    elif geo == 'BR':
+        if has_south_asian or has_hangul or has_kana or has_vn or has_cyrillic or has_arabic:
+            return False
+        if audio_lang and not audio_lang.startswith(('pt', 'en', 'es', 'zxx')):
+            return False
+        if ch_country in ['IN', 'VN', 'RU', 'PK', 'TH']:
+            return False
+
+    return True
+
 @app.get("/api/trending/feed")
 def get_trending_feed(
     country: Optional[str] = None, 
@@ -659,6 +750,12 @@ def get_trending_feed(
                     # Kiểm tra kênh hoạt động & ổn định
                     ch_id = snippet.get("channelId", "")
                     ch_info = ch_map.get(ch_id, {})
+
+                    # 5. BỘ LỌC QUỐC GIA & NGÔN NGỮ NGHIÊM NGẶT:
+                    # Ngăn chặn 100% video ngoại lai (Thái Lan, Ấn Độ, v.v.) hiển thị sai khi chọn Mỹ, Đức, v.v.
+                    if not is_video_matching_country(item, ch_info, geo_code):
+                        continue
+
                     ch_stats = ch_info.get("statistics", {})
                     subs_count = int(ch_stats.get("subscriberCount") or 0)
                     total_vids = int(ch_stats.get("videoCount") or 0)
@@ -727,12 +824,24 @@ def get_trending_feed(
             }
             c_name = country_names.get(geo_code, geo_code)
             
+            fallback_country_queries = {
+                "US": f"trending viral documentary podcast usa {current_year}",
+                "GB": f"trending viral documentary podcast uk {current_year}",
+                "DE": f"trending reportage dokumentation deutschland {current_year}",
+                "IN": f"trending documentary podcast india {current_year}",
+                "VN": f"thinh hanh phong su tai lieu podcast viet nam {current_year}",
+                "JP": f"話題の動画 トレンド ドキュメンタリー 日本 {current_year}",
+                "KR": f"인기 급상승 다큐멘터리 한국 {current_year}",
+                "BR": f"documentario podcast brasil {current_year}",
+                "CA": f"trending viral documentary canada {current_year}",
+                "AU": f"trending viral documentary australia {current_year}"
+            }
             if cat in NICHE_LOCALIZED_QUERIES:
                 niche_dict = NICHE_LOCALIZED_QUERIES[cat]
                 q_term = niche_dict.get(geo_code, niche_dict.get("DEFAULT", cat))
                 search_query = f"{q_term} {current_year}"
             else:
-                search_query = f"trending viral documentary {c_name} {current_year}"
+                search_query = fallback_country_queries.get(geo_code, f"trending viral video {c_name} {current_year}")
 
             ydl_opts = {
                 'quiet': True,
@@ -760,6 +869,23 @@ def get_trending_feed(
                             continue
                         stream_kw = ['restream', 'livestream', 'live stream', 'trực tiếp', '🔴', 'buổi stream', 'phát trực tiếp', 'streamed live', 'streamer']
                         if any(kw in t.lower() for kw in stream_kw):
+                            continue
+
+                        # Lọc quốc gia và ngôn ngữ trong fallback
+                        ch_name = e.get('channel') or e.get('uploader') or 'YouTube Creator'
+                        pseudo_item = {
+                            'snippet': {
+                                'title': t,
+                                'channelTitle': ch_name,
+                                'defaultAudioLanguage': e.get('language') or ''
+                            }
+                        }
+                        pseudo_ch = {
+                            'snippet': {
+                                'country': e.get('channel_country') or ''
+                            }
+                        }
+                        if not is_video_matching_country(pseudo_item, pseudo_ch, geo_code):
                             continue
 
                         # Kiểm tra ngày đăng trong fallback nếu có
