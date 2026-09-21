@@ -289,130 +289,130 @@ def analyze_keyword(req: KeywordAnalysisRequest):
 
 NICHE_LOCALIZED_QUERIES = {
     "philosophy": {
-        "VN": "triết lý sống khắc kỷ ý nghĩa cuộc sống bài học cuộc đời",
-        "US": "philosophy stoicism lessons on life deep thinking",
-        "GB": "philosophy stoicism life lessons meaning",
-        "JP": "哲学 ストア派 人生訓 深い思考",
-        "KR": "철학 인생 스토아학파 삶의 교훈",
-        "DE": "Philosophie Stoizismus Lebenslektionen",
-        "DEFAULT": "philosophy stoicism life lessons deep thinking"
+        "VN": "triết lý cuộc sống",
+        "US": "stoicism philosophy life lessons",
+        "GB": "stoicism philosophy",
+        "JP": "哲学 人生訓",
+        "KR": "철학 인생 교훈",
+        "DE": "Philosophie Stoizismus",
+        "DEFAULT": "stoicism philosophy life lessons"
     },
     "buddhism": {
-        "VN": "phật pháp vấn đáp lời phật dạy chữa lành tâm hồn thiền",
-        "US": "buddhism teachings mindfulness inner peace monk wisdom",
-        "GB": "buddhism mindfulness peace zen wisdom",
-        "JP": "仏教 説法 禅 瞑想 心の平安",
-        "KR": "불교 설법 명상 힐링 마음의 평화",
-        "DE": "Buddhismus Achtsamkeit Meditation Weisheit",
-        "DEFAULT": "buddhism mindfulness teachings inner peace zen"
+        "VN": "lời phật dạy phật pháp",
+        "US": "buddhism teachings mindfulness",
+        "GB": "buddhism mindfulness",
+        "JP": "仏教 説法 禅",
+        "KR": "불교 설법 명상",
+        "DE": "Buddhismus Meditation",
+        "DEFAULT": "buddhism teachings mindfulness"
     },
     "elderly_wisdom": {
-        "VN": "tâm sự tuổi già lời khuyên người già bài học viện dưỡng lão",
-        "US": "elderly wisdom senior life lessons 80 year old regrets nursing home",
-        "GB": "elderly life lessons senior wisdom advice",
-        "JP": "高齢者 人生の教訓 80歳 老後の知恵",
-        "KR": "노인의 지혜 인생 교훈 80세 노후",
-        "DE": "Lebensweisheiten älterer Menschen Ratschläge",
-        "DEFAULT": "elderly wisdom senior life lessons regrets advice"
+        "VN": "tâm sự tuổi già lời khuyên người già",
+        "US": "elderly wisdom senior life lessons",
+        "GB": "elderly wisdom senior lessons",
+        "JP": "高齢者 人生の教訓",
+        "KR": "노인의 지혜 인생 교훈",
+        "DE": "Lebensweisheiten älterer Menschen",
+        "DEFAULT": "elderly wisdom senior life lessons"
     },
     "reddit_stories": {
-        "VN": "truyện reddit tâm sự confessions bóc phốt",
-        "US": "reddit stories AITA update confessions best of reddit",
-        "GB": "reddit stories confessions drama AITA",
-        "JP": "2ch スレ 面白い話 修羅場 朗読",
-        "KR": "레딧 썰 사연 모음",
-        "DE": "Reddit Geschichten Beichten",
-        "DEFAULT": "reddit stories AITA confessions updates"
+        "VN": "truyện reddit tâm sự",
+        "US": "reddit stories AITA update",
+        "GB": "reddit stories confessions",
+        "JP": "2ch スレ 面白い話",
+        "KR": "레딧 썰 사연",
+        "DE": "Reddit Geschichten",
+        "DEFAULT": "reddit stories AITA update"
     },
     "drama_expose": {
-        "VN": "drama bóc phốt hóng biến showbiz vụ bê bối",
-        "US": "drama exposé documentary the downfall of scandal",
-        "GB": "documentary exposé downfall scandal",
-        "JP": "炎上 事件の真相 暴露",
-        "KR": "사건 폭로 이슈 정리",
+        "VN": "drama bóc phốt showbiz",
+        "US": "documentary the downfall of",
+        "GB": "documentary exposé scandal",
+        "JP": "炎上 事件の真相",
+        "KR": "사건 폭로 이슈",
         "DE": "Skandal Doku Enthüllung",
-        "DEFAULT": "drama exposé the downfall of scandal documentary"
+        "DEFAULT": "documentary the downfall of"
     },
     "true_crime": {
-        "VN": "vụ án có thật kỳ án hồ sơ trinh sát phòng thẩm vấn",
-        "US": "true crime interrogation documentary unsolved mystery police",
-        "GB": "true crime documentary police interrogation case",
-        "JP": "未解決事件 実際の事件 犯罪ドキュメンタリー",
+        "VN": "vụ án có thật kỳ án",
+        "US": "true crime documentary interrogation",
+        "GB": "true crime documentary",
+        "JP": "未解決事件 犯罪ドキュメンタリー",
         "KR": "실화 범죄 미제 사건 다큐",
-        "DE": "True Crime Kriminalfall Dokumentation",
-        "DEFAULT": "true crime interrogation mystery case documentary"
+        "DE": "True Crime Dokumentation",
+        "DEFAULT": "true crime documentary interrogation"
     },
     "horror_stories": {
-        "VN": "truyện ma đêm muộn kinh dị có thật tâm linh rùng rợn",
-        "US": "scary horror stories creepypasta encounters skinwalker night",
-        "GB": "horror stories ghost encounters spooky night",
-        "JP": "怖い話 怪談 実話 朗読",
-        "KR": "무서운 이야기 실화 괴담 공포",
-        "DE": "Gruselgeschichten Horror Creepypasta",
-        "DEFAULT": "scary horror stories creepypasta encounters"
+        "VN": "truyện ma đêm muộn kinh dị",
+        "US": "scary horror stories creepypasta",
+        "GB": "scary horror stories spooky",
+        "JP": "怖い話 怪談 実話",
+        "KR": "무서운 이야기 실화 괴담",
+        "DE": "Gruselgeschichten Horror",
+        "DEFAULT": "scary horror stories creepypasta"
     },
     "history_geopolitics": {
-        "VN": "lịch sử quân sự địa chính trị chiến tranh thế giới đế chế",
-        "US": "history documentary military warfare geopolitics empire",
-        "GB": "history documentary geopolitics war empire",
-        "JP": "歴史 ドキュメンタリー 地政学 戦争",
+        "VN": "lịch sử chiến tranh địa chính trị",
+        "US": "history documentary geopolitics",
+        "GB": "history documentary warfare",
+        "JP": "歴史 ドキュメンタリー 地政学",
         "KR": "역사 다큐멘터리 전쟁 지정학",
         "DE": "Geschichte Dokumentation Geopolitik",
-        "DEFAULT": "history documentary military geopolitics warfare"
+        "DEFAULT": "history documentary geopolitics"
     },
     "space_science": {
-        "VN": "bí ẩn vũ trụ khoa học thiên văn hố đen nghịch lý",
-        "US": "space science documentary universe black hole paradox",
-        "GB": "space universe science paradox documentary",
-        "JP": "宇宙 科学 ブラックホール 謎 パラドックス",
-        "KR": "우주 과학 블랙홀 미스터리 패러독스",
-        "DE": "Weltraum Wissenschaft Universum Dokumentation",
-        "DEFAULT": "space science universe black hole paradox documentary"
+        "VN": "bí ẩn vũ trụ khoa học thiên văn",
+        "US": "space science documentary universe",
+        "GB": "space documentary science",
+        "JP": "宇宙 科学 ブラックホール 謎",
+        "KR": "우주 과학 블랙홀 미스터리",
+        "DE": "Weltraum Wissenschaft Universum",
+        "DEFAULT": "space science documentary universe"
     },
     "finance_money": {
-        "VN": "tài chính cá nhân đầu tư kiếm tiền online làm giàu quản lý tài chính",
-        "US": "personal finance investing side hustle make money online wealth",
-        "GB": "personal finance investing side hustle wealth",
-        "JP": "個人資産 投資 副業 貯金 お金",
-        "KR": "재테크 투자 부업 돈 모으기",
-        "DE": "Finanzen Investieren Passives Einkommen",
-        "DEFAULT": "personal finance investing side hustle wealth online"
+        "VN": "tài chính cá nhân kiếm tiền online đầu tư",
+        "US": "personal finance investing make money online",
+        "GB": "personal finance investing",
+        "JP": "個人資産 投資 お金",
+        "KR": "재테크 투자 부업",
+        "DE": "Finanzen Investieren Geld",
+        "DEFAULT": "personal finance investing make money online"
     },
     "tech_ai": {
-        "VN": "công nghệ trí tuệ nhân tạo ai tools tương lai công nghệ mới",
-        "US": "artificial intelligence ai tools future tech automation",
-        "GB": "artificial intelligence ai tools technology",
-        "JP": "人工知能 AIツール 最新テクノロジー",
-        "KR": "인공지능 AI 도구 신기술",
-        "DE": "Künstliche Intelligenz AI Tools Technologie",
-        "DEFAULT": "artificial intelligence ai tools future tech"
+        "VN": "trí tuệ nhân tạo AI công nghệ mới",
+        "US": "artificial intelligence AI tools",
+        "GB": "artificial intelligence AI",
+        "JP": "人工知能 AIツール",
+        "KR": "인공지능 AI 도구",
+        "DE": "Künstliche Intelligenz AI Tools",
+        "DEFAULT": "artificial intelligence AI tools"
     },
     "recap_stories": {
-        "VN": "tóm tắt phim review phim anime tóm tắt truyện hoạt hình",
-        "US": "movie recap film summary comic recap anime recap",
-        "GB": "movie recap film summary story recap",
-        "JP": "映画 要約 アニメ 解説",
-        "KR": "영화 요약 결말 포함 애니 리뷰",
-        "DE": "Film Zusammenfassung Filmkritik Recap",
-        "DEFAULT": "movie recap film summary anime story recap"
+        "VN": "review phim tóm tắt phim",
+        "US": "movie recap film summary",
+        "GB": "movie recap film recap",
+        "JP": "映画 要約 解説",
+        "KR": "영화 요약 결말포함",
+        "DE": "Film Zusammenfassung Recap",
+        "DEFAULT": "movie recap film summary"
     },
     "gaming": {
-        "VN": "gameplay highlights gaming việt nam streamer",
-        "US": "gaming gameplay highlights walkthrough best moments",
-        "GB": "gaming highlights gameplay walkthrough",
-        "JP": "ゲーム 実況 プレイ動画 ハイライト",
-        "KR": "게임 플레이 하이라이트 실황",
-        "DE": "Gaming Gameplay Highlights Deutsch",
-        "DEFAULT": "gaming highlights gameplay walkthrough"
+        "VN": "gameplay highlights streamer việt nam",
+        "US": "gaming gameplay highlights",
+        "GB": "gaming gameplay walkthrough",
+        "JP": "ゲーム 実況 プレイ動画",
+        "KR": "게임 플레이 하이라이트",
+        "DE": "Gaming Gameplay Highlights",
+        "DEFAULT": "gaming gameplay highlights"
     },
     "entertainment": {
-        "VN": "hài hước giải trí viral gameshow triệu view",
-        "US": "entertainment funny viral comedy challenge",
-        "GB": "entertainment comedy viral funny",
+        "VN": "hài hước giải trí viral",
+        "US": "entertainment funny viral comedy",
+        "GB": "entertainment comedy viral",
         "JP": "エンタメ 面白い バラエティ",
         "KR": "예능 레전드 웃긴 영상",
         "DE": "Unterhaltung Comedy Viral",
-        "DEFAULT": "entertainment funny viral comedy show"
+        "DEFAULT": "entertainment funny viral comedy"
     }
 }
 
@@ -552,10 +552,17 @@ def get_trending_feed(
                     }
                     q_term = country_names.get(geo_code, "trending viral video")
 
+                GEO_LANG_MAP = {
+                    "US": "en", "GB": "en", "CA": "en", "AU": "en",
+                    "VN": "vi", "JP": "ja", "KR": "ko", "DE": "de",
+                    "BR": "pt", "IN": "en"
+                }
+                lang_param = GEO_LANG_MAP.get(geo_code, "en")
+
                 s_url = (
                     f"https://www.googleapis.com/youtube/v3/search?part=snippet&type=video"
                     f"&videoDuration={v_dur_param}&order=viewCount&regionCode={geo_code}"
-                    f"&q={requests.utils.quote(q_term)}&maxResults=35&key={api_key}"
+                    f"&relevanceLanguage={lang_param}&q={requests.utils.quote(q_term)}&maxResults=40&key={api_key}"
                 )
                 if published_after_str:
                     s_url += f"&publishedAfter={published_after_str}"
@@ -563,14 +570,6 @@ def get_trending_feed(
                 s_res = requests.get(s_url, timeout=10).json()
                 s_items = s_res.get("items", [])
                 v_ids = [it["id"]["videoId"] for it in s_items if it.get("id", {}).get("videoId")]
-
-                # Nếu tìm với thời gian hẹp bị rỗng, mở rộng sang 30 ngày
-                if not v_ids and published_after_str and t_range != "30d":
-                    alt_cutoff = (now - datetime.timedelta(days=30)).strftime('%Y-%m-%dT%H:%M:%SZ')
-                    alt_url = s_url.replace(f"publishedAfter={published_after_str}", f"publishedAfter={alt_cutoff}")
-                    s_res = requests.get(alt_url, timeout=10).json()
-                    s_items = s_res.get("items", [])
-                    v_ids = [it["id"]["videoId"] for it in s_items if it.get("id", {}).get("videoId")]
 
                 if v_ids:
                     d_url = f"https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id={','.join(v_ids[:40])}&key={api_key}"
@@ -593,7 +592,17 @@ def get_trending_feed(
                     stats = item.get("statistics", {})
                     content_det = item.get("contentDetails", {})
                     
-                    # LOẠI BỎ TOÀN BỘ SHORTS VÀ VIDEO QUÁ NGẮN (< 180 giây)
+                    # 1. BẢO VỆ MỐC THỜI GIAN NGHIÊM NGẶT: Tuyệt đối không cho video cũ lọt vào
+                    pub_at = snippet.get("publishedAt", "")
+                    if cutoff_dt and pub_at:
+                        try:
+                            p_dt = datetime.datetime.fromisoformat(pub_at.replace("Z", "+00:00"))
+                            if p_dt < cutoff_dt:
+                                continue
+                        except Exception:
+                            pass
+
+                    # 2. LOẠI BỎ TOÀN BỘ SHORTS VÀ VIDEO QUÁ NGẮN (< 180 giây)
                     dur_iso = content_det.get("duration", "")
                     dur_seconds = parse_iso_duration(dur_iso)
                     title_raw = snippet.get("title", "")
@@ -601,6 +610,12 @@ def get_trending_feed(
                     if dur_seconds < 180 or "#shorts" in title_raw.lower() or "shorts" in title_raw.lower().split():
                         continue
                     if dur_filter == "deep_dive" and dur_seconds < 1200:
+                        continue
+
+                    # 3. LỌC VIEW TỐI THIỂU: Đã là xu hướng (Trending) thì không thể chỉ có vài chục view
+                    view_cnt = int(stats.get("viewCount", 0))
+                    # Lọc bỏ các video view quá lẹt đẹt (< 500 views)
+                    if t_range in ["7d", "24h", "48h", "30d"] and view_cnt < 500:
                         continue
 
                     # Kiểm tra kênh hoạt động & ổn định
@@ -630,8 +645,6 @@ def get_trending_feed(
                         continue
 
                     thumb = (snippet.get("thumbnails", {}).get("high") or snippet.get("thumbnails", {}).get("medium") or {}).get("url") or f"https://i.ytimg.com/vi/{v_id}/hqdefault.jpg"
-                    pub_at = snippet.get("publishedAt", "")
-                    view_cnt = int(stats.get("viewCount", 0))
 
                     videos.append({
                         "video_id": v_id,
@@ -748,3 +761,11 @@ def serve_index():
     if os.path.exists(index_path):
         return FileResponse(index_path)
     return {"message": "Frontend chưa được khởi tạo."}
+
+@app.get("/favicon.ico")
+def serve_favicon():
+    fav_path = os.path.join(frontend_dir, "favicon.svg")
+    if os.path.exists(fav_path):
+        return FileResponse(fav_path, media_type="image/svg+xml")
+    return Response(status_code=204)
+
