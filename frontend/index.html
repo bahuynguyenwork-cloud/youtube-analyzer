@@ -99,7 +99,7 @@
       </nav>
 
       <div class="flex items-center space-x-2">
-        <button id="nav-api-btn" onclick="focusApiKeyInput()" class="px-2.5 py-1.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-xs font-semibold flex items-center space-x-1.5 border border-white/10 transition text-slate-300" title="YouTube API Key (Dán 1 lần dùng mãi mãi)">
+        <button id="nav-api-btn" onclick="openApiKeyModal()" class="px-2.5 py-1.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-xs font-semibold flex items-center space-x-1.5 border border-white/10 transition text-slate-300" title="Cài đặt YouTube API Key">
           <i data-lucide="key" class="w-3.5 h-3.5 text-amber-400"></i>
           <span id="nav-api-label">API Key: Chưa lưu</span>
         </button>
@@ -506,65 +506,32 @@
             Nhập mã kênh <code class="px-2 py-0.5 rounded bg-slate-800 text-rose-300 font-mono text-xs">UC...</code> để lấy chính xác <strong class="text-white">Ngày - Giờ - Phút - Giây</strong> đăng video quy đổi chuẩn múi giờ Việt Nam. 1-Click Copy dán thẳng vào Google Sheets!
           </p>
 
-          <!-- Input Form -->
-          <form id="uc-time-form" onsubmit="handleUCTimeSearch(event)" class="mt-6 space-y-3 max-w-2xl mx-auto">
-            <!-- Row 1: Channel ID + Limit (3 cols + 1 col) -->
-            <div class="grid grid-cols-1 sm:grid-cols-4 gap-2.5">
-              <div class="sm:col-span-3 relative">
-                <i data-lucide="hash" class="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2"></i>
-                <input 
-                  id="uc-channel-id" 
-                  type="text" 
-                  required
-                  placeholder="Nhập Channel ID (VD: UCX6OQ3DkcsbYNE6H8uQQuVA) hoặc link kênh..." 
-                  class="w-full pl-12 pr-4 h-12 bg-slate-900/90 border border-white/15 rounded-xl text-white placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 transition font-mono shadow-inner"
-                />
-              </div>
-              <div class="sm:col-span-1">
-                <select id="uc-limit" class="w-full px-3 h-12 bg-slate-900/90 border border-white/15 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 cursor-pointer shadow-inner">
-                  <option value="10">10 video</option>
-                  <option value="20" selected>20 video</option>
-                  <option value="50">50 video</option>
-                  <option value="100">100 video</option>
-                </select>
-              </div>
+          <!-- Input Form (Single Row, Sleek & Modern) -->
+          <form id="uc-time-form" onsubmit="handleUCTimeSearch(event)" class="mt-6 max-w-3xl mx-auto flex flex-col sm:flex-row items-center gap-2.5">
+            <div class="relative flex-1 w-full">
+              <i data-lucide="hash" class="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2"></i>
+              <input 
+                id="uc-channel-id" 
+                type="text" 
+                required
+                placeholder="Nhập Channel ID (VD: UCX6OQ3DkcsbYNE6H8uQQuVA) hoặc link kênh..." 
+                class="w-full pl-12 pr-4 h-12 bg-slate-900/90 border border-white/15 rounded-xl text-white placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 transition font-mono shadow-inner"
+              />
             </div>
-
-            <!-- Row 2: API Key + Button (3 cols + 1 col, perfectly aligned) -->
-            <div class="grid grid-cols-1 sm:grid-cols-4 gap-2.5 items-start">
-              <div class="sm:col-span-3 space-y-1.5 text-left">
-                <div class="relative flex items-center">
-                  <i data-lucide="key" class="w-4 h-4 text-amber-400 absolute left-3.5 pointer-events-none"></i>
-                  <input 
-                    id="uc-api-key" 
-                    type="password" 
-                    oninput="onApiKeyInputChanged(this.value)"
-                    placeholder="Dán YouTube API Key (Dán 1 lần - Hệ thống tự lưu dùng mãi mãi)..." 
-                    class="w-full pl-10 pr-20 h-12 bg-slate-900/90 border border-white/15 rounded-xl text-white placeholder-slate-500 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 transition font-mono shadow-inner"
-                  />
-                  <div class="absolute right-2.5 flex items-center space-x-1">
-                    <button type="button" onclick="toggleApiKeyVisibility('uc-api-key')" class="p-1.5 text-slate-400 hover:text-white transition rounded" title="Hiện/Ẩn API Key">
-                      <i id="uc-api-key-eye" data-lucide="eye" class="w-4 h-4"></i>
-                    </button>
-                    <button type="button" onclick="clearSavedApiKey()" class="p-1.5 text-slate-400 hover:text-rose-400 transition rounded" title="Xóa API Key đã lưu">
-                      <i data-lucide="trash-2" class="w-4 h-4"></i>
-                    </button>
-                  </div>
-                </div>
-                <div id="api-key-status" class="flex items-center space-x-2 text-[11px] text-slate-400 pl-1">
-                  <span class="w-2 h-2 rounded-full bg-slate-500 inline-block"></span>
-                  <span>Chưa lưu API Key (Hệ thống dùng chế độ Free Mode không giới hạn)</span>
-                </div>
-              </div>
-              <div class="sm:col-span-1">
-                <button 
-                  type="submit" 
-                  class="w-full h-12 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-rose-600/30 transition flex items-center justify-center space-x-1.5 shrink-0">
-                  <i data-lucide="play" class="w-4 h-4 shrink-0"></i>
-                  <span class="whitespace-nowrap">Lấy Giờ Đăng</span>
-                </button>
-              </div>
+            <div class="w-full sm:w-32 shrink-0">
+              <select id="uc-limit" class="w-full px-3 h-12 bg-slate-900/90 border border-white/15 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 cursor-pointer shadow-inner">
+                <option value="10">10 video</option>
+                <option value="20" selected>20 video</option>
+                <option value="50">50 video</option>
+                <option value="100">100 video</option>
+              </select>
             </div>
+            <button 
+              type="submit" 
+              class="w-full sm:w-auto px-6 h-12 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-lg shadow-rose-600/30 transition flex items-center justify-center space-x-2 shrink-0">
+              <i data-lucide="play" class="w-4 h-4 shrink-0"></i>
+              <span class="whitespace-nowrap">Lấy Giờ Đăng</span>
+            </button>
           </form>
 
           <div class="flex flex-wrap items-center justify-center gap-2 pt-2 text-xs text-slate-400">
@@ -848,6 +815,94 @@
     </div>
   </div>
 
+  <!-- ==================== MODAL CÀI ĐẶT API KEY ==================== -->
+  <div id="api-key-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+    <div class="glass-card rounded-3xl p-6 sm:p-7 max-w-lg w-full border border-white/15 shadow-2xl relative space-y-5 animate-in fade-in zoom-in duration-200">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-white/10 pb-4">
+        <div class="flex items-center space-x-3">
+          <div class="p-2.5 rounded-xl bg-amber-500/20 text-amber-400">
+            <i data-lucide="key" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Cài Đặt YouTube Data API Key</h3>
+            <p class="text-xs text-slate-400">Dán 1 lần trên thanh Header - Dùng chung cho toàn bộ website</p>
+          </div>
+        </div>
+        <button onclick="closeApiKeyModal()" class="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="space-y-4">
+        <div class="space-y-1.5 text-left">
+          <label class="text-xs font-semibold text-slate-300">Nhập hoặc dán API Key (YouTube Data API v3):</label>
+          <div class="relative flex items-center">
+            <i data-lucide="key-round" class="w-4 h-4 text-amber-400 absolute left-3.5 pointer-events-none"></i>
+            <input 
+              id="modal-api-key-input" 
+              type="password" 
+              placeholder="Dán mã API Key (bắt đầu bằng AIzaSy...)" 
+              class="w-full pl-10 pr-20 h-12 bg-slate-900/90 border border-white/15 rounded-xl text-white placeholder-slate-500 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 transition font-mono shadow-inner"
+            />
+            <div class="absolute right-2.5 flex items-center space-x-1">
+              <button type="button" onclick="toggleApiKeyVisibility('modal-api-key-input')" class="p-1.5 text-slate-400 hover:text-white transition rounded" title="Hiện/Ẩn API Key">
+                <i id="modal-api-key-input-eye" data-lucide="eye" class="w-4 h-4"></i>
+              </button>
+              <button type="button" onclick="pasteClipboardToApiKeyModal()" class="p-1.5 text-slate-400 hover:text-emerald-400 transition rounded" title="Dán từ Clipboard">
+                <i data-lucide="clipboard-paste" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+          <div id="modal-api-key-status" class="flex items-center space-x-2 text-[11px] text-slate-400 pl-1 pt-1">
+            <span class="w-2 h-2 rounded-full bg-slate-500 inline-block"></span>
+            <span>Chưa lưu API Key (Hệ thống dùng chế độ Free Engine không giới hạn)</span>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-slate-900/70 border border-white/5 space-y-2 text-xs text-slate-400">
+          <div class="flex items-center space-x-1.5 text-slate-300 font-semibold">
+            <i data-lucide="info" class="w-4 h-4 text-amber-400"></i>
+            <span>Lợi ích khi cấu hình API Key:</span>
+          </div>
+          <ul class="list-disc list-inside space-y-1 text-slate-400 text-[11px] leading-relaxed">
+            <li>Tự động dùng cho mọi tính năng: <b>Phân tích kênh, Bắt trend, Lấy giờ đăng UC</b>.</li>
+            <li>Tốc độ tải video tức thì, chính xác 100% từ YouTube Data API chính thức.</li>
+            <li>Tự động điền vào mã Google Sheets khi xuất báo cáo.</li>
+            <li>Nếu chưa có API Key, hệ thống vẫn tự động chạy ở chế độ <b>Free Engine</b> không giới hạn.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="flex items-center justify-between border-t border-white/10 pt-4 gap-2">
+        <button 
+          type="button" 
+          onclick="clearSavedApiKeyFromModal()" 
+          class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-rose-500/20 hover:text-rose-300 text-slate-400 text-xs font-semibold border border-white/5 transition flex items-center space-x-1.5">
+          <i data-lucide="trash-2" class="w-4 h-4"></i>
+          <span>Xóa Key</span>
+        </button>
+        <div class="flex items-center space-x-2">
+          <button 
+            type="button" 
+            onclick="closeApiKeyModal()" 
+            class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition">
+            Đóng
+          </button>
+          <button 
+            type="button" 
+            onclick="saveApiKeyFromModal()" 
+            class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold shadow-lg shadow-emerald-600/30 transition flex items-center space-x-1.5">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span>Lưu API Key</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Script Logic -->
   <script>
     const GAS_CODE = "\ufeff// ======================================================\n// YOUTUBE VIDEO PUBLISH TIME CHECKER (PRO VERSION)\n// Google Sheets + YouTube Data API v3\n// T\u1ef1 \u0111\u1ed9ng chuy\u1ec3n \u0111\u1ed5i to\u00e0n b\u1ed9 gi\u1edd \u0111\u0103ng sang Gi\u1edd Vi\u1ec7t Nam (UTC+7)\n// H\u1ed7 tr\u1ee3 l\u1ea5y theo Channel ID (UC...) k\u00e8m L\u01b0\u1ee3t xem v\u00e0 Th\u1ee9 trong tu\u1ea7n\n// ======================================================\n\n// =========================\n// 1. \u0110I\u1ec0N TH\u00d4NG TIN C\u1ee6A B\u1ea0N\n// =========================\n\n// \u0110i\u1ec1n API Key c\u1ee7a b\u1ea1n t\u1eeb Google Cloud Console (YouTube Data API v3)\nconst API_KEY = \"D\u00c1N_API_KEY_V\u00c0O_\u0110\u00c2Y\";\n\n// \u0110i\u1ec1n Channel ID c\u1ee7a k\u00eanh (b\u1eaft \u0111\u1ea7u b\u1eb1ng UC, v\u00ed d\u1ee5: UC_x5XG1OV2P6uZZ5FSM9Ttw)\nconst CHANNEL_ID = \"D\u00c1N_CHANNEL_ID_V\u00c0O_\u0110\u00c2Y\";\n\n// M\u00fai gi\u1edd Vi\u1ec7t Nam (UTC+7)\nconst TIMEZONE = \"Asia/Ho_Chi_Minh\";\n\n// T\u00ean Sheet s\u1ebd ghi k\u1ebft qu\u1ea3\nconst SHEET_NAME = \"YouTube Publish Times\";\n\n\n// ======================================================\n// 2. T\u1ea0O MENU TI\u1ec6N \u00cdCH TR\u00caN GOOGLE SHEETS\n// ======================================================\n\nfunction onOpen() {\n  SpreadsheetApp.getUi()\n    .createMenu(\"\ud83c\udfac YouTube Tracker\")\n    .addItem(\"\ud83d\udce5 L\u1ea5y To\u00e0n B\u1ed9 Gi\u1edd \u0110\u0103ng Video (Theo UC)\", \"getYouTubeVideos\")\n    .addItem(\"\ud83d\udd04 C\u1eadp Nh\u1eadt L\u1ea1i Gi\u1edd \u0110\u0103ng & L\u01b0\u1ee3t Xem\", \"updatePublishTimes\")\n    .addToUi();\n}\n\n\n// ======================================================\n// 3. KI\u1ec2M TRA TH\u00d4NG TIN H\u1ee2P L\u1ec6\n// ======================================================\n\nfunction checkApiKey() {\n  if (!API_KEY || API_KEY === \"D\u00c1N_API_KEY_V\u00c0O_\u0110\u00c2Y\") {\n    throw new Error(\"\u26a0\ufe0f B\u1ea1n ch\u01b0a nh\u1eadp API_KEY! H\u00e3y d\u00e1n YouTube Data API v3 key v\u00e0o d\u00f2ng const API_KEY.\");\n  }\n\n  if (!CHANNEL_ID || CHANNEL_ID === \"D\u00c1N_CHANNEL_ID_V\u00c0O_\u0110\u00c2Y\") {\n    throw new Error(\"\u26a0\ufe0f B\u1ea1n ch\u01b0a nh\u1eadp CHANNEL_ID! H\u00e3y d\u00e1n m\u00e3 k\u00eanh (b\u1eaft \u0111\u1ea7u b\u1eb1ng UC...) v\u00e0o d\u00f2ng const CHANNEL_ID.\");\n  }\n}\n\n\n// ======================================================\n// 4. L\u1ea4Y TO\u00c0N B\u1ed8 VIDEO & GI\u1edc \u0110\u0102NG THEO M\u00c3 UC\n// ======================================================\n\nfunction getYouTubeVideos() {\n  checkApiKey();\n  const sheet = getSheet();\n\n  // X\u00f3a tr\u1eafng b\u1ea3ng c\u0169\n  sheet.clear();\n\n  // Ti\u00eau \u0111\u1ec1 c\u00e1c c\u1ed9t\n  sheet.appendRow([\n    \"STT\",\n    \"Video ID\",\n    \"Ti\u00eau \u0111\u1ec1\",\n    \"Ng\u00e0y \u0111\u0103ng (VN)\",\n    \"Gi\u1edd \u0111\u0103ng (VN)\",\n    \"Ng\u00e0y + gi\u1edd \u0111\u0103ng\",\n    \"Th\u1ee9\",\n    \"L\u01b0\u1ee3t xem\",\n    \"URL Video\"\n  ]);\n\n  // B\u01af\u1edaC 1: L\u1ea4Y UPLOADS PLAYLIST ID\n  // V\u1edbi m\u1ecdi k\u00eanh YouTube c\u00f3 Channel ID l\u00e0 UCxxxx, Uploads Playlist ID s\u1ebd l\u00e0 UUxxxx\n  let uploadsPlaylistId = \"\";\n  if (CHANNEL_ID.startsWith(\"UC\")) {\n    uploadsPlaylistId = \"UU\" + CHANNEL_ID.substring(2);\n  } else {\n    // N\u1ebfu kh\u00f4ng ph\u1ea3i d\u1ea1ng UC, g\u1ecdi API \u0111\u1ec3 l\u1ea5y uploads playlist\n    const channelUrl = \"https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=\" +\n      encodeURIComponent(CHANNEL_ID) + \"&key=\" + encodeURIComponent(API_KEY);\n    const channelResponse = UrlFetchApp.fetch(channelUrl);\n    const channelData = JSON.parse(channelResponse.getContentText());\n\n    if (!channelData.items || channelData.items.length === 0) {\n      throw new Error(\"Kh\u00f4ng t\u00ecm th\u1ea5y k\u00eanh v\u1edbi Channel ID: \" + CHANNEL_ID);\n    }\n    uploadsPlaylistId = channelData.items[0].contentDetails.relatedPlaylists.uploads;\n  }\n\n  // B\u01af\u1edaC 2: L\u1ea4Y DANH S\u00c1CH VIDEO ID\n  let videoIds = [];\n  let nextPageToken = \"\";\n\n  do {\n    let playlistUrl = \"https://www.googleapis.com/youtube/v3/playlistItems\" +\n      \"?part=contentDetails\" +\n      \"&playlistId=\" + encodeURIComponent(uploadsPlaylistId) +\n      \"&maxResults=50\" +\n      \"&key=\" + encodeURIComponent(API_KEY);\n\n    if (nextPageToken) {\n      playlistUrl += \"&pageToken=\" + encodeURIComponent(nextPageToken);\n    }\n\n    const response = UrlFetchApp.fetch(playlistUrl);\n    const data = JSON.parse(response.getContentText());\n\n    if (data.error) {\n      throw new Error(\"L\u1ed7i YouTube API: \" + data.error.message);\n    }\n\n    data.items.forEach(item => {\n      if (item.contentDetails && item.contentDetails.videoId) {\n        videoIds.push(item.contentDetails.videoId);\n      }\n    });\n\n    nextPageToken = data.nextPageToken || \"\";\n  } while (nextPageToken);\n\n  // B\u01af\u1edaC 3: L\u1ea4Y CHI TI\u1ebeT VIDEO (TI\u00caU \u0110\u1ec0, NG\u00c0Y \u0110\u0102NG, L\u01af\u1ee2T XEM)\n  let allRows = [];\n  let counter = 1;\n  const daysOfWeek = [\"Ch\u1ee7 Nh\u1eadt\", \"Th\u1ee9 2\", \"Th\u1ee9 3\", \"Th\u1ee9 4\", \"Th\u1ee9 5\", \"Th\u1ee9 6\", \"Th\u1ee9 7\"];\n\n  for (let i = 0; i < videoIds.length; i += 50) {\n    const batch = videoIds.slice(i, i + 50);\n    const videoUrl = \"https://www.googleapis.com/youtube/v3/videos\" +\n      \"?part=snippet,statistics\" +\n      \"&id=\" + batch.join(\",\") +\n      \"&key=\" + encodeURIComponent(API_KEY);\n\n    const response = UrlFetchApp.fetch(videoUrl);\n    const data = JSON.parse(response.getContentText());\n\n    if (data.error) {\n      throw new Error(\"L\u1ed7i l\u1ea5y th\u00f4ng tin video: \" + data.error.message);\n    }\n\n    data.items.forEach(video => {\n      const videoId = video.id;\n      const title = video.snippet.title;\n      const publishedAt = video.snippet.publishedAt;\n      const viewCount = video.statistics ? Number(video.statistics.viewCount || 0) : 0;\n\n      const date = new Date(publishedAt);\n\n      // Quy \u0111\u1ed5i sang Gi\u1edd Vi\u1ec7t Nam (Asia/Ho_Chi_Minh)\n      const dateVN = Utilities.formatDate(date, TIMEZONE, \"dd/MM/yyyy\");\n      const timeVN = Utilities.formatDate(date, TIMEZONE, \"HH:mm:ss\");\n      const dateTimeVN = Utilities.formatDate(date, TIMEZONE, \"dd/MM/yyyy HH:mm:ss\");\n      const dayOfWeek = daysOfWeek[date.getDay()];\n      const url = \"https://www.youtube.com/watch?v=\" + videoId;\n\n      allRows.push([\n        counter,\n        videoId,\n        title,\n        dateVN,\n        timeVN,\n        dateTimeVN,\n        dayOfWeek,\n        viewCount,\n        url\n      ]);\n\n      counter++;\n    });\n  }\n\n  // B\u01af\u1edaC 4: GHI D\u1eee LI\u1ec6U V\u00c0 \u0110\u1ecaNH D\u1ea0NG B\u1ea2NG\n  if (allRows.length > 0) {\n    sheet.getRange(2, 1, allRows.length, 9).setValues(allRows);\n  }\n\n  sheet.setFrozenRows(1);\n  sheet.getRange(1, 1, 1, 9).setFontWeight(\"bold\").setBackground(\"#f1f5f9\");\n  sheet.autoResizeColumns(1, 9);\n\n  SpreadsheetApp.getUi().alert(\n    \"\u2705 Ho\u00e0n Th\u00e0nh Xu\u1ea5t S\u1eafc!\\n\\n\" +\n    \"\u0110\u00e3 l\u1ea5y t\u1ed5ng c\u1ed9ng: \" + allRows.length + \" video t\u1eeb k\u00eanh \" + CHANNEL_ID + \"\\n\\n\" +\n    \"To\u00e0n b\u1ed9 gi\u1edd \u0111\u0103ng \u0111\u00e3 \u0111\u01b0\u1ee3c chuy\u1ec3n sang Gi\u1edd Vi\u1ec7t Nam (UTC+7).\"\n  );\n}\n\n\n// ======================================================\n// 5. C\u1eacP NH\u1eacT L\u1ea0I GI\u1edc \u0110\u0102NG V\u00c0 L\u01af\u1ee2T XEM\n// ======================================================\n\nfunction updatePublishTimes() {\n  checkApiKey();\n  const sheet = getSheet();\n  const lastRow = sheet.getLastRow();\n\n  if (lastRow < 2) {\n    SpreadsheetApp.getUi().alert(\"Ch\u01b0a c\u00f3 d\u1eef li\u1ec7u video \u0111\u1ec3 c\u1eadp nh\u1eadt!\");\n    return;\n  }\n\n  const videoIds = sheet.getRange(2, 2, lastRow - 1, 1).getValues().flat();\n  let updated = 0;\n  const daysOfWeek = [\"Ch\u1ee7 Nh\u1eadt\", \"Th\u1ee9 2\", \"Th\u1ee9 3\", \"Th\u1ee9 4\", \"Th\u1ee9 5\", \"Th\u1ee9 6\", \"Th\u1ee9 7\"];\n\n  for (let i = 0; i < videoIds.length; i += 50) {\n    const batch = videoIds.slice(i, i + 50).filter(String);\n    if (batch.length === 0) continue;\n\n    const url = \"https://www.googleapis.com/youtube/v3/videos\" +\n      \"?part=snippet,statistics\" +\n      \"&id=\" + batch.join(\",\") +\n      \"&key=\" + encodeURIComponent(API_KEY);\n\n    const response = UrlFetchApp.fetch(url);\n    const data = JSON.parse(response.getContentText());\n\n    data.items.forEach(video => {\n      const index = videoIds.indexOf(video.id);\n      if (index === -1) return;\n\n      const row = index + 2;\n      const date = new Date(video.snippet.publishedAt);\n      const viewCount = video.statistics ? Number(video.statistics.viewCount || 0) : 0;\n\n      const dateVN = Utilities.formatDate(date, TIMEZONE, \"dd/MM/yyyy\");\n      const timeVN = Utilities.formatDate(date, TIMEZONE, \"HH:mm:ss\");\n      const dateTimeVN = Utilities.formatDate(date, TIMEZONE, \"dd/MM/yyyy HH:mm:ss\");\n      const dayOfWeek = daysOfWeek[date.getDay()];\n\n      sheet.getRange(row, 3).setValue(video.snippet.title);\n      sheet.getRange(row, 4).setValue(dateVN);\n      sheet.getRange(row, 5).setValue(timeVN);\n      sheet.getRange(row, 6).setValue(dateTimeVN);\n      sheet.getRange(row, 7).setValue(dayOfWeek);\n      sheet.getRange(row, 8).setValue(viewCount);\n\n      updated++;\n    });\n  }\n\n  SpreadsheetApp.getUi().alert(\"\u2705 \u0110\u00e3 c\u1eadp nh\u1eadt th\u00e0nh c\u00f4ng \" + updated + \" video!\");\n}\n\nfunction getSheet() {\n  const ss = SpreadsheetApp.getActiveSpreadsheet();\n  let sheet = ss.getSheetByName(SHEET_NAME);\n  if (!sheet) {\n    sheet = ss.insertSheet(SHEET_NAME);\n  }\n  return sheet;\n}\n";
@@ -895,35 +950,17 @@
     }
 
     function updateApiKeyUI(key) {
-      const inputEl = document.getElementById('uc-api-key');
-      const statusEl = document.getElementById('api-key-status');
       const navLabel = document.getElementById('nav-api-label');
       const navBtn = document.getElementById('nav-api-btn');
 
-      if (inputEl && key) {
-        inputEl.value = key;
-      }
-
       if (key) {
         const masked = key.slice(0, 6) + '...' + key.slice(-4);
-        if (statusEl) {
-          statusEl.innerHTML = `
-            <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
-            <span class="text-emerald-400 font-semibold">Đã lưu API Key: <code class="font-mono text-emerald-300">${masked}</code> (Tự động nạp cho mọi lần sau & tự điền vào Google Sheets)</span>
-          `;
-        }
         if (navLabel) navLabel.textContent = `API: ${masked}`;
         if (navBtn) {
           navBtn.classList.remove('text-slate-300');
           navBtn.classList.add('text-emerald-400', 'border-emerald-500/30', 'bg-emerald-500/10');
         }
       } else {
-        if (statusEl) {
-          statusEl.innerHTML = `
-            <span class="w-2 h-2 rounded-full bg-slate-500 inline-block"></span>
-            <span class="text-slate-400">Chưa lưu API Key (Hệ thống dùng chế độ Free Mode không giới hạn)</span>
-          `;
-        }
         if (navLabel) navLabel.textContent = 'API Key: Chưa lưu';
         if (navBtn) {
           navBtn.classList.remove('text-emerald-400', 'border-emerald-500/30', 'bg-emerald-500/10');
@@ -934,34 +971,87 @@
       updateGasCodeWithApiKey(key);
     }
 
-    let apiKeySaveTimeout = null;
-    function onApiKeyInputChanged(val) {
-      const clean = (val || '').trim();
-      savedApiKey = clean;
-      
-      clearTimeout(apiKeySaveTimeout);
-      apiKeySaveTimeout = setTimeout(() => {
-        if (clean) {
-          localStorage.setItem('yt_api_key', clean);
-          fetch('/api/settings/api-key', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ api_key: clean })
-          }).catch(() => {});
-          showToast('Đã lưu API Key vĩnh viễn! Lần sau không cần nhập lại.');
+    function openApiKeyModal() {
+      const modal = document.getElementById('api-key-modal');
+      const input = document.getElementById('modal-api-key-input');
+      const statusEl = document.getElementById('modal-api-key-status');
+      if (input) input.value = savedApiKey || '';
+      if (statusEl) {
+        if (savedApiKey) {
+          const masked = savedApiKey.slice(0, 6) + '...' + savedApiKey.slice(-4);
+          statusEl.innerHTML = `
+            <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
+            <span class="text-emerald-400 font-semibold">Đang sử dụng API Key: <code class="font-mono text-emerald-300">${masked}</code></span>
+          `;
         } else {
-          clearSavedApiKey(false);
+          statusEl.innerHTML = `
+            <span class="w-2 h-2 rounded-full bg-slate-500 inline-block"></span>
+            <span class="text-slate-400">Chưa lưu API Key (Hệ thống dùng chế độ Free Engine không giới hạn)</span>
+          `;
         }
-        updateApiKeyUI(clean);
-      }, 350);
+      }
+      modal.classList.remove('hidden');
+      setTimeout(() => input?.focus(), 80);
+      lucide.createIcons();
+    }
+
+    function closeApiKeyModal() {
+      document.getElementById('api-key-modal')?.classList.add('hidden');
+    }
+
+    async function pasteClipboardToApiKeyModal() {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          const input = document.getElementById('modal-api-key-input');
+          if (input) input.value = text.trim();
+        }
+      } catch (e) {
+        showToast('Vui lòng dán thủ công bằng phím Ctrl + V');
+      }
+    }
+
+    function saveApiKeyFromModal() {
+      const input = document.getElementById('modal-api-key-input');
+      const val = (input?.value || '').trim();
+      savedApiKey = val;
+      if (val) {
+        localStorage.setItem('yt_api_key', val);
+        fetch('/api/settings/api-key', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ api_key: val })
+        }).catch(() => {});
+        showToast('Đã lưu API Key vĩnh viễn! Dùng chung cho toàn hệ thống.');
+      } else {
+        localStorage.removeItem('yt_api_key');
+        fetch('/api/settings/api-key', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ api_key: '' })
+        }).catch(() => {});
+        showToast('Đã chuyển sang chế độ Free Mode.');
+      }
+      updateApiKeyUI(savedApiKey);
+      closeApiKeyModal();
+    }
+
+    function clearSavedApiKeyFromModal() {
+      const input = document.getElementById('modal-api-key-input');
+      if (input) input.value = '';
+      clearSavedApiKey(true);
+      const statusEl = document.getElementById('modal-api-key-status');
+      if (statusEl) {
+        statusEl.innerHTML = `
+          <span class="w-2 h-2 rounded-full bg-slate-500 inline-block"></span>
+          <span class="text-slate-400">Chưa lưu API Key (Hệ thống dùng chế độ Free Engine không giới hạn)</span>
+        `;
+      }
     }
 
     function clearSavedApiKey(withToast = true) {
       savedApiKey = '';
       localStorage.removeItem('yt_api_key');
-      const inputEl = document.getElementById('uc-api-key');
-      if (inputEl) inputEl.value = '';
-      
       fetch('/api/settings/api-key', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -987,13 +1077,7 @@
     }
 
     function focusApiKeyInput() {
-      switchNav('uctime');
-      const input = document.getElementById('uc-api-key');
-      if (input) {
-        input.focus();
-        input.select();
-        showToast('Dán API Key vào đây, hệ thống sẽ tự động nhớ vĩnh viễn!');
-      }
+      openApiKeyModal();
     }
 
     function updateGasCodeWithApiKey(key) {
@@ -1141,8 +1225,7 @@
       const channelInput = (document.getElementById('channel-input')?.value || '').trim();
       const countryEl = document.getElementById('channel-geo') || document.getElementById('target-country');
       const country = (countryEl ? countryEl.value : 'US').trim().toUpperCase() || 'US';
-      const apiKeyEl = document.getElementById('api-key-input') || document.getElementById('uc-api-key');
-      const apiKey = (apiKeyEl ? apiKeyEl.value.trim() : '') || savedApiKey || null;
+      const apiKey = savedApiKey || null;
       if (!channelInput) return;
 
       document.getElementById('channel-loading').classList.remove('hidden');
@@ -1657,7 +1740,7 @@
       e.preventDefault();
       const channelId = document.getElementById('uc-channel-id').value.trim();
       const limit = parseInt(document.getElementById('uc-limit').value) || 20;
-      const apiKey = (document.getElementById('uc-api-key')?.value || savedApiKey || '').trim();
+      const apiKey = (savedApiKey || '').trim();
       if (!channelId) return;
 
       document.getElementById('uc-loading').classList.remove('hidden');
