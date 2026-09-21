@@ -280,7 +280,11 @@ def analyze_keyword(req: KeywordAnalysisRequest):
                 'socket_timeout': 10
             }
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                search_res = ydl.extract_info(f"ytsearch6:{kw}", download=False)
+                encoded_kw = requests.utils.quote(kw)
+                search_url = f"https://www.youtube.com/results?search_query={encoded_kw}&gl={gl_country}&hl={hl_lang}"
+                search_res = ydl.extract_info(search_url, download=False)
+                if not search_res or not search_res.get('entries'):
+                    search_res = ydl.extract_info(f"ytsearch6:{kw}", download=False)
                 if search_res and search_res.get('entries'):
                     for e in search_res['entries']:
                         if not e:
@@ -408,6 +412,42 @@ def get_trending_niche_tags(geo: Optional[str] = "US"):
             {"tag": "true crime casi reali", "niche": "🕵️ Cronaca", "badge": "🚀 Popolare"},
             {"tag": "intelligenza artificiale AI", "niche": "🤖 Tech AI", "badge": "🔥 Trend"},
             {"tag": "guadagnare online soldi", "niche": "💰 Finanza", "badge": "⚡ 2026"}
+        ],
+        "KR": [
+            {"tag": "무서운 이야기 실화", "niche": "👻 Kinh Dị", "badge": "🔥 괴담"},
+            {"tag": "공포 라디오 실화", "niche": "👻 Kinh Dị", "badge": "⚡ Rùng rợn"},
+            {"tag": "영어 회화 기초", "niche": "🎓 Tiếng Anh", "badge": "🔥 Hot"},
+            {"tag": "영어 듣기 리스닝", "niche": "🎓 Tiếng Anh", "badge": "🚀 Đang lên"},
+            {"tag": "불륜 참교육 썰", "niche": "💔 Ngoại Tình", "badge": "🔥 사이다"},
+            {"tag": "바람 복수 사이다", "niche": "💔 Bắt Gian", "badge": "⚡ Viral"},
+            {"tag": "시월드 시어머니 갈등", "niche": "🏡 Gia Đình", "badge": "⚡ Drama"},
+            {"tag": "네이트판 레전드 썰", "niche": "💬 Diễn đàn", "badge": "🔥 Cực hot"},
+            {"tag": "19금 연애 썰", "niche": "🔞 18+ Thầm kín", "badge": "🔥 19금"},
+            {"tag": "미제 사건 실화 다큐", "niche": "🕵️ Kỳ Án", "badge": "🚀 Triệu view"},
+            {"tag": "AI 인공지능 툴", "niche": "🤖 Công Nghệ", "badge": "🚀 Mới"},
+            {"tag": "재테크 부업 2026", "niche": "💰 Tài Chính", "badge": "🔥 Trend"},
+            {"tag": "인생 교훈 명언", "niche": "📜 Triết Lý", "badge": "🌱 Chữa lành"}
+        ],
+        "JP": [
+            {"tag": "怖い話 実話 怪談", "niche": "👻 Kinh Dị", "badge": "🔥 怪談"},
+            {"tag": "洒落怖 スレ", "niche": "👻 Kinh Dị", "badge": "⚡ Rùng rợn"},
+            {"tag": "英語学習 英会話 初心者", "niche": "🎓 Tiếng Anh", "badge": "🔥 Hot"},
+            {"tag": "浮気 不倫 修羅場 復讐", "niche": "💔 Ngoại Tình", "badge": "🔥 修羅場"},
+            {"tag": "サレ妻 復讐 スレ", "niche": "💔 Bắt Gian", "badge": "⚡ Viral"},
+            {"tag": "義母 嫁トラブル 家族", "niche": "🏡 Gia Đình", "badge": "⚡ Drama"},
+            {"tag": "2ch スレ 面白い話", "niche": "💬 Diễn đàn 2ch", "badge": "🔥 Cực hot"},
+            {"tag": "未解決事件 犯罪ドキュメンタリー", "niche": "🕵️ Kỳ Án", "badge": "🚀 Triệu view"},
+            {"tag": "AIツール 最新技術", "niche": "🤖 Công Nghệ", "badge": "🚀 Mới"},
+            {"tag": "副業 ネットビジネス 投資", "niche": "💰 Tài Chính", "badge": "🔥 Trend"}
+        ],
+        "DE": [
+            {"tag": "Gruselgeschichten Horror Deutsch", "niche": "👻 Horror", "badge": "🔥 Spooky"},
+            {"tag": "Englisch lernen Anfänger", "niche": "🎓 Learn English", "badge": "🚀 Hot"},
+            {"tag": "Fremdgehen Rache Betrug", "niche": "💔 Revenge", "badge": "🔥 Viral"},
+            {"tag": "Familiendrama Geschichten", "niche": "🏡 Family", "badge": "⚡ Drama"},
+            {"tag": "True Crime Doku Deutsch", "niche": "🕵️ True Crime", "badge": "🚀 Beliebt"},
+            {"tag": "Künstliche Intelligenz Tools", "niche": "🤖 AI Tech", "badge": "🔥 Trend"},
+            {"tag": "Geld verdienen online 2026", "niche": "💰 Finanzen", "badge": "⚡ 2026"}
         ],
         "DEFAULT": [
             {"tag": "learn english conversation", "niche": "🎓 Learn English", "badge": "🔥 Viral"},
