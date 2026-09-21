@@ -18,6 +18,8 @@ class TrendService:
             "DE": ("de", "DE"),
             "IN": ("en", "IN"),
             "BR": ("pt", "BR"),
+            "FR": ("fr", "FR"),
+            "IT": ("it", "IT"),
             "VN": ("vi", "VN"),
         }
 
@@ -227,7 +229,7 @@ class TrendService:
 
         country_names = {
             "US": "Hoa Kỳ (Mỹ)", "GB": "Anh Quốc", "JP": "Nhật Bản", "KR": "Hàn Quốc",
-            "DE": "Đức", "IN": "Ấn Độ", "BR": "Brazil", "VN": "Việt Nam", "": "Toàn Cầu"
+            "DE": "Đức", "FR": "Pháp", "IT": "Ý", "IN": "Ấn Độ", "BR": "Brazil", "VN": "Việt Nam", "": "Toàn Cầu"
         }
         geo_name = country_names.get(geo, geo)
         origin_geo_name = country_names.get(market_fit.get("origin_geo", "KR"), market_fit.get("origin_geo", "KR"))

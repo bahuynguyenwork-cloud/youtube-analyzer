@@ -415,6 +415,54 @@ NICHE_LOCALIZED_QUERIES = {
         "KR": "예능 레전드 웃긴 영상",
         "DE": "Unterhaltung Comedy Viral",
         "DEFAULT": "entertainment funny viral comedy"
+    },
+    "spicy_18_drama": {
+        "VN": "tâm sự thầm kín đêm muộn tình một đêm",
+        "US": "spicy relationship drama secret affair stories",
+        "GB": "relationship drama confessions secret affair",
+        "FR": "histoires d'amour secrètes adultère confessions",
+        "IT": "storie d'amore segrete tradimento confessioni",
+        "DE": "Geheime Liebesgeschichten Fremdgehen Beichte",
+        "IN": "relationship secret affair stories drama",
+        "JP": "大人の恋愛 浮気 不倫 体験談",
+        "KR": "19금 사연 불륜 연애 썰",
+        "DEFAULT": "spicy relationship drama secret affair stories"
+    },
+    "father_inlaw_drama": {
+        "VN": "bố chồng nàng dâu tâm sự gia đình cay đắng",
+        "US": "father in law daughter in law family drama stories",
+        "GB": "father in law daughter in law Reddit drama",
+        "FR": "beau-père belle-fille drame familial histoires",
+        "IT": "suocero e nuora drammi familiari storie",
+        "DE": "Schwiegervater Schwiegertochter Familiendrama",
+        "IN": "father in law daughter in law family drama",
+        "JP": "義父と嫁 家族の確執 ドラマ",
+        "KR": "시아버지 며느리 가족 갈등 썰",
+        "DEFAULT": "father in law daughter in law family drama stories"
+    },
+    "mother_inlaw_drama": {
+        "VN": "mẹ vợ con rể tâm sự xung đột gia đình trớ trêu",
+        "US": "mother in law son in law toxic family drama stories",
+        "GB": "mother in law son in law Reddit stories",
+        "FR": "belle-mère gendre conflit familial histoires",
+        "IT": "suocera e genero drammi familiari storie",
+        "DE": "Schwiegermutter Schwiegersohn Konflikt Drama",
+        "IN": "mother in law son in law family conflict stories",
+        "JP": "義母と婿 家族トラブル ドラマ",
+        "KR": "장모 사위 갈등 사연",
+        "DEFAULT": "mother in law son in law toxic family drama stories"
+    },
+    "infidelity_revenge": {
+        "VN": "ngoại tình bắt gian đánh ghen trả thù kịch tính",
+        "US": "cheating spouse caught revenge drama stories",
+        "GB": "cheating partner caught revenge Reddit",
+        "FR": "tromperie vengeance drames histoires réelles",
+        "IT": "tradimento vendetta storie drammi reali",
+        "DE": "Fremdgehen Rache Betrug Geschichten",
+        "IN": "cheating revenge drama stories",
+        "JP": "浮気 修羅場 復讐 スレ",
+        "KR": "바람 불륜 참교육 사이다 썰",
+        "DEFAULT": "cheating spouse caught revenge drama stories"
     }
 }
 
@@ -583,6 +631,24 @@ def is_video_matching_country(item: dict, ch_info: dict, target_geo: str) -> boo
         if ch_country in ['IN', 'VN', 'RU', 'PK', 'TH']:
             return False
 
+    # 9. Thị trường Pháp (FR)
+    elif geo == 'FR':
+        if has_south_asian or has_hangul or has_kana or has_cyrillic or has_arabic or has_vn:
+            return False
+        if audio_lang and not audio_lang.startswith(('fr', 'en', 'zxx')):
+            return False
+        if ch_country in ['IN', 'VN', 'RU', 'PK', 'BD', 'ID', 'KR', 'JP', 'TH']:
+            return False
+
+    # 10. Thị trường Ý (IT)
+    elif geo == 'IT':
+        if has_south_asian or has_hangul or has_kana or has_cyrillic or has_arabic or has_vn:
+            return False
+        if audio_lang and not audio_lang.startswith(('it', 'en', 'zxx')):
+            return False
+        if ch_country in ['IN', 'VN', 'RU', 'PK', 'BD', 'ID', 'KR', 'JP', 'TH']:
+            return False
+
     return True
 
 @app.get("/api/trending/feed")
@@ -669,14 +735,18 @@ def get_trending_feed(
                         "JP": "ドキュメンタリー 話題の動画",
                         "KR": "인기 급상승 다큐멘터리",
                         "DE": "Dokumentation Podcast Trends",
-                        "VN": "phóng sự tài liệu podcast xu hướng"
+                        "VN": "phóng sự tài liệu podcast xu hướng",
+                        "FR": "documentaire reportage podcast france",
+                        "IT": "documentario reportage podcast italia",
+                        "IN": "trending documentary podcast india",
+                        "BR": "documentario podcast brasil"
                     }
                     q_term = country_names.get(geo_code, "trending viral video")
 
                 GEO_LANG_MAP = {
                     "US": "en", "GB": "en", "CA": "en", "AU": "en",
                     "VN": "vi", "JP": "ja", "KR": "ko", "DE": "de",
-                    "BR": "pt", "IN": "en"
+                    "BR": "pt", "IN": "en", "FR": "fr", "IT": "it"
                 }
                 lang_param = GEO_LANG_MAP.get(geo_code, "en")
 
@@ -820,7 +890,7 @@ def get_trending_feed(
             country_names = {
                 "US": "United States", "GB": "United Kingdom", "JP": "Japan",
                 "KR": "Korea", "DE": "Germany", "VN": "Việt Nam", "IN": "India",
-                "BR": "Brazil", "CA": "Canada", "AU": "Australia"
+                "BR": "Brazil", "CA": "Canada", "AU": "Australia", "FR": "France", "IT": "Italy"
             }
             c_name = country_names.get(geo_code, geo_code)
             
@@ -828,6 +898,8 @@ def get_trending_feed(
                 "US": f"trending viral documentary podcast usa {current_year}",
                 "GB": f"trending viral documentary podcast uk {current_year}",
                 "DE": f"trending reportage dokumentation deutschland {current_year}",
+                "FR": f"trending reportage documentaire france {current_year}",
+                "IT": f"trending reportage documentario italia {current_year}",
                 "IN": f"trending documentary podcast india {current_year}",
                 "VN": f"thinh hanh phong su tai lieu podcast viet nam {current_year}",
                 "JP": f"話題の動画 トレンド ドキュメンタリー 日本 {current_year}",

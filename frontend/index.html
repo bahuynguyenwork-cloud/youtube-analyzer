@@ -144,6 +144,8 @@
                 <option value="JP">🇯🇵 Khán giả Nhật (JP)</option>
                 <option value="KR">🇰🇷 Khán giả Hàn (KR)</option>
                 <option value="DE">🇩🇪 Khán giả Đức (DE)</option>
+                <option value="FR">🇫🇷 Khán giả Pháp (FR)</option>
+                <option value="IT">🇮🇹 Khán giả Ý (IT)</option>
                 <option value="IN">🇮🇳 Khán giả Ấn Độ (IN)</option>
                 <option value="BR">🇧🇷 Khán giả Brazil (BR)</option>
                 <option value="VN">🇻🇳 Khán giả Việt Nam (VN)</option>
@@ -645,6 +647,8 @@
             <option value="JP">Nhật Bản (JP)</option>
             <option value="KR">Hàn Quốc (KR)</option>
             <option value="DE">Đức (DE)</option>
+            <option value="FR">Pháp (FR)</option>
+            <option value="IT">Ý (IT)</option>
             <option value="VN">Việt Nam (VN)</option>
           </select>
           <button type="submit" class="px-6 py-3 bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-rose-600/30 transition">Kiểm Tra</button>
@@ -692,6 +696,8 @@
             <option value="US">🇺🇸 Hoa Kỳ (US)</option>
             <option value="VN">🇻🇳 Việt Nam (VN)</option>
             <option value="GB">🇬🇧 Vương Quốc Anh (UK)</option>
+            <option value="FR">🇫🇷 Pháp (FR)</option>
+            <option value="IT">🇮🇹 Ý (IT)</option>
             <option value="JP">🇯🇵 Nhật Bản (JP)</option>
             <option value="KR">🇰🇷 Hàn Quốc (KR)</option>
             <option value="DE">🇩🇪 Đức (DE)</option>
@@ -702,6 +708,10 @@
           </select>
           <select id="feed-category" onchange="loadTrendingFeed()" class="px-3.5 py-2.5 bg-slate-900/90 border border-white/15 rounded-xl text-white text-xs focus:ring-2 focus:ring-rose-500 font-medium">
             <option value="all">🔥 Tất cả xu hướng (Top Trending)</option>
+            <option value="spicy_18_drama">🔞 18+ & Tâm Sự Thầm Kín Đêm Muộn</option>
+            <option value="father_inlaw_drama">🏡 Bố Chồng Nàng Dâu (Gia Đình Cay Đắng)</option>
+            <option value="mother_inlaw_drama">⚡ Mẹ Vợ Con Rể (Xung Đột & Trớ Trêu)</option>
+            <option value="infidelity_revenge">💔 Ngoại Tình & Bắt Gian Trả Thù (Revenge Drama)</option>
             <option value="philosophy">📜 Triết Lý & Khắc Kỷ (Stoicism)</option>
             <option value="buddhism">🪷 Phật Pháp & Chữa Lành</option>
             <option value="elderly_wisdom">👴 Tâm Sự & Lời Khuyên Người Già</option>
@@ -1115,7 +1125,7 @@
       // Target country display labels
       const countryNames = {
         "US": "Hoa Kỳ (Mỹ)", "GB": "Anh Quốc (UK)", "JP": "Nhật Bản (JP)", "KR": "Hàn Quốc (KR)",
-        "DE": "Đức (DE)", "IN": "Ấn Độ (IN)", "BR": "Brazil (BR)", "VN": "Việt Nam (VN)", "": "Toàn Cầu"
+        "DE": "Đức (DE)", "FR": "Pháp (FR)", "IT": "Ý (IT)", "IN": "Ấn Độ (IN)", "BR": "Brazil (BR)", "VN": "Việt Nam (VN)", "": "Toàn Cầu"
       };
       const geoCode = (trend_momentum?.target_geo || publish_time_analysis?.target_country_code || 'US').toUpperCase();
       const geoDisplayName = countryNames[geoCode] || publish_time_analysis?.target_country_name || geoCode;
@@ -1395,7 +1405,7 @@
         const geoCode = (trend.target_geo || 'US').toUpperCase();
         const countryNames = {
           "US": "Hoa Kỳ (Mỹ)", "GB": "Anh Quốc (UK)", "JP": "Nhật Bản (JP)", "KR": "Hàn Quốc (KR)",
-          "DE": "Đức (DE)", "IN": "Ấn Độ (IN)", "BR": "Brazil (BR)", "VN": "Việt Nam (VN)"
+          "DE": "Đức (DE)", "FR": "Pháp (FR)", "IT": "Ý (IT)", "IN": "Ấn Độ (IN)", "BR": "Brazil (BR)", "VN": "Việt Nam (VN)"
         };
         targetLabel.textContent = `Mục tiêu: ${countryNames[geoCode] || geoCode}`;
       }

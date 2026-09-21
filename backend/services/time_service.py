@@ -88,6 +88,30 @@ COUNTRY_TIMEZONE_PROFILES = {
         "weekend_upload_vn": "20:00 - 22:00 (Tối Việt Nam)",
         "tip": "Brazil chậm hơn Việt Nam 10 tiếng. Giờ cao điểm xem ở Brazil (18h-22h) tương đương 4h-8h sáng hôm sau tại VN. Đăng từ 1h-3h sáng VN là đẹp nhất."
     },
+    "FR": {
+        "name": "Pháp (France)",
+        "utc_offset": 1,  # Chậm hơn VN 6 tiếng
+        "tz_name": "CET / CEST (Paris, UTC+1)",
+        "prime_view_local": "18:00 - 22:00 (Tối Paris)",
+        "prime_view_vn": "00:00 - 04:00 (Rạng sáng hôm sau)",
+        "best_upload_local": "14:00 - 16:00 (Chiều Paris)",
+        "best_upload_vn": "20:00 - 22:00 (Tối Việt Nam)",
+        "weekend_view_vn": "16:00 - 20:00 (Chiều tối VN)",
+        "weekend_upload_vn": "14:00 - 16:00 (Chiều VN)",
+        "tip": "Khán giả Pháp xem nhiều nhất từ 18h - 22h giờ Paris (tức 0h - 4h sáng hôm sau tại VN). Đăng từ 20h - 22h tối VN giúp video kịp xử lý chất lượng cao và đón trọn đỉnh xem tại Pháp!"
+    },
+    "IT": {
+        "name": "Ý (Italy)",
+        "utc_offset": 1,  # Chậm hơn VN 6 tiếng
+        "tz_name": "CET / CEST (Rome, UTC+1)",
+        "prime_view_local": "18:00 - 22:00 (Tối Rome)",
+        "prime_view_vn": "00:00 - 04:00 (Rạng sáng hôm sau)",
+        "best_upload_local": "14:00 - 16:00 (Chiều Rome)",
+        "best_upload_vn": "20:00 - 22:00 (Tối Việt Nam)",
+        "weekend_view_vn": "16:00 - 20:00 (Chiều tối VN)",
+        "weekend_upload_vn": "14:00 - 16:00 (Chiều VN)",
+        "tip": "Khán giả Ý có thói quen xem YouTube mạnh nhất vào buổi tối từ 18h - 22h giờ Rome (tức 0h - 4h sáng VN). Đăng vào khoảng 20h - 22h đêm VN là thời điểm vàng tối ưu."
+    },
     "VN": {
         "name": "Việt Nam",
         "utc_offset": 7,
