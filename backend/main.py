@@ -450,7 +450,7 @@ def is_stream_video(item: dict) -> bool:
     stream_keywords = [
         "restream", "livestream", "live stream", "trực tiếp", "🔴", 
         "buổi stream", "phát trực tiếp", "streamed live", "[live]", "(live)",
-        "giao lưu trực tiếp", "talkshow live"
+        "giao lưu trực tiếp", "talkshow live", "streamer"
     ]
     for kw in stream_keywords:
         if kw in title:
@@ -458,18 +458,8 @@ def is_stream_video(item: dict) -> bool:
 
     ls = item.get("liveStreamingDetails")
     if ls:
-        start_str = ls.get("actualStartTime")
-        end_str = ls.get("actualEndTime")
-        if start_str and not end_str:
+        if ls.get("actualStartTime") or ls.get("scheduledStartTime") or ls.get("concurrentViewers"):
             return True
-        if start_str and end_str:
-            try:
-                st = datetime.datetime.fromisoformat(start_str.replace("Z", "+00:00"))
-                et = datetime.datetime.fromisoformat(end_str.replace("Z", "+00:00"))
-                if (et - st).total_seconds() > 1200:
-                    return True
-            except Exception:
-                pass
     return False
 
 def format_published_age(pub_iso: str) -> str:
@@ -479,6 +469,11 @@ def format_published_age(pub_iso: str) -> str:
         dt = datetime.datetime.fromisoformat(pub_iso.replace("Z", "+00:00"))
         now = datetime.datetime.now(datetime.timezone.utc)
         diff_seconds = (now - dt).total_seconds()
+        
+        if diff_seconds < 3600:
+            diff_mins = max(1, int(diff_seconds // 60)) if diff_seconds > 0 else 1
+            return f"⚡ {diff_mins} phút trước • Vừa đăng"
+
         diff_hours = int(diff_seconds // 3600)
         diff_days = int(diff_seconds // 86400)
         
@@ -558,20 +553,20 @@ def get_trending_feed(
                 # Lọc theo khung thời gian (7d, 24h, 30d...)
                 for it in raw_items:
                     pub_iso = it.get("snippet", {}).get("publishedAt", "")
-                    if cutoff_dt and pub_iso:
+                    if cutoff_dt:
+                        if not pub_iso:
+                            continue
                         try:
                             p_dt = datetime.datetime.fromisoformat(pub_iso.replace("Z", "+00:00"))
                             if p_dt < cutoff_dt:
                                 continue
                         except Exception:
-                            pass
+                            continue
                     video_items.append(it)
             
-            # TRƯỜNG HỢP 2: Theo chủ đề / ngách cụ thể HOẶC nếu chart trả về quá ít
-            if cat != "all" or (len(video_items) < 5 and published_after_str):
-                v_dur_param = "medium"
-                if dur_filter == "deep_dive":
-                    v_dur_param = "long"
+            # TRƯỜNG HỢP 2: Theo chủ đề / ngách cụ thể HOẶC nếu chart trả về chưa đủ video
+            if cat != "all" or len(video_items) < 8:
+                v_dur_param = "long" if dur_filter == "deep_dive" else "any"
 
                 niche_dict = NICHE_LOCALIZED_QUERIES.get(cat, {})
                 if cat != "all" and niche_dict:
@@ -609,7 +604,10 @@ def get_trending_feed(
                 if v_ids:
                     d_url = f"https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails,liveStreamingDetails&id={','.join(v_ids[:40])}&key={api_key}"
                     d_res = requests.get(d_url, timeout=10).json()
-                    video_items = d_res.get("items", [])
+                    existing_ids = {it.get("id") for it in video_items}
+                    for it in d_res.get("items", []):
+                        if it.get("id") and it["id"] not in existing_ids:
+                            video_items.append(it)
 
             if video_items:
                 # Lấy thông tin kênh để xác nhận kênh còn sống và có lượng sub ổn định
@@ -629,13 +627,15 @@ def get_trending_feed(
                     
                     # 1. BẢO VỆ MỐC THỜI GIAN NGHIÊM NGẶT: Tuyệt đối không cho video cũ lọt vào
                     pub_at = snippet.get("publishedAt", "")
-                    if cutoff_dt and pub_at:
+                    if cutoff_dt:
+                        if not pub_at:
+                            continue
                         try:
                             p_dt = datetime.datetime.fromisoformat(pub_at.replace("Z", "+00:00"))
                             if p_dt < cutoff_dt:
                                 continue
                         except Exception:
-                            pass
+                            continue
 
                     # 2. LOẠI BỎ TOÀN BỘ VIDEO LIVESTREAM, RESTREAM, TRỰC TIẾP
                     if is_stream_video(item):
@@ -651,9 +651,8 @@ def get_trending_feed(
                     if dur_filter == "deep_dive" and dur_seconds < 1200:
                         continue
 
-                    # 3. LỌC VIEW TỐI THIỂU: Đã là xu hướng (Trending) thì không thể chỉ có vài chục view
+                    # 4. LỌC VIEW TỐI THIỂU: Đã là xu hướng (Trending) thì không thể chỉ có vài chục view
                     view_cnt = int(stats.get("viewCount", 0))
-                    # Lọc bỏ các video view quá lẹt đẹt (< 500 views)
                     if t_range in ["7d", "24h", "48h", "30d"] and view_cnt < 500:
                         continue
 
@@ -664,7 +663,7 @@ def get_trending_feed(
                     subs_count = int(ch_stats.get("subscriberCount") or 0)
                     total_vids = int(ch_stats.get("videoCount") or 0)
                     
-                    is_active_channel = subs_count >= 1000 and total_vids >= 5
+                    is_active_channel = (subs_count >= 1000 and total_vids >= 5) or (view_cnt >= 5000)
                     is_very_stable = subs_count >= 10000 and total_vids >= 20
                     
                     if is_very_stable:
@@ -675,10 +674,14 @@ def get_trending_feed(
                         channel_badge_text = "📺 Kênh Mới"
                         
                     if subs_count > 0:
-                        if subs_count >= 1000000:
-                            channel_badge_text += f" • {subs_count / 1000000:.1f}M Subs"
+                        if subs_count >= 1_000_000:
+                            channel_badge_text += f" • {subs_count / 1_000_000:.1f}M Subs"
+                        elif subs_count >= 10_000:
+                            channel_badge_text += f" • {subs_count // 1_000}K Subs"
+                        elif subs_count >= 1_000:
+                            channel_badge_text += f" • {subs_count / 1_000:.1f}K Subs"
                         else:
-                            channel_badge_text += f" • {subs_count // 1000}K Subs"
+                            channel_badge_text += f" • {subs_count} Subs"
 
                     if mode == "active_channels" and not is_active_channel:
                         continue
@@ -716,6 +719,7 @@ def get_trending_feed(
     # 2. Nếu không có API Key hoặc API trả về rỗng, dùng fallback qua yt-dlp ytsearch
     if not videos:
         try:
+            current_year = datetime.datetime.now().year
             country_names = {
                 "US": "United States", "GB": "United Kingdom", "JP": "Japan",
                 "KR": "Korea", "DE": "Germany", "VN": "Việt Nam", "IN": "India",
@@ -726,9 +730,9 @@ def get_trending_feed(
             if cat in NICHE_LOCALIZED_QUERIES:
                 niche_dict = NICHE_LOCALIZED_QUERIES[cat]
                 q_term = niche_dict.get(geo_code, niche_dict.get("DEFAULT", cat))
-                search_query = f"{q_term} 2026"
+                search_query = f"{q_term} {current_year}"
             else:
-                search_query = f"trending viral documentary {c_name} 2026"
+                search_query = f"trending viral documentary {c_name} {current_year}"
 
             ydl_opts = {
                 'quiet': True,
@@ -754,12 +758,36 @@ def get_trending_feed(
                         # Loại bỏ video livestream, restream
                         if e.get('live_status') in ['is_live', 'is_upcoming', 'was_live', 'post_live']:
                             continue
-                        stream_kw = ['restream', 'livestream', 'live stream', 'trực tiếp', '🔴', 'buổi stream', 'phát trực tiếp', 'streamed live']
+                        stream_kw = ['restream', 'livestream', 'live stream', 'trực tiếp', '🔴', 'buổi stream', 'phát trực tiếp', 'streamed live', 'streamer']
                         if any(kw in t.lower() for kw in stream_kw):
                             continue
 
+                        # Kiểm tra ngày đăng trong fallback nếu có
+                        up_date = e.get('upload_date')
+                        e_ts = e.get('timestamp') or e.get('release_timestamp')
+                        pub_str = ""
+                        age_str = "🔥 Xu hướng gần đây"
+                        if e_ts:
+                            try:
+                                dt_e = datetime.datetime.fromtimestamp(e_ts, tz=datetime.timezone.utc)
+                                if cutoff_dt and dt_e < cutoff_dt:
+                                    continue
+                                pub_str = dt_e.strftime('%Y-%m-%d')
+                                age_str = format_published_age(dt_e.isoformat())
+                            except Exception:
+                                pass
+                        elif up_date and len(up_date) == 8:
+                            try:
+                                dt_e = datetime.datetime.strptime(up_date, '%Y%m%d').replace(tzinfo=datetime.timezone.utc)
+                                if cutoff_dt and dt_e < cutoff_dt:
+                                    continue
+                                pub_str = dt_e.strftime('%Y-%m-%d')
+                                age_str = format_published_age(dt_e.isoformat())
+                            except Exception:
+                                pass
+
                         v_cnt = int(e.get('view_count') or 0)
-                        if v_cnt < 1000:
+                        if v_cnt < 500:
                             continue
 
                         v_id = e.get('id')
@@ -770,6 +798,7 @@ def get_trending_feed(
                         elif v_id:
                             thumb = f"https://i.ytimg.com/vi/{v_id}/hqdefault.jpg"
 
+                        f_subs = int(e.get('channel_follower_count') or 0)
                         videos.append({
                             "video_id": v_id,
                             "id": v_id,
@@ -777,15 +806,15 @@ def get_trending_feed(
                             "channel_title": e.get('channel') or e.get('uploader') or 'YouTube Creator',
                             "channel": e.get('channel') or e.get('uploader') or 'YouTube Creator',
                             "channel_badge": "🟢 Kênh Hoạt Động",
-                            "channel_subs": e.get('channel_follower_count') or 0,
-                            "is_verified": bool(e.get('channel_is_verified')),
+                            "channel_subs": f_subs,
+                            "is_verified": bool(e.get('channel_is_verified')) or f_subs >= 100000,
                             "is_active_channel": True,
                             "view_count": v_cnt,
                             "views": v_cnt,
                             "duration_seconds": dur,
                             "duration_formatted": format_duration_display(dur),
-                            "published_at": "",
-                            "published_age": "🔥 Xu hướng tuần này",
+                            "published_at": pub_str,
+                            "published_age": age_str,
                             "url": e.get('url') or f"https://www.youtube.com/watch?v={v_id}",
                             "thumbnail": thumb
                         })

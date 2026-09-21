@@ -165,18 +165,51 @@ class PublishTimeService:
 
     def _fetch_via_youtube_api(self, channel_id: str, api_key: str, limit: int = 50) -> Dict[str, Any]:
         """Sử dụng YouTube Data API v3 chính thức giống Google Apps Script."""
-        uploads_playlist_id = "UU" + channel_id[2:] if channel_id.startswith("UC") else ""
+        uploads_playlist_id = "UU" + channel_id[2:] if (channel_id.startswith("UC") and len(channel_id) == 24) else ""
         channel_title = "YouTube Channel"
 
-        try:
-            ch_url = f"https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails&id={channel_id}&key={api_key}"
-            ch_res = self.session.get(ch_url, timeout=12).json()
-            if ch_res.get("items"):
-                ch_item = ch_res["items"][0]
-                channel_title = ch_item.get("snippet", {}).get("title", channel_title)
-                uploads_playlist_id = ch_item.get("contentDetails", {}).get("relatedPlaylists", {}).get("uploads", uploads_playlist_id)
-        except Exception as e:
-            logger.warning(f"Lỗi truy vấn channels API: {e}")
+        # Nếu không phải dạng UC... chuẩn 24 ký tự, giải quyết qua API
+        if not (channel_id.startswith("UC") and len(channel_id) == 24):
+            clean_name = channel_id.lstrip("@").strip()
+            try:
+                # 1. Thử tìm kiếm theo forHandle
+                ch_url = f"https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails&forHandle={clean_name}&key={api_key}"
+                ch_res = self.session.get(ch_url, timeout=10).json()
+                if ch_res.get("items"):
+                    ch_item = ch_res["items"][0]
+                    channel_id = ch_item.get("id", channel_id)
+                    channel_title = ch_item.get("snippet", {}).get("title", channel_title)
+                    uploads_playlist_id = ch_item.get("contentDetails", {}).get("relatedPlaylists", {}).get("uploads", "")
+                else:
+                    # 2. Thử search kênh
+                    s_url = f"https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q={clean_name}&key={api_key}"
+                    s_res = self.session.get(s_url, timeout=10).json()
+                    if s_res.get("items"):
+                        c_id = s_res["items"][0]["snippet"]["channelId"]
+                        ch_url2 = f"https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails&id={c_id}&key={api_key}"
+                        ch_res2 = self.session.get(ch_url2, timeout=10).json()
+                        if ch_res2.get("items"):
+                            ch_item = ch_res2["items"][0]
+                            channel_id = ch_item.get("id", c_id)
+                            channel_title = ch_item.get("snippet", {}).get("title", channel_title)
+                            uploads_playlist_id = ch_item.get("contentDetails", {}).get("relatedPlaylists", {}).get("uploads", "")
+            except Exception as e:
+                logger.warning(f"Lỗi phân giải channel id từ handle: {e}")
+
+        if not uploads_playlist_id and channel_id.startswith("UC"):
+            uploads_playlist_id = "UU" + channel_id[2:]
+
+        if channel_title == "YouTube Channel" and channel_id.startswith("UC"):
+            try:
+                ch_url = f"https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails&id={channel_id}&key={api_key}"
+                ch_res = self.session.get(ch_url, timeout=10).json()
+                if ch_res.get("items"):
+                    ch_item = ch_res["items"][0]
+                    channel_title = ch_item.get("snippet", {}).get("title", channel_title)
+                    if not uploads_playlist_id:
+                        uploads_playlist_id = ch_item.get("contentDetails", {}).get("relatedPlaylists", {}).get("uploads", "")
+            except Exception as e:
+                logger.warning(f"Lỗi truy vấn channels API: {e}")
 
         video_ids = []
         next_page_token = ""

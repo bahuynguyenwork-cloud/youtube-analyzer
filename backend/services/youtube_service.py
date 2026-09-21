@@ -111,7 +111,7 @@ class YouTubeService:
             'banner_url': '',
             'description': snip.get('description', ''),
             'country': snip.get('country', ''),
-            'is_verified': False
+            'is_verified': int(stats_raw.get('subscriberCount') or 0) >= 100000
         }
 
         uploads_id = ch_item.get('contentDetails', {}).get('relatedPlaylists', {}).get('uploads')
@@ -136,6 +136,7 @@ class YouTubeService:
                         det = v_map.get(vid, {})
                         d_snip = det.get('snippet', it.get('snippet', {}))
                         d_stats = det.get('statistics', {})
+                        d_content = det.get('contentDetails', {})
                         pub_at = d_snip.get('publishedAt', '')
                         dt_vn = None
                         v_ts = None
@@ -154,6 +155,9 @@ class YouTubeService:
                         v_thumbs = d_snip.get('thumbnails', {})
                         thumb_u = v_thumbs.get('high', {}).get('url') or v_thumbs.get('medium', {}).get('url') or f'https://i.ytimg.com/vi/{vid}/hqdefault.jpg'
 
+                        dur_iso = d_content.get('duration', '')
+                        dur_sec = self.parse_iso_duration(dur_iso)
+
                         videos.append({
                             'id': vid,
                             'video_id': vid,
@@ -163,8 +167,8 @@ class YouTubeService:
                             'timestamp': v_ts,
                             'date': date_str,
                             'publish_time_vn': pub_vn_str,
-                            'duration_seconds': 0,
-                            'duration_formatted': '00:00',
+                            'duration_seconds': dur_sec,
+                            'duration_formatted': self.format_duration(dur_sec),
                             'thumbnail': thumb_u,
                             'description': d_snip.get('description', '')
                         })
@@ -389,6 +393,17 @@ class YouTubeService:
             'stats': stats
         }
 
+    def parse_iso_duration(self, dur_str: str) -> int:
+        if not dur_str:
+            return 0
+        m = re.match(r'PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?', dur_str)
+        if not m:
+            return 0
+        h = int(m.group(1) or 0)
+        minute = int(m.group(2) or 0)
+        s = int(m.group(3) or 0)
+        return h * 3600 + minute * 60 + s
+
     def format_duration(self, seconds: Optional[int]) -> str:
         if not seconds:
             return '00:00'
@@ -437,7 +452,8 @@ class YouTubeService:
                     'title': v['title'],
                     'view_count': v['view_count'],
                     'thumbnail': v['thumbnail'],
-                    'date': v['date'],
+                    'date': v.get('date', ''),
+                    'publish_time_vn': v.get('publish_time_vn') or v.get('date', ''),
                     'multiplier': round(v['view_count'] / max(avg_views, 1), 1)
                 })
 

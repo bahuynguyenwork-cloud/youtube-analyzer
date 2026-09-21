@@ -178,6 +178,7 @@ class CompetitorService:
                 'avg_views_sample': avg_views,
                 'avg_views': avg_views,
                 'subscriber_count': data.get('subscriber_count', 0),
+                'is_verified': int(data.get('subscriber_count', 0) or 0) >= 100000,
                 'top_video_title': data['videos'][0]['title'] if data['videos'] else '',
                 'top_video_views': max([v['views'] for v in data['videos']]) if data['videos'] else 0
             })
