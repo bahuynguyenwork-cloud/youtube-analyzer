@@ -175,6 +175,14 @@ class YouTubeService:
             except Exception as e:
                 logger.warning(f"Error fetching uploads playlist videos via API: {e}")
 
+        # Ưu tiên video dài chuẩn: Nếu có video dài, loại bỏ hoàn toàn các video Shorts (< 180s hoặc có tag #shorts)
+        standard_vids = [
+            v for v in videos 
+            if not (0 < v.get('duration_seconds', 0) < 180 or '#shorts' in v.get('title', '').lower() or '#short' in v.get('title', '').lower() or '/shorts/' in v.get('url', '').lower())
+        ]
+        if standard_vids:
+            videos = standard_vids
+
         stats = self.compute_performance_metrics(videos, channel_meta['subscriber_count'])
         return {
             'channel': channel_meta,
@@ -384,6 +392,14 @@ class YouTubeService:
                         v['date'] = dt_vn.strftime('%d/%m/%Y')
                 except Exception:
                     pass
+
+        # Ưu tiên video dài chuẩn: Nếu có video dài, loại bỏ hoàn toàn các video Shorts (< 180s hoặc có tag #shorts)
+        standard_vids = [
+            v for v in videos 
+            if not (0 < v.get('duration_seconds', 0) < 180 or '#shorts' in v.get('title', '').lower() or '#short' in v.get('title', '').lower() or '/shorts/' in v.get('url', '').lower())
+        ]
+        if standard_vids:
+            videos = standard_vids
 
         stats = self.compute_performance_metrics(videos, channel_meta.get('subscriber_count', 0))
 

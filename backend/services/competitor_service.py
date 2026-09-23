@@ -37,8 +37,29 @@ class CompetitorService:
             pass
         return ""
 
+    def is_short_or_shorts_channel(self, title: str = "", uploader: str = "", duration_sec: int = 0, url: str = "") -> bool:
+        """Kiểm tra nghiêm ngặt xem video hoặc kênh có phải Shorts không."""
+        t = (title or "").lower()
+        ch = (uploader or "").lower()
+        u = (url or "").lower()
+
+        if "/shorts/" in u:
+            return True
+        ch_words = set(re.findall(r'\b\w+\b', ch))
+        if "shorts" in ch or "쇼츠" in ch or "shorts" in ch_words:
+            return True
+        if any(tag in t for tag in ["#shorts", "#short", "#쇼츠", "#shortvideo", "#youtubeshorts"]):
+            return True
+        if 0 < duration_sec < 180:
+            return True
+        if duration_sec == 0:
+            t_words = set(re.findall(r'\b\w+\b', t))
+            if "shorts" in t_words or "쇼츠" in t:
+                return True
+        return False
+
     def find_similar_channels(self, current_channel_name: str, current_channel_url: str, top_keywords: List[Dict[str, Any]], limit: int = 6, api_key: Optional[str] = None) -> List[Dict[str, Any]]:
-        """Tìm kiếm các kênh đối thủ cùng chủ đề và lấy ảnh đại diện logo chính thức."""
+        """Tìm kiếm các kênh đối thủ cùng chủ đề và lấy ảnh đại diện logo chính thức (loại bỏ hoàn toàn kênh Shorts)."""
         if not top_keywords:
             return []
 
@@ -69,7 +90,7 @@ class CompetitorService:
 
         try:
             with yt_dlp.YoutubeDL(self.ydl_opts) as ydl:
-                res = ydl.extract_info(f"ytsearch15:{query}", download=False)
+                res = ydl.extract_info(f"ytsearch30:{query}", download=False)
                 if res and res.get('entries'):
                     for entry in res['entries']:
                         if not entry:
@@ -96,10 +117,18 @@ class CompetitorService:
                         if current_channel_url and uploader_url and current_channel_url.lower() in uploader_url.lower():
                             continue
 
+                        v_title = entry.get('title', '')
+                        v_dur = entry.get('duration') or 0
+                        v_url = entry.get('url') or f"https://www.youtube.com/watch?v={entry.get('id')}"
+
+                        # TUYỆT ĐỐI BỎ QUA SHORTS VÀ KÊNH CHUYÊN SHORTS
+                        if self.is_short_or_shorts_channel(title=v_title, uploader=uploader, duration_sec=v_dur, url=v_url):
+                            continue
+
                         v_data = {
-                            'title': entry.get('title', ''),
+                            'title': v_title,
                             'views': entry.get('view_count') or 0,
-                            'url': entry.get('url') or f"https://www.youtube.com/watch?v={entry.get('id')}",
+                            'url': v_url,
                             'thumbnail': entry.get('thumbnails', [{}])[-1].get('url', '') if entry.get('thumbnails') else ''
                         }
 
@@ -114,8 +143,11 @@ class CompetitorService:
         except Exception as e:
             logger.warning(f"Lỗi khi tìm kiếm kênh đối thủ: {e}")
 
-        # Lọc danh sách ứng viên
-        candidate_items = [item for item in competitors_map.values() if item['videos']]
+        # Lọc danh sách ứng viên (loại bỏ hoàn toàn các kênh có từ khóa Shorts)
+        candidate_items = [
+            item for item in competitors_map.values() 
+            if item['videos'] and not self.is_short_or_shorts_channel(uploader=item['channel_name'])
+        ]
         candidate_items.sort(key=lambda x: int(x['total_views'] / len(x['videos'])), reverse=True)
         top_candidates = candidate_items[:limit]
 

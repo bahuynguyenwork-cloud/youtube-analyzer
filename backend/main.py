@@ -298,7 +298,91 @@ def fetch_google_suggestions(kw: str, hl_lang: str, gl_country: str) -> List[str
                 pass
     return collected
 
+def parse_iso_duration(dur_str: str) -> int:
+    if not dur_str:
+        return 0
+    m = re.match(r'PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?', dur_str)
+    if not m:
+        return 0
+    h = int(m.group(1) or 0)
+    minute = int(m.group(2) or 0)
+    s = int(m.group(3) or 0)
+    return h * 3600 + minute * 60 + s
+
+def format_duration_display(seconds: int) -> str:
+    if not seconds:
+        return "Video Dài"
+    h = seconds // 3600
+    m = (seconds % 3600) // 60
+    s = seconds % 60
+    if h > 0:
+        return f"{h}:{m:02d}:{s:02d}"
+    return f"{m:02d}:{s:02d}"
+
+def is_stream_video(item: dict) -> bool:
+    """Kiểm tra video có phải là livestream, restream hoặc phát trực tiếp không."""
+    snippet = item.get("snippet", {})
+    title = snippet.get("title", "").lower()
+    lbc = snippet.get("liveBroadcastContent", "none")
+    if lbc in ["live", "upcoming"]:
+        return True
+
+    stream_keywords = [
+        "restream", "livestream", "live stream", "trực tiếp", "🔴", 
+        "buổi stream", "phát trực tiếp", "streamed live", "[live]", "(live)",
+        "giao lưu trực tiếp", "talkshow live", "streamer"
+    ]
+    for kw in stream_keywords:
+        if kw in title:
+            return True
+
+    ls = item.get("liveStreamingDetails")
+    if ls:
+        if ls.get("actualStartTime") or ls.get("scheduledStartTime") or ls.get("concurrentViewers"):
+            return True
+    return False
+
+def is_short_video_or_channel(
+    title: str = "",
+    channel_title: str = "",
+    duration_sec: int = 0,
+    url: str = ""
+) -> bool:
+    """
+    Kiểm tra nghiêm ngặt xem video hoặc kênh có phải là Shorts hoặc định dạng video ngắn không.
+    Tuyệt đối không để video Shorts hoặc kênh chuyên Shorts lọt vào kết quả phân tích.
+    """
+    t = (title or "").lower()
+    ch = (channel_title or "").lower()
+    u = (url or "").lower()
+
+    # 1. URL chứa định dạng Shorts của YouTube
+    if "/shorts/" in u:
+        return True
+
+    # 2. Kênh chuyên Shorts (tên kênh chứa 'shorts', '쇼츠', 'short')
+    ch_words = set(re.findall(r'\b\w+\b', ch))
+    if "shorts" in ch or "쇼츠" in ch or "shorts" in ch_words:
+        return True
+
+    # 3. Hashtag Shorts hoặc từ khóa Shorts trong tiêu đề
+    if any(tag in t for tag in ["#shorts", "#short", "#쇼츠", "#shortvideo", "#youtubeshorts"]):
+        return True
+
+    # 4. Độ dài video: Nếu có độ dài và < 180 giây (3 phút) -> coi là Shorts / video ngắn
+    if 0 < duration_sec < 180:
+        return True
+
+    # 5. Nếu chưa có độ dài (duration_sec == 0) nhưng tiêu đề chứa từ riêng biệt 'shorts' hoặc '쇼츠'
+    if duration_sec == 0:
+        t_words = set(re.findall(r'\b\w+\b', t))
+        if "shorts" in t_words or "쇼츠" in t:
+            return True
+
+    return False
+
 def fetch_top_youtube_videos(kw: str, gl_country: str, hl_lang: str, api_key: Optional[str]) -> List[dict]:
+    """Lấy danh sách các video dài thu hút view hàng đầu cho từ khóa (loại bỏ hoàn toàn Shorts)."""
     yt_results = []
     # 1. Ưu tiên cao nhất: Dùng YouTube Data API v3 (Siêu tốc ~200-300ms, chính xác 100%)
     if api_key:
@@ -306,72 +390,113 @@ def fetch_top_youtube_videos(kw: str, gl_country: str, hl_lang: str, api_key: Op
             encoded_kw = requests.utils.quote(kw)
             search_url = (
                 f"https://www.googleapis.com/youtube/v3/search?part=snippet&type=video"
-                f"&maxResults=8&q={encoded_kw}&regionCode={gl_country}&relevanceLanguage={hl_lang}&key={api_key}"
+                f"&maxResults=25&q={encoded_kw}&regionCode={gl_country}&relevanceLanguage={hl_lang}&key={api_key}"
             )
-            s_resp = http_session.get(search_url, timeout=4)
+            s_resp = http_session.get(search_url, timeout=5)
             if s_resp.status_code == 200:
                 items = s_resp.json().get("items", [])
                 v_ids = [it["id"]["videoId"] for it in items if it.get("id", {}).get("videoId")]
-                stats_map = {}
                 if v_ids:
-                    d_url = f"https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id={','.join(v_ids)}&key={api_key}"
-                    d_resp = http_session.get(d_url, timeout=4)
+                    d_url = f"https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics,liveStreamingDetails&id={','.join(v_ids[:25])}&key={api_key}"
+                    d_resp = http_session.get(d_url, timeout=5)
                     if d_resp.status_code == 200:
-                        for v in d_resp.json().get("items", []):
-                            stats_map[v["id"]] = int(v.get("statistics", {}).get("viewCount", 0))
+                        detail_items = d_resp.json().get("items", [])
+                        for v in detail_items:
+                            vid = v.get("id")
+                            if not vid:
+                                continue
+                            snip = v.get("snippet", {})
+                            content_det = v.get("contentDetails", {})
+                            stats = v.get("statistics", {})
+                            
+                            v_title = snip.get("title", "")
+                            v_channel = snip.get("channelTitle", "")
+                            dur_iso = content_det.get("duration", "")
+                            dur_sec = parse_iso_duration(dur_iso)
+                            v_url = f"https://www.youtube.com/watch?v={vid}"
 
-                for it in items:
-                    vid = it.get("id", {}).get("videoId")
-                    if not vid:
-                        continue
-                    snip = it.get("snippet", {})
-                    thumb = (snip.get("thumbnails", {}).get("high") or snip.get("thumbnails", {}).get("medium") or {}).get("url") or f"https://i.ytimg.com/vi/{vid}/hqdefault.jpg"
-                    yt_results.append({
-                        'id': vid,
-                        'title': snip.get("title", ""),
-                        'channel': snip.get("channelTitle", ""),
-                        'views': stats_map.get(vid, 0),
-                        'url': f"https://www.youtube.com/watch?v={vid}",
-                        'thumbnail': thumb
-                    })
+                            # Lọc bỏ Livestream/Restream
+                            if is_stream_video(v):
+                                continue
+
+                            # LỌC NGHIÊM NGẶT: Tuyệt đối không lấy Shorts hoặc Kênh Shorts
+                            if is_short_video_or_channel(title=v_title, channel_title=v_channel, duration_sec=dur_sec, url=v_url):
+                                continue
+
+                            thumb = (snip.get("thumbnails", {}).get("high") or snip.get("thumbnails", {}).get("medium") or {}).get("url") or f"https://i.ytimg.com/vi/{vid}/hqdefault.jpg"
+                            yt_results.append({
+                                'id': vid,
+                                'title': v_title,
+                                'channel': v_channel,
+                                'views': int(stats.get("viewCount", 0)),
+                                'url': v_url,
+                                'thumbnail': thumb,
+                                'duration_seconds': dur_sec,
+                                'duration_formatted': format_duration_display(dur_sec)
+                            })
+
                 if yt_results:
-                    return yt_results
+                    # Sắp xếp theo view giảm dần để đưa các video thu hút view nhất lên đầu
+                    yt_results.sort(key=lambda x: x.get('views', 0), reverse=True)
+                    return yt_results[:6]
         except Exception as ex_api:
             logger.warning(f"Lỗi truy vấn YouTube API search cho '{kw}': {ex_api}")
 
-    # 2. Fallback siêu tốc qua yt-dlp ytsearch8 (Chạy trực tiếp trong 1.5s thay vì cào HTML mất 30s)
+    # 2. Fallback siêu tốc qua yt-dlp ytsearch25 (Chạy trực tiếp thay vì cào HTML)
     try:
         ydl_opts = {
             'quiet': True,
             'skip_download': True,
             'extract_flat': True,
-            'socket_timeout': 5,
-            'playlist_items': '1-8',
+            'socket_timeout': 6,
+            'playlist_items': '1-25',
             'http_headers': {
                 'Accept-Language': f"{hl_lang}-{gl_country},{hl_lang};q=0.9,en;q=0.8"
             }
         }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            search_res = ydl.extract_info(f"ytsearch8:{kw}", download=False)
+            search_res = ydl.extract_info(f"ytsearch25:{kw}", download=False)
             if search_res and search_res.get('entries'):
-                for e in search_res['entries'][:8]:
+                for e in search_res['entries']:
                     if not e:
                         continue
+                    v_id = e.get('id')
+                    if not v_id:
+                        continue
+                    v_title = e.get('title') or ''
+                    v_channel = e.get('channel') or e.get('uploader') or ''
+                    dur = e.get('duration') or 0
+                    v_url = e.get('url') or f"https://www.youtube.com/watch?v={v_id}"
+
+                    # Lọc bỏ Livestream
+                    if e.get('live_status') in ['is_live', 'is_upcoming', 'was_live', 'post_live']:
+                        continue
+                    if any(kw_str in v_title.lower() for kw_str in ['restream', 'livestream', 'live stream', 'trực tiếp', '🔴', 'buổi stream', 'phát trực tiếp']):
+                        continue
+
+                    # LỌC NGHIÊM NGẶT: Tuyệt đối không lấy Shorts hoặc Kênh Shorts
+                    if is_short_video_or_channel(title=v_title, channel_title=v_channel, duration_sec=dur, url=v_url):
+                        continue
+
                     thumb = ""
                     thumbs = e.get('thumbnails', [])
                     if thumbs:
                         thumb = thumbs[-1].get('url') or thumbs[0].get('url', '')
-                    elif e.get('id'):
-                        thumb = f"https://i.ytimg.com/vi/{e.get('id')}/hqdefault.jpg"
+                    elif v_id:
+                        thumb = f"https://i.ytimg.com/vi/{v_id}/hqdefault.jpg"
 
                     yt_results.append({
-                        'id': e.get('id'),
-                        'title': e.get('title') or '',
-                        'channel': e.get('channel') or e.get('uploader'),
+                        'id': v_id,
+                        'title': v_title,
+                        'channel': v_channel,
                         'views': e.get('view_count') or 0,
-                        'url': e.get('url') or f"https://www.youtube.com/watch?v={e.get('id')}",
-                        'thumbnail': thumb
+                        'url': v_url,
+                        'thumbnail': thumb,
+                        'duration_seconds': dur,
+                        'duration_formatted': format_duration_display(dur)
                     })
+                    if len(yt_results) >= 6:
+                        break
     except Exception as yt_err:
         logger.warning(f"Lỗi khi search YouTube yt-dlp cho từ khóa '{kw}': {yt_err}")
 
@@ -415,6 +540,8 @@ def analyze_keyword(req: KeywordAnalysisRequest):
         def add_tag(t_str: str):
             clean_t = str(t_str).strip()
             if clean_t and clean_t.lower() not in seen_tags and len(clean_t) >= 2:
+                if clean_t.lower() in ["shorts", "short", "쇼츠", "shortvideo", "youtubeshorts"]:
+                    return
                 seen_tags.add(clean_t.lower())
                 suggested_tags.append(clean_t)
 
@@ -935,49 +1062,7 @@ def is_published_age_matching_range(pub_text: str, t_range: str) -> bool:
                 
     return True
 
-def parse_iso_duration(dur_str: str) -> int:
-    if not dur_str:
-        return 0
-    m = re.match(r'PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?', dur_str)
-    if not m:
-        return 0
-    h = int(m.group(1) or 0)
-    minute = int(m.group(2) or 0)
-    s = int(m.group(3) or 0)
-    return h * 3600 + minute * 60 + s
 
-def format_duration_display(seconds: int) -> str:
-    if not seconds:
-        return "Video Dài"
-    h = seconds // 3600
-    m = (seconds % 3600) // 60
-    s = seconds % 60
-    if h > 0:
-        return f"{h}:{m:02d}:{s:02d}"
-    return f"{m:02d}:{s:02d}"
-
-def is_stream_video(item: dict) -> bool:
-    """Kiểm tra video có phải là livestream, restream hoặc phát trực tiếp không."""
-    snippet = item.get("snippet", {})
-    title = snippet.get("title", "").lower()
-    lbc = snippet.get("liveBroadcastContent", "none")
-    if lbc in ["live", "upcoming"]:
-        return True
-
-    stream_keywords = [
-        "restream", "livestream", "live stream", "trực tiếp", "🔴", 
-        "buổi stream", "phát trực tiếp", "streamed live", "[live]", "(live)",
-        "giao lưu trực tiếp", "talkshow live", "streamer"
-    ]
-    for kw in stream_keywords:
-        if kw in title:
-            return True
-
-    ls = item.get("liveStreamingDetails")
-    if ls:
-        if ls.get("actualStartTime") or ls.get("scheduledStartTime") or ls.get("concurrentViewers"):
-            return True
-    return False
 
 def format_published_age(pub_iso: str) -> str:
     if not pub_iso:
@@ -1311,12 +1396,13 @@ def get_trending_feed(
                     if is_stream_video(item):
                         continue
 
-                    # 3. LOẠI BỎ TOÀN BỘ SHORTS VÀ VIDEO QUÁ NGẮN (< 180 giây)
+                    # 3. LOẠI BỎ TOÀN BỘ SHORTS VÀ KÊNH SHORTS (< 180 giây hoặc kênh chuyên Shorts)
                     dur_iso = content_det.get("duration", "")
                     dur_seconds = parse_iso_duration(dur_iso)
                     title_raw = snippet.get("title", "")
+                    ch_title_raw = snippet.get("channelTitle", "")
                     
-                    if dur_seconds < 180 or "#shorts" in title_raw.lower() or "shorts" in title_raw.lower().split():
+                    if is_short_video_or_channel(title=title_raw, channel_title=ch_title_raw, duration_sec=dur_seconds, url=f"https://www.youtube.com/watch?v={v_id}"):
                         continue
                     if dur_filter == "deep_dive" and dur_seconds < 1200:
                         continue
@@ -1508,11 +1594,9 @@ def get_trending_feed(
                                 if is_live or any(kw in pub_age.lower() for kw in ['trực tiếp', 'phát trực tiếp', 'stream']) or any(kw in t.lower() for kw in ['restream', 'livestream', '🔴']):
                                     continue
 
-                                # Độ dài
+                                # Độ dài & Lọc Shorts / Kênh Shorts
                                 dur_sec = parse_duration_str_to_seconds(dur_str)
-                                if dur_sec > 0 and dur_sec < 180:
-                                    continue
-                                if '#shorts' in t.lower() or 'shorts' in t.lower().split():
+                                if is_short_video_or_channel(title=t, channel_title=ch_name, duration_sec=dur_sec, url=f"https://www.youtube.com/watch?v={v_id}"):
                                     continue
                                 if dur_filter == "deep_dive" and dur_sec > 0 and dur_sec < 1200:
                                     continue
@@ -1601,11 +1685,12 @@ def get_trending_feed(
                                 continue
                             dur = e.get('duration') or 0
                             t = e.get('title', '')
-                            if dur > 0 and dur < 180:
+                            ch_name = e.get('channel') or e.get('uploader') or 'YouTube Creator'
+
+                            # Lọc Shorts và Kênh Shorts
+                            if is_short_video_or_channel(title=t, channel_title=ch_name, duration_sec=dur, url=e.get('url', '')):
                                 continue
                             if dur_filter == "deep_dive" and dur > 0 and dur < 1200:
-                                continue
-                            if '#shorts' in t.lower() or 'shorts' in t.lower().split():
                                 continue
 
                             if t_range in ["24h", "48h", "7d"] and re.search(r'\b(19\d\d|200\d|201\d|202[0-3])\b', t):
@@ -1616,8 +1701,6 @@ def get_trending_feed(
                             stream_kw = ['restream', 'livestream', 'live stream', 'trực tiếp', '🔴', 'buổi stream', 'phát trực tiếp', 'streamed live']
                             if any(kw in t.lower() for kw in stream_kw):
                                 continue
-
-                            ch_name = e.get('channel') or e.get('uploader') or 'YouTube Creator'
                             pseudo_item = {
                                 'snippet': {
                                     'title': t,
