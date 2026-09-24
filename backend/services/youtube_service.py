@@ -453,8 +453,9 @@ class YouTubeService:
         max_views = max(views_list)
         min_views = min(views_list)
 
-        views_to_subs_ratio = 0.0
-        if subscriber_count > 0:
+        is_subs_hidden = (subscriber_count <= 0)
+        views_to_subs_ratio = None
+        if not is_subs_hidden:
             views_to_subs_ratio = round((avg_views / subscriber_count) * 100, 2)
 
         outlier_threshold = max(avg_views * 1.6, median_views * 1.8)
@@ -498,6 +499,7 @@ class YouTubeService:
             'median_views': median_views,
             'max_views': max_views,
             'min_views': min_views,
+            'is_subs_hidden': is_subs_hidden,
             'views_to_subs_ratio': views_to_subs_ratio,
             'upload_frequency_days': upload_freq_days,
             'upload_cadence_str': upload_cadence_str,

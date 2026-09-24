@@ -187,16 +187,25 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
           <div class="lg:col-span-2 glass-card rounded-2xl p-5 space-y-5">
-            <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
-              <img id="ch-avatar" src="" alt="Avatar" class="w-16 h-16 rounded-2xl object-cover ring-2 ring-rose-500/30 bg-slate-800" />
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center space-x-2">
-                  <h2 id="ch-title" class="text-xl font-bold truncate text-white">Tên Kênh</h2>
-                  <span id="ch-verified" class="hidden text-rose-400" title="Đã xác minh"><i data-lucide="check-circle" class="w-4 h-4 inline"></i></span>
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-3 sm:space-y-0 sm:space-x-4">
+              <div class="flex items-center space-x-4 min-w-0">
+                <img id="ch-avatar" src="" alt="Avatar" class="w-16 h-16 rounded-2xl object-cover ring-2 ring-rose-500/30 bg-slate-800 shrink-0" />
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center space-x-2">
+                    <h2 id="ch-title" class="text-xl font-bold truncate text-white">Tên Kênh</h2>
+                    <span id="ch-verified" class="hidden text-rose-400" title="Đã xác minh"><i data-lucide="check-circle" class="w-4 h-4 inline"></i></span>
+                  </div>
+                  <p id="ch-url" class="text-xs text-slate-400 truncate mt-0.5">https://youtube.com/@channel</p>
+                  <div id="ch-categories" class="flex flex-wrap gap-1.5 mt-2"></div>
                 </div>
-                <p id="ch-url" class="text-xs text-slate-400 truncate mt-0.5">https://youtube.com/@channel</p>
-                <div id="ch-categories" class="flex flex-wrap gap-1.5 mt-2"></div>
               </div>
+              <button 
+                onclick="exportStrategicReport()" 
+                class="px-3.5 py-2 bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white rounded-xl border border-white/10 hover:border-rose-500/40 text-xs font-semibold flex items-center space-x-2 transition shrink-0 shadow-sm" 
+                title="Tải toàn bộ báo cáo chiến lược kênh dạng văn bản">
+                <i data-lucide="file-down" class="w-4 h-4 text-rose-400"></i>
+                <span>Xuất Báo Cáo Kênh</span>
+              </button>
             </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-white/5">
@@ -257,25 +266,29 @@
             <i data-lucide="clock" class="w-4 h-4"></i>
             <span>⏰ 1. Giờ Đăng Vàng (Giờ VN)</span>
           </button>
+          <button onclick="switchSubTab('sub-earnings')" id="sub-btn-earnings" class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 text-slate-400 hover:text-white hover:bg-slate-800">
+            <i data-lucide="dollar-sign" class="w-4 h-4 text-emerald-400"></i>
+            <span>💰 2. Doanh Thu RPM & Tiềm Năng</span>
+          </button>
           <button onclick="switchSubTab('sub-keywords')" id="sub-btn-keywords" class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 text-slate-400 hover:text-white hover:bg-slate-800">
             <i data-lucide="copy" class="w-4 h-4"></i>
-            <span>📋 2. Từ Khóa Bắt Trend 1-Click Copy</span>
+            <span>📋 3. Từ Khóa Bắt Trend 1-Click Copy</span>
           </button>
           <button onclick="switchSubTab('sub-overview')" id="sub-btn-overview" class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 text-slate-400 hover:text-white hover:bg-slate-800">
             <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
-            <span>📊 3. Hiệu Suất Video</span>
+            <span>📊 4. Hiệu Suất Video</span>
           </button>
           <button onclick="switchSubTab('sub-trends')" id="sub-btn-trends" class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 text-slate-400 hover:text-white hover:bg-slate-800">
             <i data-lucide="trending-up" class="w-4 h-4"></i>
-            <span>🌍 4. Google Trends Khu Vực</span>
+            <span>🌍 5. Google Trends Khu Vực</span>
           </button>
           <button onclick="switchSubTab('sub-competitors')" id="sub-btn-competitors" class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 text-slate-400 hover:text-white hover:bg-slate-800">
             <i data-lucide="compass" class="w-4 h-4"></i>
-            <span>👥 5. Kênh Đối Thủ Cùng Ngách</span>
+            <span>👥 6. Kênh Đối Thủ Cùng Ngách</span>
           </button>
           <button onclick="switchSubTab('sub-strategy')" id="sub-btn-strategy" class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 text-slate-400 hover:text-white hover:bg-slate-800">
             <i data-lucide="lightbulb" class="w-4 h-4"></i>
-            <span>💡 6. Mẫu Tiêu Đề Bắt Trend</span>
+            <span>💡 7. Mẫu Tiêu Đề & Đo Điểm CTR</span>
           </button>
         </div>
 
@@ -358,7 +371,129 @@
           </div>
         </div>
 
-        <!-- Subtab 2: Từ Khóa Bắt Trend 1-Click Copy -->
+        <!-- Subtab 2: Dự Toán Doanh Thu RPM & Tiềm Năng -->
+        <div id="sub-earnings" class="subtab-pane hidden space-y-5">
+          <!-- Banner tổng quan RPM -->
+          <div class="p-5 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-slate-900/90 to-slate-900/90 border border-emerald-500/25 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div class="space-y-1.5">
+              <div class="inline-flex items-center space-x-2 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold">
+                <i data-lucide="trending-up" class="w-3.5 h-3.5 text-emerald-400"></i>
+                <span>Chỉ Số Doanh Thu AdSense Ước Tính Theo Ngách & Thị Trường Mục Tiêu</span>
+              </div>
+              <h3 class="text-lg font-bold text-white flex items-center space-x-2 flex-wrap">
+                <span>Mức RPM Ước Tính:</span>
+                <span id="rpm-display-usd" class="text-emerald-400 text-2xl font-black">$0.00</span>
+                <span class="text-xs text-slate-400 font-normal">/ 1.000 lượt xem</span>
+              </h3>
+              <p id="rpm-display-vnd" class="text-xs text-slate-300">Tương đương khoảng <strong class="text-amber-300 font-semibold">0 VNĐ</strong> / 1.000 view</p>
+            </div>
+            <div class="p-3 bg-slate-900/80 rounded-xl border border-white/10 text-xs space-y-1 shrink-0 min-w-[210px]">
+              <div class="text-slate-400 flex justify-between"><span>Biên độ thấp nhất:</span> <strong id="rpm-min-usd" class="text-white">$0.00</strong></div>
+              <div class="text-slate-400 flex justify-between"><span>Biên độ cao nhất:</span> <strong id="rpm-max-usd" class="text-white">$0.00</strong></div>
+              <div class="text-[10px] text-emerald-400/80 pt-1 border-t border-white/5">Tỷ giá quy đổi: 1 USD ≈ 25.400đ</div>
+            </div>
+          </div>
+
+          <!-- Bảng 3 mốc doanh thu: 10k, 100k, 1M view -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="glass-card rounded-2xl p-5 border-t-4 border-t-indigo-500 space-y-2">
+              <div class="flex items-center justify-between text-xs text-slate-400">
+                <span class="font-semibold text-indigo-300 uppercase tracking-wider">MỐC 10.000 VIEW</span>
+                <i data-lucide="video" class="w-4 h-4 text-indigo-400"></i>
+              </div>
+              <div id="earn-10k-usd" class="text-2xl font-black text-white">$0</div>
+              <p id="earn-10k-vnd" class="text-xs font-semibold text-amber-400">≈ 0 VNĐ</p>
+              <p class="text-[11px] text-slate-400">Doanh thu tối thiểu đạt được khi video có lượng tương tác cơ bản.</p>
+            </div>
+
+            <div class="glass-card rounded-2xl p-5 border-t-4 border-t-emerald-500 space-y-2">
+              <div class="flex items-center justify-between text-xs text-slate-400">
+                <span class="font-semibold text-emerald-300 uppercase tracking-wider">MỐC 100.000 VIEW</span>
+                <i data-lucide="zap" class="w-4 h-4 text-emerald-400"></i>
+              </div>
+              <div id="earn-100k-usd" class="text-2xl font-black text-white">$0</div>
+              <p id="earn-100k-vnd" class="text-xs font-semibold text-amber-400">≈ 0 VNĐ</p>
+              <p class="text-[11px] text-slate-400">Mốc video bắt đầu được YouTube đề xuất mạnh trên trang chủ.</p>
+            </div>
+
+            <div class="glass-card rounded-2xl p-5 border-t-4 border-t-amber-500 space-y-2">
+              <div class="flex items-center justify-between text-xs text-slate-400">
+                <span class="font-semibold text-amber-300 uppercase tracking-wider">MỐC 1.000.000 VIEW (TRIỆU VIEW)</span>
+                <i data-lucide="award" class="w-4 h-4 text-amber-400"></i>
+              </div>
+              <div id="earn-1m-usd" class="text-2xl font-black text-white">$0</div>
+              <p id="earn-1m-vnd" class="text-xs font-semibold text-amber-400">≈ 0 VNĐ</p>
+              <p class="text-[11px] text-slate-400">Doanh thu đột phá khi video trở thành video xu hướng viral.</p>
+            </div>
+          </div>
+
+          <!-- Thu nhập tháng ước tính của kênh & Thanh trượt mô phỏng -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <!-- Thu nhập tháng theo nhịp độ kênh -->
+            <div class="glass-card rounded-2xl p-5 space-y-3">
+              <div class="flex items-center justify-between">
+                <h4 class="text-sm font-bold text-white flex items-center space-x-2">
+                  <i data-lucide="calendar" class="w-4 h-4 text-rose-400"></i>
+                  <span>Ước Tính Doanh Thu Hàng Tháng Của Kênh</span>
+                </h4>
+                <span id="monthly-video-count-badge" class="px-2 py-0.5 rounded bg-slate-800 text-[11px] text-slate-300 font-mono">4 video/tháng</span>
+              </div>
+              <p class="text-xs text-slate-400">Dựa trên view trung bình của các video dài gần đây và tần suất đăng video của kênh:</p>
+              
+              <div class="p-4 bg-slate-900/80 rounded-xl border border-white/5 flex items-center justify-between">
+                <div>
+                  <div class="text-[11px] text-slate-400 uppercase tracking-wider">Tiềm Năng Tháng (USD)</div>
+                  <div id="monthly-earn-usd" class="text-2xl font-black text-emerald-400">$0 - $0</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-[11px] text-slate-400 uppercase tracking-wider">Tiềm Năng Tháng (VNĐ)</div>
+                  <div id="monthly-earn-vnd" class="text-base font-bold text-amber-300">0đ - 0đ</div>
+                </div>
+              </div>
+              <p class="text-[11px] text-slate-400 italic leading-relaxed">* Lưu ý: Thu nhập thực tế phụ thuộc thêm vào thời lượng xem trung bình (Audience Retention), tỷ lệ khán giả xem từ máy tính/TV và mùa quảng cáo trong năm (Q4 thường cao hơn Q1).</p>
+            </div>
+
+            <!-- Thanh trượt Interactive Calculator -->
+            <div class="glass-card rounded-2xl p-5 space-y-4">
+              <div class="flex items-center justify-between">
+                <h4 class="text-sm font-bold text-white flex items-center space-x-2">
+                  <i data-lucide="sliders" class="w-4 h-4 text-emerald-400"></i>
+                  <span>Thanh Trượt Tính Doanh Thu Tùy Chọn</span>
+                </h4>
+                <span id="custom-views-display" class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold font-mono">250.000 views</span>
+              </div>
+              <input 
+                id="interactive-views-slider" 
+                type="range" 
+                min="5000" 
+                max="2000000" 
+                step="5000" 
+                value="250000" 
+                oninput="onViewsSliderChange(this.value)"
+                class="w-full accent-emerald-500 cursor-pointer h-2 bg-slate-800 rounded-lg"
+              />
+              <div class="flex justify-between text-[10px] text-slate-500 font-mono">
+                <span>5K</span>
+                <span>250K</span>
+                <span>500K</span>
+                <span>1M</span>
+                <span>2M</span>
+              </div>
+              <div class="p-4 bg-slate-900/90 rounded-xl border border-emerald-500/20 flex items-center justify-between">
+                <div>
+                  <div class="text-[10px] text-slate-400 uppercase">Doanh thu dự tính</div>
+                  <div id="slider-result-usd" class="text-xl font-black text-white">$0.00</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-[10px] text-slate-400 uppercase">Quy đổi tiền Việt</div>
+                  <div id="slider-result-vnd" class="text-lg font-bold text-amber-300">0 VNĐ</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Subtab 3: Từ Khóa Bắt Trend 1-Click Copy -->
         <div id="sub-keywords" class="subtab-pane hidden space-y-5">
           <div class="glass-card rounded-2xl p-5 space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -493,18 +628,142 @@
           </div>
         </div>
 
-        <!-- Subtab 6: Mẫu Tiêu Đề Bắt Trend -->
-        <div id="sub-strategy" class="subtab-pane hidden space-y-5">
+        <!-- Subtab 7: Mẫu Tiêu Đề Bắt Trend & Đo Điểm CTR -->
+        <div id="sub-strategy" class="subtab-pane hidden space-y-6">
+          
+          <!-- Bộ Chấm Điểm & Tối Ưu Hóa Tiêu Đề YouTube (CTR Scorer & Optimizer) -->
+          <div class="glass-card rounded-2xl p-6 space-y-5 border border-amber-500/20 shadow-xl">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/5">
+              <div>
+                <h3 class="text-base font-bold text-white flex items-center space-x-2">
+                  <i data-lucide="sparkles" class="w-5 h-5 text-amber-400"></i>
+                  <span>Công Cụ Đo Điểm CTR & Tối Ưu Tiêu Đề YouTube</span>
+                </h3>
+                <p class="text-xs text-slate-400">Kiểm tra ngay tiêu đề trước khi xuất bản để tối đa hóa tỷ lệ nhấp chuột (Click-Through Rate)</p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span class="text-xs text-slate-400">Điểm CTR:</span>
+                <span id="title-score-badge" class="px-3 py-1 rounded-full text-xs font-black bg-slate-800 text-slate-400 border border-white/10">0 / 100</span>
+              </div>
+            </div>
+
+            <!-- Input Form for Title -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between text-xs font-semibold">
+                <span class="text-slate-300">Nhập tiêu đề video thử nghiệm:</span>
+                <span id="title-char-counter" class="font-mono text-slate-400">0/100 ký tự (Lý tưởng: 45 - 65)</span>
+              </div>
+              <div class="relative">
+                <input 
+                  id="title-scorer-input" 
+                  type="text" 
+                  oninput="scoreCurrentTitle(this.value)" 
+                  placeholder="Ví dụ: [SỰ THẬT] 7 Dấu Hiệu Bạn Đang Bị Lợi Dụng Mà Không Hề Hay Biết..." 
+                  class="w-full px-4 py-3.5 glass-input rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 text-white placeholder:text-slate-500 shadow-inner pr-24"
+                />
+                <button 
+                  type="button"
+                  onclick="clearTitleScorer()" 
+                  class="absolute right-2.5 top-1/2 -translate-y-1/2 px-2.5 py-1 text-xs bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-lg transition">
+                  Xóa
+                </button>
+              </div>
+              <p id="title-score-feedback" class="text-xs text-slate-400 italic">Nhập tiêu đề để xem phân tích thuật toán click-through rate thời gian thực.</p>
+            </div>
+
+            <!-- 4 tiêu chuẩn chấm điểm CTR -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <!-- Tiêu chuẩn 1: Độ dài -->
+              <div id="crit-length" class="p-3.5 bg-slate-900/80 rounded-xl border border-white/5 space-y-1.5 transition">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-bold text-slate-300 flex items-center space-x-1.5">
+                    <i data-lucide="ruler" class="w-3.5 h-3.5 text-blue-400"></i>
+                    <span>1. Độ Dài Tối Ưu</span>
+                  </span>
+                  <span id="crit-length-status" class="px-1.5 py-0.5 rounded text-[10px] bg-slate-800 text-slate-400 font-semibold">Chưa đạt</span>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-tight">45-65 ký tự hiển thị trọn vẹn trên YouTube Mobile mà không bị dấu "..." cắt bớt.</p>
+              </div>
+
+              <!-- Tiêu chuẩn 2: Từ ngữ thôi miên -->
+              <div id="crit-power" class="p-3.5 bg-slate-900/80 rounded-xl border border-white/5 space-y-1.5 transition">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-bold text-slate-300 flex items-center space-x-1.5">
+                    <i data-lucide="flame" class="w-3.5 h-3.5 text-rose-400"></i>
+                    <span>2. Từ Ngữ Thôi Miên</span>
+                  </span>
+                  <span id="crit-power-status" class="px-1.5 py-0.5 rounded text-[10px] bg-slate-800 text-slate-400 font-semibold">0 từ</span>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-tight">Từ kích thích cảm xúc & tò mò: Shocking, Insane, Bí Mật, Sự Thật, Tại Sao, Không Ngờ...</p>
+              </div>
+
+              <!-- Tiêu chuẩn 3: Con số / Dữ liệu -->
+              <div id="crit-number" class="p-3.5 bg-slate-900/80 rounded-xl border border-white/5 space-y-1.5 transition">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-bold text-slate-300 flex items-center space-x-1.5">
+                    <i data-lucide="hash" class="w-3.5 h-3.5 text-amber-400"></i>
+                    <span>3. Con Số & Dữ Liệu</span>
+                  </span>
+                  <span id="crit-number-status" class="px-1.5 py-0.5 rounded text-[10px] bg-slate-800 text-slate-400 font-semibold">Thiếu số</span>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-tight">Tiêu đề có số (VD: 3, 5, 7, 2026, 24H, $1000) tăng trung bình +25% lượt click.</p>
+              </div>
+
+              <!-- Tiêu chuẩn 4: Dấu ngoặc vuông/tròn -->
+              <div id="crit-brackets" class="p-3.5 bg-slate-900/80 rounded-xl border border-white/5 space-y-1.5 transition">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-bold text-slate-300 flex items-center space-x-1.5">
+                    <i data-lucide="tag" class="w-3.5 h-3.5 text-emerald-400"></i>
+                    <span>4. Móc Câu [] ()</span>
+                  </span>
+                  <span id="crit-brackets-status" class="px-1.5 py-0.5 rounded text-[10px] bg-slate-800 text-slate-400 font-semibold">Chưa có</span>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-tight">Dấu [TẬP 1], (SỰ THẬT), [4K], (AITA) đóng vai trò điểm dừng thị giác mạnh mẽ.</p>
+              </div>
+            </div>
+
+            <!-- YouTube Mobile Card Preview -->
+            <div class="p-4 bg-slate-950/80 rounded-xl border border-white/10 space-y-2">
+              <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-1.5">
+                <i data-lucide="smartphone" class="w-3.5 h-3.5 text-rose-400"></i>
+                <span>Mô Phỏng Hiển Thị Trên Ứng Dụng YouTube Mobile:</span>
+              </span>
+              <div class="max-w-md mx-auto sm:mx-0 p-3 bg-slate-900 rounded-xl border border-white/5 space-y-2.5 shadow-lg">
+                <div class="relative w-full aspect-video bg-slate-800 rounded-lg overflow-hidden flex items-center justify-center border border-white/5">
+                  <div class="text-slate-600 flex flex-col items-center space-y-1">
+                    <i data-lucide="play" class="w-8 h-8 text-slate-600"></i>
+                    <span class="text-[10px]">Thumbnail Video (16:9)</span>
+                  </div>
+                  <span class="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 bg-black/80 text-white text-[10px] font-bold rounded">18:42</span>
+                </div>
+                <div class="flex items-start space-x-3">
+                  <div id="preview-mobile-avatar" class="w-9 h-9 rounded-full bg-gradient-to-tr from-rose-500 to-amber-500 shrink-0 flex items-center justify-center font-bold text-xs text-white shadow overflow-hidden">
+                    YT
+                  </div>
+                  <div class="flex-1 min-w-0 space-y-0.5">
+                    <p id="preview-mobile-title" class="text-xs font-semibold text-white line-clamp-2 leading-snug">
+                      Tiêu đề video của bạn sẽ hiển thị tại đây...
+                    </p>
+                    <p class="text-[11px] text-slate-400 truncate">
+                      <span id="preview-mobile-channel">Kênh Của Bạn</span> • 185K lượt xem • 1 ngày trước
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Danh Sách Các Mẫu Tiêu Đề Bắt Trend -->
           <div class="glass-card rounded-2xl p-5 space-y-4">
             <div>
               <h3 class="text-base font-bold text-white flex items-center space-x-2">
                 <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
-                <span>Gợi Ý Cấu Trúc Tiêu Đề Bắt Trend & Tăng CTR</span>
+                <span>Gợi Ý Cấu Trúc Tiêu Đề Bắt Trend & Tăng CTR Theo Ngách</span>
               </h3>
-              <p class="text-xs text-slate-400">Các công thức tiêu đề áp dụng thành công nhất trong ngách này cho người làm view ngoại</p>
+              <p class="text-xs text-slate-400">Các công thức tiêu đề áp dụng thành công nhất trong ngách này cho người làm view ngoại. Nhấn "Thử Ngay" để đưa vào bộ đo điểm!</p>
             </div>
             <div id="title-templates" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <!-- Templates -->
+              <!-- Templates rendered here -->
             </div>
           </div>
         </div>
@@ -942,6 +1201,27 @@
     let trendChartInstance = null;
     let kwChartInstance = null;
     let savedApiKey = '';
+    let currentAvgRpmUSD = 2.5;
+
+    const USD_VND_RATE = 25400;
+
+    const COUNTRY_NAMES = {
+      "US": "Hoa Kỳ (Mỹ)", "GB": "Anh Quốc (UK)", "JP": "Nhật Bản (JP)", "KR": "Hàn Quốc (KR)",
+      "DE": "Đức (DE)", "FR": "Pháp (FR)", "IT": "Ý (IT)", "IN": "Ấn Độ (IN)", "BR": "Brazil (BR)", "VN": "Việt Nam (VN)", "": "Toàn Cầu"
+    };
+
+    const GEO_BASE_RPM = {
+      "US": 3.8, "GB": 3.4, "DE": 3.2, "FR": 2.8, "IT": 2.6,
+      "JP": 2.5, "KR": 2.4, "VN": 0.85, "BR": 0.95, "IN": 0.65, "GLOBAL": 2.2
+    };
+
+    const NICHE_RPM_MULTIPLIERS = {
+      "finance_money": 2.3, "tech_ai": 1.85, "learn_english": 1.45, "philosophy": 1.35,
+      "elderly_wisdom": 1.25, "true_crime": 1.25, "history_geopolitics": 1.30, "space_science": 1.35,
+      "horror_stories": 1.10, "spicy_18_drama": 1.15, "father_inlaw_drama": 1.15,
+      "mother_inlaw_drama": 1.15, "infidelity_revenge": 1.15, "drama_expose": 1.10,
+      "reddit_stories": 1.10, "buddhism": 1.05, "recap_stories": 0.95, "gaming": 0.75, "entertainment": 0.85
+    };
 
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
@@ -1292,12 +1572,8 @@
       document.getElementById('channel-results').classList.remove('hidden');
 
       // Target country display labels
-      const countryNames = {
-        "US": "Hoa Kỳ (Mỹ)", "GB": "Anh Quốc (UK)", "JP": "Nhật Bản (JP)", "KR": "Hàn Quốc (KR)",
-        "DE": "Đức (DE)", "FR": "Pháp (FR)", "IT": "Ý (IT)", "IN": "Ấn Độ (IN)", "BR": "Brazil (BR)", "VN": "Việt Nam (VN)", "": "Toàn Cầu"
-      };
       const geoCode = (trend_momentum?.target_geo || publish_time_analysis?.target_country_code || 'US').toUpperCase();
-      const geoDisplayName = countryNames[geoCode] || publish_time_analysis?.target_country_name || geoCode;
+      const geoDisplayName = COUNTRY_NAMES[geoCode] || publish_time_analysis?.target_country_name || geoCode;
 
       const hotnessLabel = document.getElementById('target-country-hotness-label');
       if (hotnessLabel) {
@@ -1328,10 +1604,12 @@
       document.getElementById('ch-title').textContent = channel_info.title || 'Kênh YouTube';
       document.getElementById('ch-avatar').src = channel_info.avatar_url || 'https://via.placeholder.com/80';
       document.getElementById('ch-url').textContent = channel_info.channel_url || '';
-      document.getElementById('ch-subs').textContent = formatNumber(channel_info.subscriber_count);
+      
+      const isSubsHidden = channel_info.is_subs_hidden || (channel_info.subscriber_count <= 0);
+      document.getElementById('ch-subs').textContent = isSubsHidden ? 'Ẩn số sub' : formatNumber(channel_info.subscriber_count);
       document.getElementById('ch-avg-views').textContent = formatNumber(channel_info.avg_views);
       document.getElementById('ch-cadence').textContent = `${channel_info.cadence_days ? channel_info.cadence_days + ' ngày/video' : 'Hàng tuần'}`;
-      document.getElementById('ch-ratio').textContent = `${channel_info.view_to_sub_ratio !== undefined ? Number(channel_info.view_to_sub_ratio).toFixed(1) : 0}%`;
+      document.getElementById('ch-ratio').textContent = isSubsHidden ? 'N/A (Ẩn Sub)' : `${channel_info.view_to_sub_ratio !== undefined && channel_info.view_to_sub_ratio !== null ? Number(channel_info.view_to_sub_ratio).toFixed(1) : 0}%`;
 
       const catsEl = document.getElementById('ch-categories');
       catsEl.innerHTML = '';
@@ -1415,6 +1693,23 @@
       // Competitors & Strategies
       renderCompetitors(competitor_sources || []);
       renderTitleTemplates(strategy_recommendations.title_templates || []);
+
+      // RPM & Estimated Earnings
+      if (data.estimated_earnings) {
+        renderEstimatedEarnings(data.estimated_earnings);
+      }
+
+      // Sync Title Scorer Mobile Preview
+      const previewMobileChannel = document.getElementById('preview-mobile-channel');
+      if (previewMobileChannel) previewMobileChannel.textContent = channel_info.title || 'Kênh Của Bạn';
+      const previewMobileAvatar = document.getElementById('preview-mobile-avatar');
+      if (previewMobileAvatar) {
+        if (channel_info.avatar_url) {
+          previewMobileAvatar.innerHTML = `<img src="${channel_info.avatar_url}" class="w-full h-full object-cover" />`;
+        } else {
+          previewMobileAvatar.textContent = (channel_info.title || 'YT')[0].toUpperCase();
+        }
+      }
 
       lucide.createIcons();
     }
@@ -1716,7 +2011,7 @@
       const niche = NICHE_CLIENT_PROFILES[nicheKey] || NICHE_CLIENT_PROFILES.general;
       const geoCode = (currentChannelData?.trend_momentum?.target_geo || currentChannelData?.publish_time_analysis?.target_country_code || 'US').toUpperCase();
       const offset = COUNTRY_OFFSETS[geoCode] !== undefined ? COUNTRY_OFFSETS[geoCode] : -5;
-      const countryName = countryNames[geoCode] || geoCode;
+      const countryName = COUNTRY_NAMES[geoCode] || geoCode;
 
       const slot1 = formatVnTimeRange(niche.upload_1_start, niche.upload_1_end, offset);
       const slot2 = formatVnTimeRange(niche.upload_2_start, niche.upload_2_end, offset);
@@ -1741,7 +2036,43 @@
         strategyText.textContent = `🎯 Chủ đề: ${niche.name_vi} | Thị trường: ${countryName}. ${niche.behavior_insight} Khuyến nghị đăng Khung 1 (${slot1}) hoặc Khung 2 (${slot2}) theo giờ VN.`;
       }
 
-      showToast(`Đã chuyển lịch đăng sang ngách: ${niche.name_vi}`);
+      // Dynamic RPM & Earnings recalculation on niche switch
+      const baseRpm = GEO_BASE_RPM[geoCode] || GEO_BASE_RPM["GLOBAL"] || 2.2;
+      const mult = NICHE_RPM_MULTIPLIERS[nicheKey] || 1.0;
+      const avgRpm = parseFloat((baseRpm * mult).toFixed(2));
+      const minRpm = parseFloat((avgRpm * 0.70).toFixed(2));
+      const maxRpm = parseFloat((avgRpm * 1.45).toFixed(2));
+
+      const avgViews = currentChannelData?.channel_info?.avg_views || 25000;
+      const cadence = currentChannelData?.channel_info?.cadence_days || 7.0;
+      const videosPerMonth = parseFloat(Math.min(60.0, 30.0 / Math.max(1.0, cadence)).toFixed(1));
+      const monthlyViews = Math.round(videosPerMonth * avgViews);
+
+      const newEarnings = {
+        target_geo: geoCode,
+        niche_key: nicheKey,
+        rpm_usd: { min: minRpm, max: maxRpm, avg: avgRpm },
+        rpm_vnd: { min: Math.round(minRpm * USD_VND_RATE), max: Math.round(maxRpm * USD_VND_RATE), avg: Math.round(avgRpm * USD_VND_RATE) },
+        earnings_10k: { usd: parseFloat((avgRpm * 10).toFixed(1)), vnd: Math.round(avgRpm * 10 * USD_VND_RATE) },
+        earnings_100k: { usd: parseFloat((avgRpm * 100).toFixed(1)), vnd: Math.round(avgRpm * 100 * USD_VND_RATE) },
+        earnings_1m: { usd: parseFloat((avgRpm * 1000).toFixed(1)), vnd: Math.round(avgRpm * 1000 * USD_VND_RATE) },
+        monthly_estimate: {
+          videos_per_month: videosPerMonth,
+          estimated_views: monthlyViews,
+          usd_min: parseFloat(((monthlyViews / 1000) * minRpm).toFixed(1)),
+          usd_max: parseFloat(((monthlyViews / 1000) * maxRpm).toFixed(1)),
+          usd_avg: parseFloat(((monthlyViews / 1000) * avgRpm).toFixed(1)),
+          vnd_min: Math.round(((monthlyViews / 1000) * minRpm) * USD_VND_RATE),
+          vnd_max: Math.round(((monthlyViews / 1000) * maxRpm) * USD_VND_RATE),
+          vnd_avg: Math.round(((monthlyViews / 1000) * avgRpm) * USD_VND_RATE)
+        }
+      };
+      if (currentChannelData) {
+        currentChannelData.estimated_earnings = newEarnings;
+      }
+      renderEstimatedEarnings(newEarnings);
+
+      showToast(`Đã chuyển lịch đăng & RPM sang ngách: ${niche.name_vi}`);
     }
 
     function renderTagsPool(tags) {
@@ -1877,11 +2208,7 @@
       const targetLabel = document.getElementById('trends-target-label');
       if (targetLabel) {
         const geoCode = (trend.target_geo || 'US').toUpperCase();
-        const countryNames = {
-          "US": "Hoa Kỳ (Mỹ)", "GB": "Anh Quốc (UK)", "JP": "Nhật Bản (JP)", "KR": "Hàn Quốc (KR)",
-          "DE": "Đức (DE)", "FR": "Pháp (FR)", "IT": "Ý (IT)", "IN": "Ấn Độ (IN)", "BR": "Brazil (BR)", "VN": "Việt Nam (VN)"
-        };
-        targetLabel.textContent = `Mục tiêu: ${countryNames[geoCode] || geoCode}`;
+        targetLabel.textContent = `Mục tiêu: ${COUNTRY_NAMES[geoCode] || geoCode}`;
       }
 
       const ctx = document.getElementById('googleTrendsChart').getContext('2d');
@@ -2012,23 +2339,392 @@
 
     function renderTitleTemplates(templates) {
       const el = document.getElementById('title-templates');
+      if (!el) return;
       el.innerHTML = '';
       (templates || []).forEach(t => {
+        const rawTemplate = t.template || '';
+        const safeTemplateAttr = rawTemplate.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         const card = document.createElement('div');
-        card.className = 'p-4 bg-slate-900/60 rounded-2xl border border-white/5 space-y-2';
+        card.className = 'p-4 bg-slate-900/60 rounded-2xl border border-white/5 space-y-2.5 hover:border-amber-500/30 transition flex flex-col justify-between';
         card.innerHTML = `
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold text-amber-400 uppercase tracking-wider">${t.type || 'Công Thức'}</span>
-            <button onclick="navigator.clipboard.writeText('${t.template}'); showToast('Đã copy mẫu tiêu đề!')" class="text-slate-400 hover:text-white p-1">
-              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-amber-400 uppercase tracking-wider">${t.type || 'Công Thức'}</span>
+              <button onclick="navigator.clipboard.writeText('${safeTemplateAttr}'); showToast('Đã copy mẫu tiêu đề!')" class="text-slate-400 hover:text-white p-1 transition" title="Copy mẫu tiêu đề">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+            <p class="text-xs font-semibold text-white leading-relaxed">${rawTemplate}</p>
+            <p class="text-[11px] text-slate-400">${t.rationale || ''}</p>
+          </div>
+          <div class="pt-2 border-t border-white/5 flex items-center justify-between gap-2">
+            <button onclick="applyTitleTemplate('${safeTemplateAttr}')" class="w-full py-1.5 px-3 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 hover:text-amber-200 text-xs font-semibold rounded-xl border border-amber-500/30 transition flex items-center justify-center space-x-1.5">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+              <span>Thử Chấm Điểm Mẫu Này</span>
             </button>
           </div>
-          <p class="text-xs font-medium text-white">${t.template}</p>
-          <p class="text-[11px] text-slate-400">${t.rationale || ''}</p>
         `;
         el.appendChild(card);
       });
       lucide.createIcons();
+    }
+
+    function renderEstimatedEarnings(earnings) {
+      if (!earnings) return;
+      const rpmUsd = earnings.rpm_usd || { min: 2.0, max: 4.5, avg: 3.0 };
+      const rpmVnd = earnings.rpm_vnd || { min: 50800, max: 114300, avg: 76200 };
+      const e10k = earnings.earnings_10k || { usd: 30, vnd: 762000 };
+      const e100k = earnings.earnings_100k || { usd: 300, vnd: 7620000 };
+      const e1m = earnings.earnings_1m || { usd: 3000, vnd: 76200000 };
+      const mEst = earnings.monthly_estimate || {
+        videos_per_month: 4.0, estimated_views: 100000,
+        usd_min: 200, usd_max: 450, usd_avg: 300,
+        vnd_min: 5080000, vnd_max: 11430000, vnd_avg: 7620000
+      };
+
+      currentAvgRpmUSD = rpmUsd.avg || 2.5;
+
+      const rpmDispUsd = document.getElementById('rpm-display-usd');
+      if (rpmDispUsd) rpmDispUsd.textContent = `$${rpmUsd.avg.toFixed(2)}`;
+
+      const rpmDispVnd = document.getElementById('rpm-display-vnd');
+      if (rpmDispVnd) {
+        rpmDispVnd.innerHTML = `Tương đương khoảng <strong class="text-amber-300 font-semibold">${formatNumber(rpmVnd.avg)} VNĐ</strong> / 1.000 view`;
+      }
+
+      const rpmMin = document.getElementById('rpm-min-usd');
+      if (rpmMin) rpmMin.textContent = `$${rpmUsd.min.toFixed(2)}`;
+
+      const rpmMax = document.getElementById('rpm-max-usd');
+      if (rpmMax) rpmMax.textContent = `$${rpmUsd.max.toFixed(2)}`;
+
+      // 3 Tiers
+      const earn10kUsd = document.getElementById('earn-10k-usd');
+      if (earn10kUsd) earn10kUsd.textContent = `$${e10k.usd}`;
+      const earn10kVnd = document.getElementById('earn-10k-vnd');
+      if (earn10kVnd) earn10kVnd.textContent = `≈ ${formatNumber(e10k.vnd)} VNĐ`;
+
+      const earn100kUsd = document.getElementById('earn-100k-usd');
+      if (earn100kUsd) earn100kUsd.textContent = `$${e100k.usd}`;
+      const earn100kVnd = document.getElementById('earn-100k-vnd');
+      if (earn100kVnd) earn100kVnd.textContent = `≈ ${formatNumber(e100k.vnd)} VNĐ`;
+
+      const earn1mUsd = document.getElementById('earn-1m-usd');
+      if (earn1mUsd) earn1mUsd.textContent = `$${e1m.usd}`;
+      const earn1mVnd = document.getElementById('earn-1m-vnd');
+      if (earn1mVnd) earn1mVnd.textContent = `≈ ${formatNumber(e1m.vnd)} VNĐ`;
+
+      // Monthly channel estimate
+      const mVideoBadge = document.getElementById('monthly-video-count-badge');
+      if (mVideoBadge) mVideoBadge.textContent = `${mEst.videos_per_month} video/tháng (~${formatNumber(mEst.estimated_views)} views)`;
+
+      const mEarnUsd = document.getElementById('monthly-earn-usd');
+      if (mEarnUsd) mEarnUsd.textContent = `$${formatNumber(mEst.usd_min)} - $${formatNumber(mEst.usd_max)}`;
+
+      const mEarnVnd = document.getElementById('monthly-earn-vnd');
+      if (mEarnVnd) mEarnVnd.textContent = `${formatNumber(mEst.vnd_min)}đ - ${formatNumber(mEst.vnd_max)}đ`;
+
+      // Update interactive slider
+      const slider = document.getElementById('interactive-views-slider');
+      const curViews = slider ? parseInt(slider.value) : 250000;
+      onViewsSliderChange(curViews);
+    }
+
+    function onViewsSliderChange(views) {
+      const v = Math.max(0, parseInt(views) || 0);
+      const customViewsDisplay = document.getElementById('custom-views-display');
+      if (customViewsDisplay) {
+        customViewsDisplay.textContent = `${formatNumber(v)} views`;
+      }
+
+      const activeRpm = currentAvgRpmUSD || 2.5;
+      const usdTotal = (v / 1000.0) * activeRpm;
+      const vndTotal = usdTotal * USD_VND_RATE;
+
+      const resUsd = document.getElementById('slider-result-usd');
+      if (resUsd) {
+        resUsd.textContent = `$${usdTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      }
+
+      const resVnd = document.getElementById('slider-result-vnd');
+      if (resVnd) {
+        resVnd.textContent = `${formatNumber(Math.round(vndTotal))} VNĐ`;
+      }
+    }
+
+    const TITLE_POWER_WORDS = [
+      "SHOCKING", "INSANE", "REVEALED", "SECRET", "SECRETS", "TRUTH", "WHY", "NEVER",
+      "MISTAKE", "MISTAKES", "EXPOSED", "HOW TO", "DON'T", "WARNING", "PROOF",
+      "UNBELIEVABLE", "WORST", "BEST", "FINALLY", "REAL", "CONFESSION", "STORY",
+      "BÍ MẬT", "SỰ THẬT", "KINH HOÀNG", "CỰC SỐC", "CẢNH BÁO", "SAI LẦM", "ĐỪNG",
+      "LÝ DO", "TẠI SAO", "BÓC PHỐT", "BẤT NGỜ", "KHÔNG NGỜ", "CHẤN ĐỘNG", "TỘI ÁC",
+      "HỐI HẬN", "TRẢ THÙ", "NGOẠI TÌNH", "BẮT GIAN", "KỲ ÁN", "THẢM KỊCH"
+    ];
+
+    function scoreCurrentTitle(title) {
+      const t = (title || '').trim();
+      const lengthStatus = document.getElementById('crit-length-status');
+      const powerStatus = document.getElementById('crit-power-status');
+      const numberStatus = document.getElementById('crit-number-status');
+      const bracketsStatus = document.getElementById('crit-brackets-status');
+      const badgeEl = document.getElementById('title-score-badge');
+      const feedbackEl = document.getElementById('title-score-feedback');
+      const counterEl = document.getElementById('title-char-counter');
+      const previewTitle = document.getElementById('preview-mobile-title');
+
+      if (previewTitle) {
+        previewTitle.textContent = t || 'Tiêu đề video của bạn sẽ hiển thị tại đây...';
+      }
+
+      if (!t) {
+        if (badgeEl) {
+          badgeEl.className = 'px-3 py-1 rounded-full text-xs font-black bg-slate-800 text-slate-400 border border-white/10';
+          badgeEl.textContent = '0 / 100';
+        }
+        if (counterEl) counterEl.textContent = '0/100 ký tự (Lý tưởng: 45 - 65)';
+        if (feedbackEl) feedbackEl.textContent = 'Nhập tiêu đề để xem phân tích thuật toán click-through rate thời gian thực.';
+        [lengthStatus, powerStatus, numberStatus, bracketsStatus].forEach(s => {
+          if (s) { s.className = 'px-1.5 py-0.5 rounded text-[10px] bg-slate-800 text-slate-400 font-semibold'; s.textContent = 'Chưa đạt'; }
+        });
+        return;
+      }
+
+      let score = 0;
+      const len = t.length;
+
+      // 1. Length scoring (0 - 25)
+      let lenScore = 0;
+      if (len >= 45 && len <= 65) {
+        lenScore = 25;
+        if (lengthStatus) {
+          lengthStatus.className = 'px-1.5 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300 font-bold';
+          lengthStatus.textContent = `${len} ký tự (Tối ưu)`;
+        }
+      } else if (len >= 35 && len <= 75) {
+        lenScore = 18;
+        if (lengthStatus) {
+          lengthStatus.className = 'px-1.5 py-0.5 rounded text-[10px] bg-amber-500/20 text-amber-300 font-bold';
+          lengthStatus.textContent = `${len} ký tự (Khá tốt)`;
+        }
+      } else if (len > 75) {
+        lenScore = 8;
+        if (lengthStatus) {
+          lengthStatus.className = 'px-1.5 py-0.5 rounded text-[10px] bg-rose-500/20 text-rose-300 font-bold';
+          lengthStatus.textContent = `${len} ký tự (Bị cắt)`;
+        }
+      } else {
+        lenScore = 10;
+        if (lengthStatus) {
+          lengthStatus.className = 'px-1.5 py-0.5 rounded text-[10px] bg-slate-800 text-slate-300 font-bold';
+          lengthStatus.textContent = `${len} ký tự (Hơi ngắn)`;
+        }
+      }
+      score += lenScore;
+      if (counterEl) {
+        counterEl.textContent = `${len}/100 ký tự ${len >= 45 && len <= 65 ? '✅ Tối ưu hiển thị điện thoại' : (len > 70 ? '⚠️ Dễ bị cắt trên điện thoại' : '⚠️ Cần thêm chi tiết tò mò')}`;
+      }
+
+      // 2. Power words scoring (0 - 25)
+      const upper = t.toUpperCase();
+      let matchedPowerWords = [];
+      TITLE_POWER_WORDS.forEach(pw => {
+        if (upper.includes(pw) && !matchedPowerWords.includes(pw)) {
+          matchedPowerWords.push(pw);
+        }
+      });
+      let powerScore = 0;
+      if (matchedPowerWords.length >= 2) {
+        powerScore = 25;
+      } else if (matchedPowerWords.length === 1) {
+        powerScore = 18;
+      } else {
+        powerScore = 0;
+      }
+      score += powerScore;
+      if (powerStatus) {
+        if (matchedPowerWords.length > 0) {
+          powerStatus.className = 'px-1.5 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300 font-bold';
+          powerStatus.textContent = `${matchedPowerWords.length} từ mạnh`;
+        } else {
+          powerStatus.className = 'px-1.5 py-0.5 rounded text-[10px] bg-rose-500/20 text-rose-300 font-semibold';
+          powerStatus.textContent = '0 từ cảm xúc';
+        }
+      }
+
+      // 3. Numbers & Data scoring (0 - 25)
+      const hasNumber = /\d+/.test(t);
+      const numberScore = hasNumber ? 25 : 0;
+      score += numberScore;
+      if (numberStatus) {
+        if (hasNumber) {
+          numberStatus.className = 'px-1.5 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300 font-bold';
+          numberStatus.textContent = 'Có con số';
+        } else {
+          numberStatus.className = 'px-1.5 py-0.5 rounded text-[10px] bg-slate-800 text-slate-400 font-semibold';
+          numberStatus.textContent = 'Thiếu số cụ thể';
+        }
+      }
+
+      // 4. Brackets [] () {} 【】 scoring (0 - 25)
+      const hasBrackets = /[\[\]\(\)\{\}【】]/.test(t);
+      const bracketsScore = hasBrackets ? 25 : 0;
+      score += bracketsScore;
+      if (bracketsStatus) {
+        if (hasBrackets) {
+          bracketsStatus.className = 'px-1.5 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300 font-bold';
+          bracketsStatus.textContent = 'Có móc câu []';
+        } else {
+          bracketsStatus.className = 'px-1.5 py-0.5 rounded text-[10px] bg-slate-800 text-slate-400 font-semibold';
+          bracketsStatus.textContent = 'Chưa có ngoặc';
+        }
+      }
+
+      // Update Total Score Badge
+      if (badgeEl) {
+        badgeEl.textContent = `${score} / 100`;
+        if (score >= 80) {
+          badgeEl.className = 'px-3 py-1 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 animate-pulse';
+        } else if (score >= 60) {
+          badgeEl.className = 'px-3 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-300 border border-amber-500/40';
+        } else {
+          badgeEl.className = 'px-3 py-1 rounded-full text-xs font-black bg-rose-500/20 text-rose-300 border border-rose-500/40';
+        }
+      }
+
+      // Feedback message
+      if (feedbackEl) {
+        if (score >= 80) {
+          feedbackEl.innerHTML = `<span class="text-emerald-400 font-bold">🔥 Tiêu đề xuất sắc!</span> Đầy đủ móc câu thị giác, từ ngữ thôi miên và độ dài chuẩn thuật toán YouTube Mobile feed.`;
+        } else if (score >= 60) {
+          feedbackEl.innerHTML = `<span class="text-amber-400 font-bold">⚡ Tiêu đề khá tốt:</span> ${!hasNumber ? 'Thêm 1 con số cụ thể (VD: 3, 5, 2026, 24H) ' : ''}${!hasBrackets ? 'Thêm thẻ móc ngoặc đầu tiêu đề (VD: [SỰ THẬT], (TẬP 1)) ' : ''}để đạt trên 85 điểm!`;
+        } else {
+          feedbackEl.innerHTML = `<span class="text-rose-400 font-bold">⚠️ Cần tối ưu:</span> Tiêu đề còn yếu tính gợi mở. Hãy thêm từ khóa thôi miên, con số và dấu ngoặc vuông để tạo điểm dừng thị giác.`;
+        }
+      }
+    }
+
+    function clearTitleScorer() {
+      const input = document.getElementById('title-scorer-input');
+      if (input) input.value = '';
+      scoreCurrentTitle('');
+    }
+
+    function applyTitleTemplate(templateText) {
+      const input = document.getElementById('title-scorer-input');
+      if (input) {
+        input.value = templateText;
+        scoreCurrentTitle(templateText);
+        input.focus();
+        showToast('Đã đưa mẫu vào bộ đo điểm CTR!');
+      }
+    }
+
+    function exportStrategicReport() {
+      if (!currentChannelData) {
+        showToast('Vui lòng phân tích kênh trước khi xuất báo cáo!', false);
+        return;
+      }
+
+      const { channel_info, publish_time_analysis, keyword_intelligence, trend_momentum, competitor_sources, strategy_recommendations, estimated_earnings } = currentChannelData;
+      const chTitle = channel_info.title || 'Kenh_YouTube';
+      const geoCode = (trend_momentum?.target_geo || publish_time_analysis?.target_country_code || 'US').toUpperCase();
+      const geoName = COUNTRY_NAMES[geoCode] || geoCode;
+      const nicheName = publish_time_analysis?.detected_niche_name || 'Giải Trí & Tổng Hợp';
+      const dateStr = new Date().toLocaleString('vi-VN');
+
+      let lines = [];
+      lines.push(`# BÁO CÁO CHIẾN LƯỢC KÊNH YOUTUBE & TỐI ƯU VIEW NGOẠI`);
+      lines.push(`Thời gian trích xuất: ${dateStr}`);
+      lines.push(`Kênh: ${chTitle} (${channel_info.channel_url || ''})`);
+      lines.push(`Thị trường mục tiêu: ${geoName} | Ngách nội dung: ${nicheName}`);
+      lines.push(``);
+      lines.push(`--------------------------------------------------------------------------------`);
+      lines.push(`1. CHỈ SỐ SỨC KHỎE KÊNH`);
+      lines.push(`--------------------------------------------------------------------------------`);
+      lines.push(`- Lượt đăng ký (Subscribers): ${channel_info.is_subs_hidden || channel_info.subscriber_count <= 0 ? 'Ẩn số sub' : formatNumber(channel_info.subscriber_count)}`);
+      lines.push(`- Lượt xem trung bình / video dài: ${formatNumber(channel_info.avg_views)} views`);
+      lines.push(`- Tần suất đăng video: ${channel_info.cadence_days ? channel_info.cadence_days + ' ngày/video' : 'Hàng tuần'}`);
+      lines.push(`- Tỷ lệ View / Sub: ${channel_info.is_subs_hidden || channel_info.subscriber_count <= 0 ? 'N/A (Ẩn sub)' : (channel_info.view_to_sub_ratio ? channel_info.view_to_sub_ratio.toFixed(1) + '%' : '0%')}`);
+      lines.push(`- Điểm xu hướng (Trend Score): ${trend_momentum?.trend_score || 50}/100 (${trend_momentum?.trend_status || 'Ổn định'})`);
+      lines.push(``);
+      lines.push(`--------------------------------------------------------------------------------`);
+      lines.push(`2. CHIẾN LƯỢC KHUNG GIỜ VÀNG ĐĂNG VIDEO (QUY ĐỔI GIỜ VIỆT NAM UTC+7)`);
+      lines.push(`--------------------------------------------------------------------------------`);
+      lines.push(`- Khung giờ chính (Slot 1): ${publish_time_analysis?.best_upload_time_vn || '--:--'} (${publish_time_analysis?.upload_slot_1_label || 'Khung đón đầu lượng người xem cao nhất'})`);
+      lines.push(`- Khung giờ phụ (Slot 2): ${publish_time_analysis?.second_upload_time_vn || '--:--'} (${publish_time_analysis?.upload_slot_2_label || 'Khung video giải trí phụ / cuối tuần'})`);
+      lines.push(`- Ngày đăng tốt nhất: ${publish_time_analysis?.best_day_of_week || 'Thứ Bảy'}`);
+      if (publish_time_analysis?.best_weekdays) {
+        const days = Array.isArray(publish_time_analysis.best_weekdays) ? publish_time_analysis.best_weekdays.join(', ') : publish_time_analysis.best_weekdays;
+        lines.push(`- Các ngày ưu tiên trong tuần: ${days}`);
+      }
+      lines.push(`- Khuyến nghị chiến lược: ${publish_time_analysis?.strategy_tip || ''}`);
+      lines.push(``);
+
+      if (estimated_earnings) {
+        lines.push(`--------------------------------------------------------------------------------`);
+        lines.push(`3. DỰ TOÁN DOANH THU ADSENSE (RPM) THEO THỊ TRƯỜNG & NGÁCH`);
+        lines.push(`--------------------------------------------------------------------------------`);
+        lines.push(`- Mức RPM trung bình: $${estimated_earnings.rpm_usd?.avg || 0} USD (≈ ${formatNumber(estimated_earnings.rpm_vnd?.avg || 0)} VNĐ) / 1.000 lượt xem`);
+        lines.push(`- Biên độ RPM: $${estimated_earnings.rpm_usd?.min || 0} - $${estimated_earnings.rpm_usd?.max || 0} USD / 1.000 view`);
+        lines.push(`- Mốc 10.000 view: ~$${estimated_earnings.earnings_10k?.usd || 0} (≈ ${formatNumber(estimated_earnings.earnings_10k?.vnd || 0)} VNĐ)`);
+        lines.push(`- Mốc 100.000 view: ~$${estimated_earnings.earnings_100k?.usd || 0} (≈ ${formatNumber(estimated_earnings.earnings_100k?.vnd || 0)} VNĐ)`);
+        lines.push(`- Mốc 1.000.000 view: ~$${estimated_earnings.earnings_1m?.usd || 0} (≈ ${formatNumber(estimated_earnings.earnings_1m?.vnd || 0)} VNĐ)`);
+        if (estimated_earnings.monthly_estimate) {
+          lines.push(`- Thu nhập tháng ước tính của kênh (~${estimated_earnings.monthly_estimate.videos_per_month} video/tháng):`);
+          lines.push(`  + USD: $${formatNumber(estimated_earnings.monthly_estimate.usd_min)} - $${formatNumber(estimated_earnings.monthly_estimate.usd_max)} USD/tháng`);
+          lines.push(`  + VNĐ: ${formatNumber(estimated_earnings.monthly_estimate.vnd_min)}đ - ${formatNumber(estimated_earnings.monthly_estimate.vnd_max)}đ VNĐ/tháng`);
+        }
+        lines.push(``);
+      }
+
+      if (keyword_intelligence) {
+        lines.push(`--------------------------------------------------------------------------------`);
+        lines.push(`4. TỪ KHÓA BẮT TREND & BỘ THẺ TAG VIRAL (SẴN SÀNG COPY VÀO YOUTUBE STUDIO)`);
+        lines.push(`--------------------------------------------------------------------------------`);
+        lines.push(`Bộ thẻ Tag chuẩn CSV:`);
+        lines.push(keyword_intelligence.copyable_tags_csv || 'Không có tag');
+        lines.push(``);
+        lines.push(`Từ khóa tác động cao (High Impact):`);
+        (keyword_intelligence.high_impact_keywords || []).slice(0, 10).forEach((k, idx) => {
+          lines.push(`  ${idx + 1}. ${k.keyword} (View TB: ${formatNumber(k.avg_views)})`);
+        });
+        lines.push(``);
+      }
+
+      if (channel_info.outlier_videos && channel_info.outlier_videos.length > 0) {
+        lines.push(`--------------------------------------------------------------------------------`);
+        lines.push(`5. VIDEO ĐỘT PHÁ LƯỢT XEM CỦA KÊNH (OUTLIER VIRAL)`);
+        lines.push(`--------------------------------------------------------------------------------`);
+        channel_info.outlier_videos.slice(0, 5).forEach((v, idx) => {
+          lines.push(`  ${idx + 1}. [${formatNumber(v.view_count)} views | ${v.multiplier || 1.5}x] ${v.title}`);
+          lines.push(`     Link: ${v.url || ('https://www.youtube.com/watch?v=' + (v.video_id || v.id))}`);
+        });
+        lines.push(``);
+      }
+
+      if (strategy_recommendations?.title_templates && strategy_recommendations.title_templates.length > 0) {
+        lines.push(`--------------------------------------------------------------------------------`);
+        lines.push(`6. MẪU TIÊU ĐỀ BẮT TREND TĂNG CTR`);
+        lines.push(`--------------------------------------------------------------------------------`);
+        strategy_recommendations.title_templates.forEach((t, idx) => {
+          lines.push(`  ${idx + 1}. [${t.type || 'Công Thức'}] ${t.template}`);
+          if (t.rationale) lines.push(`     Ghi chú: ${t.rationale}`);
+        });
+        lines.push(``);
+      }
+
+      const reportContent = lines.join('\n');
+      const blob = new Blob([reportContent], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const safeTitle = (chTitle || 'YouTube_Channel').replace(/[^a-zA-Z0-9_\u00C0-\u024F\u1EA0-\u1EF9-]/g, '_');
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${safeTitle}_Bao_Cao_Chien_Luoc.md`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`Đã xuất báo cáo chiến lược kênh: ${safeTitle}!`);
     }
 
     // ==========================================

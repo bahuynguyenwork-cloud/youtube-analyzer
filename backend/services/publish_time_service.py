@@ -54,6 +54,17 @@ class PublishTimeService:
         # 2. Free Engine (Không cần API Key)
         return self._fetch_via_free_engine(cleaned_id, limit)
 
+    def parse_iso_duration(self, dur_str: str) -> int:
+        if not dur_str:
+            return 0
+        m = re.match(r'PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?', dur_str)
+        if not m:
+            return 0
+        h = int(m.group(1) or 0)
+        minute = int(m.group(2) or 0)
+        s = int(m.group(3) or 0)
+        return h * 3600 + minute * 60 + s
+
     def _fetch_video_datetime(self, video_id: str) -> Optional[datetime.datetime]:
         """Lấy ngày giờ đăng chính xác từ thẻ meta của video."""
         url = f"https://www.youtube.com/watch?v={video_id}"
@@ -112,9 +123,13 @@ class PublishTimeService:
             entries = res.get("entries", []) or []
             for e in entries:
                 if e and e.get("id"):
+                    v_title = e.get("title", "Video")
+                    v_dur = e.get("duration") or 0
+                    if (0 < v_dur < 180) or ("#shorts" in v_title.lower()) or ("#short" in v_title.lower()) or ("#쇼츠" in v_title.lower()):
+                        continue
                     raw_items.append({
                         "video_id": e.get("id"),
-                        "title": e.get("title", "Video"),
+                        "title": v_title,
                         "views": int(e.get("view_count") or 0),
                         "timestamp": e.get("timestamp")
                     })
@@ -237,7 +252,7 @@ class PublishTimeService:
         counter = 1
         for i in range(0, len(video_ids), 50):
             batch = video_ids[i:i+50]
-            v_url = f"https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id={','.join(batch)}&key={api_key}"
+            v_url = f"https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id={','.join(batch)}&key={api_key}"
             v_res = self.session.get(v_url, timeout=12).json()
             if "error" in v_res:
                 raise ValueError(f"Lỗi YouTube API Videos: {v_res['error'].get('message')}")
@@ -245,6 +260,13 @@ class PublishTimeService:
             for v in v_res.get("items", []):
                 vid = v.get("id")
                 title = v.get("snippet", {}).get("title", "")
+                dur_iso = v.get("contentDetails", {}).get("duration", "")
+                dur_sec = self.parse_iso_duration(dur_iso)
+                
+                # Loại bỏ video Shorts (< 180s hoặc có tag shorts)
+                if (0 < dur_sec < 180) or ("#shorts" in title.lower()) or ("#short" in title.lower()) or ("#쇼츠" in title.lower()):
+                    continue
+
                 pub_at = v.get("snippet", {}).get("publishedAt", "")
                 views = int(v.get("statistics", {}).get("viewCount", 0))
 

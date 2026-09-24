@@ -540,10 +540,32 @@ class TimeService:
                 "video_count": weekday_counts.get(idx, 0)
             })
 
-        sorted_days = sorted(weekdays_distribution, key=lambda x: (x["avg_views"], x["video_count"]), reverse=True)
-        historical_best_days = [d["day_name"] for d in sorted_days if d["video_count"] > 0]
+        # Tính điểm tin cậy thống kê cho từng ngày:
+        # Score = avg_views * sample_weight * niche_multiplier
+        # Tránh trường hợp 1 video tình cờ view cao lấn át ngày có nhiều video đều đặn view cao
         recommended_days = niche_prof.get("best_weekdays", ["Thứ 6", "Thứ 7", "Chủ Nhật"])
-        best_day_single = historical_best_days[0] if historical_best_days else recommended_days[0]
+
+        for d in weekdays_distribution:
+            cnt = d["video_count"]
+            avg_w = d["avg_views"]
+            if cnt == 0:
+                conf_weight = 0.0
+            elif cnt == 1:
+                conf_weight = 0.55
+            elif cnt == 2:
+                conf_weight = 0.80
+            elif cnt == 3:
+                conf_weight = 1.0
+            else:
+                conf_weight = min(1.25, 1.0 + (cnt - 3) * 0.05)
+
+            is_niche_fav = d["day_name"] in recommended_days
+            niche_multiplier = 1.15 if is_niche_fav else 1.0
+            d["composite_score"] = avg_w * conf_weight * niche_multiplier
+
+        sorted_days = sorted(weekdays_distribution, key=lambda x: x.get("composite_score", 0), reverse=True)
+        historical_best_days = [d["day_name"] for d in sorted_days if d["video_count"] > 0 and d.get("composite_score", 0) > 0]
+        best_day_single = historical_best_days[0] if historical_best_days else (recommended_days[0] if recommended_days else "Thứ 6")
 
         # 4. Lời khuyên chiến lược ngắn gọn, tập trung thẳng vào GIỜ ĐĂNG
         strategy_tip = (

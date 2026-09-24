@@ -107,6 +107,7 @@ class ChannelAnalysisRequest(BaseModel):
     max_results: Optional[int] = None
     target_geo: Optional[str] = None
     target_country: Optional[str] = None
+    niche: Optional[str] = None
     api_key: Optional[str] = None
 
 class KeywordAnalysisRequest(BaseModel):
@@ -208,7 +209,8 @@ def analyze_channel(req: ChannelAnalysisRequest):
             target_geo=geo,
             channel_keywords=all_channel_kws,
             channel_title=channel_meta.get("channel_title", "") or channel_meta.get("title", ""),
-            channel_description=channel_meta.get("description", "")
+            channel_description=channel_meta.get("description", ""),
+            forced_niche=req.niche
         )
 
         # Enrich time_data with friendly UI fields
@@ -230,14 +232,23 @@ def analyze_channel(req: ChannelAnalysisRequest):
             api_key=effective_key
         )
 
-        strategy_data = strategy_service.generate_recommendations(channel_meta, stats, keyword_data, trend_data)
+        detected_niche = time_data.get("detected_niche_code", "entertainment")
+        strategy_data = strategy_service.generate_recommendations(
+            channel_meta=channel_meta,
+            stats=stats,
+            keyword_data=keyword_data,
+            trend_data=trend_data,
+            target_geo=geo,
+            niche_key=detected_niche
+        )
 
         # Channel info alias
         channel_info_merged = dict(channel_meta)
         channel_info_merged["title"] = channel_meta.get("channel_title", "")
         channel_info_merged["avg_views"] = stats.get("avg_views", 0)
         channel_info_merged["cadence_days"] = stats.get("upload_frequency_days", 0)
-        channel_info_merged["view_to_sub_ratio"] = stats.get("views_to_subs_ratio", 0)
+        channel_info_merged["view_to_sub_ratio"] = stats.get("views_to_subs_ratio")
+        channel_info_merged["is_subs_hidden"] = stats.get("is_subs_hidden", False)
         channel_info_merged["outlier_videos"] = stats.get("outliers", [])
         channel_info_merged["recent_videos"] = videos
         channel_info_merged["keywords"] = [k["keyword"] for k in keyword_data.get("top_keywords", [])]
@@ -257,7 +268,8 @@ def analyze_channel(req: ChannelAnalysisRequest):
             "competitors": competitors,
             "competitor_sources": competitors,
             "strategy": strategy_data,
-            "strategy_recommendations": strategy_data
+            "strategy_recommendations": strategy_data,
+            "estimated_earnings": strategy_data.get("estimated_earnings")
         }
     except ValueError as ve:
         logger.warning(f"Validation error: {ve}")
