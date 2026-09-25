@@ -34,6 +34,9 @@ NICHE_RPM_MULTIPLIERS = {
     "reddit_stories": 1.10,
     "buddhism": 1.05,
     "recap_stories": 0.95,
+    "travel_vlog": 1.15,
+    "vlog": 1.15,
+    "travel": 1.15,
     "gaming": 0.75,
     "entertainment": 0.85
 }

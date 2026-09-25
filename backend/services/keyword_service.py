@@ -8,7 +8,11 @@ STOP_WORDS = {
     'đã', 'ra', 'vào', 'lại', 'làm', 'cũng', 'hay', 'rồi', 'sau', 'người', 'gì',
     'nào', 'sao', 'thì', 'lên', 'xuống', 'qua', 'nhưng', 'bị', 'bởi', 'theo',
     'tập', 'phần', 'full', 'video', 'mới', 'nhất', 'cùng', 'cực', 'quá', 'rất',
-    'official', 'trailer', 'teasing', 'lyrics', 'mv', 'hd', 'review', 'vlog',
+    'official', 'trailer', 'teasing', 'lyrics', 'mv', 'hd',
+    'đừng', 'đến', 'nếu', 'chưa', 'xem', 'biết', 'thấy', 'nghĩ', 'bảo', 'muốn',
+    'phải', 'thôi', 'luôn', 'nhé', 'nha', 'ạ', 'ơi', 'thế', 'nọ', 'kia', 'đây',
+    'cái', 'con', 'chiếc', 'việc', 'chuyện', 'thứ', 'ngày', 'lần', 'giờ', 'năm',
+    'tháng', 'hôm', 'nay', 'mai', 'tới', 'trước', 'vừa', 'ko', 'chẳng', 'thế này',
     'the', 'and', 'to', 'of', 'a', 'in', 'that', 'is', 'for', 'it', 'on', 'with',
     'as', 'this', 'was', 'at', 'by', 'an', 'be', 'from', 'or', 'are', 'your',
     'all', 'you', 'how', 'what', 'why', 'who', 'where', 'when', 'my', 'we',
@@ -121,17 +125,28 @@ class KeywordService:
         topic_categories = self.categorize_channel_topic(ranked_keywords)
 
         # Xây dựng danh sách từ khóa bắt trend sẵn sàng 1-click copy và chuỗi dán thẳng YouTube Studio
-        copyable_tags = []
+        raw_candidates = []
         for hk in high_impact[:12]:
-            if hk['keyword'] not in copyable_tags:
-                copyable_tags.append(hk['keyword'])
+            if hk['keyword'] not in raw_candidates:
+                raw_candidates.append(hk['keyword'])
         for tk in ranked_keywords[:25]:
-            if tk['keyword'] not in copyable_tags:
-                copyable_tags.append(tk['keyword'])
+            if tk['keyword'] not in raw_candidates:
+                raw_candidates.append(tk['keyword'])
         for ht in top_hashtags[:8]:
             raw_tag = ht['hashtag'].replace('#', '')
-            if raw_tag not in copyable_tags:
-                copyable_tags.append(raw_tag)
+            if raw_tag not in raw_candidates:
+                raw_candidates.append(raw_tag)
+
+        # Loại bỏ các từ đơn 1 chữ nếu đã tồn tại cụm từ 2-3 chữ chứa từ đó (VD: không để lẻ 'quốc', 'trung' khi đã có 'trung quốc')
+        multi_word_phrases = [t for t in raw_candidates if len(t.split()) > 1]
+        copyable_tags = []
+        for tag in raw_candidates:
+            words = tag.split()
+            if len(words) == 1 and len(tag) <= 5:
+                # Nếu từ đơn này đã nằm trọn trong một cụm từ ghép đã có, bỏ qua để tránh rác
+                if any(tag in p.split() for p in multi_word_phrases):
+                    continue
+            copyable_tags.append(tag)
 
         # Chuỗi CSV phân cách bởi dấu phẩy
         copyable_tags_csv = ", ".join(copyable_tags)

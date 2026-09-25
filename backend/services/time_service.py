@@ -346,6 +346,28 @@ NICHE_PROFILES = {
             "게임 플레이", "게임 하이라이트", "실황", "ゲーム実況", "プレイ動画"
         ]
     },
+    "travel_vlog": {
+        "name_vi": "✈️ Du Lịch, Ẩm Thực & Vlog Đời Sống",
+        "upload_1_start": 11.5,
+        "upload_1_end": 13.0,
+        "upload_1_label": "Khung chính: Trưa nghỉ ngơi xem ẩm thực & du lịch",
+        "upload_2_start": 18.5,
+        "upload_2_end": 20.3,
+        "upload_2_label": "Khung phụ: Tối thư giãn giải trí sau giờ làm",
+        "best_weekdays": ["Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+        "behavior_insight": "Khán giả xem vlog du lịch, ẩm thực và trải nghiệm cuộc sống nhiều nhất vào giờ ăn trưa và buổi tối cuối tuần để giải trí và lên kế hoạch đi chơi.",
+        "keywords": [
+            "vlog", "du lịch", "ẩm thực", "ăn uống", "trải nghiệm", "khám phá", "solo trip",
+            "du lịch việt nam", "du lịch tự túc", "review du lịch", "review ẩm thực", "món ăn",
+            "đặc sản", "quán ăn", "food tour", "street food", "ẩm thực đường phố", "vlog cuộc sống",
+            "cuộc sống", "đi chơi", "phượt", "camping", "cắm trại", "khoa pug", "khoai lang thang",
+            "sang vlog", "hành trình", "chuyến đi", "check in", "khách sạn", "resort", "nhà hàng",
+            "đất nước", "quốc gia", "travel vlog", "travel", "solo travel", "food review",
+            "walking tour", "travel guide", "daily vlog", "lifestyle vlog", "budget travel",
+            "trip", "traveling", "vacation", "eating show", "mukbang",
+            "여행", "브이로그", "여행 브이로그", "맛집", "먹방", "旅行", "vlog", "グルメ"
+        ]
+    },
     "entertainment": {
         "name_vi": "🎉 Giải Trí & Hài Hước",
         "upload_1_start": 16.5,
@@ -357,7 +379,7 @@ NICHE_PROFILES = {
         "best_weekdays": ["Thứ 6", "Thứ 7", "Chủ Nhật"],
         "behavior_insight": "Khán giả giải trí xem nhiều nhất vào các buổi tối sau giờ tan làm và trưa cuối tuần.",
         "keywords": [
-            "hài hước", "giải trí", "vlog", "tiểu phẩm hài", "troll vui", "thử thách", "viral clip", "ẩm thực đời sống",
+            "hài hước", "giải trí", "tiểu phẩm hài", "troll vui", "thử thách", "viral clip",
             "funny moments", "comedy", "entertainment viral", "prank", "challenge",
             "예능", "웃긴 영상", "레전드", "バラエティ", "面白い"
         ]
@@ -371,6 +393,11 @@ NICHE_PROFILES["education"] = NICHE_PROFILES["learn_english"]
 NICHE_PROFILES["drama_story"] = NICHE_PROFILES["infidelity_revenge"]
 NICHE_PROFILES["finance_biz"] = NICHE_PROFILES["finance_money"]
 NICHE_PROFILES["quotes_philosophy"] = NICHE_PROFILES["philosophy"]
+NICHE_PROFILES["vlog"] = NICHE_PROFILES["travel_vlog"]
+NICHE_PROFILES["travel"] = NICHE_PROFILES["travel_vlog"]
+
+VN_WORD_BOUNDARY = r'(?<![\wàáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ])'
+VN_WORD_BOUNDARY_END = r'(?![\wàáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ])'
 
 def convert_local_hour_to_vn(hour: float, utc_offset: float) -> float:
     """Chuyển đổi giờ địa phương sang giờ Việt Nam (UTC+7)."""
@@ -411,48 +438,58 @@ class TimeService:
         video_titles = " ".join([v.get("title", "").lower() for v in (videos or [])[:30]])
         video_descs = " ".join([(v.get("description", "") or "")[:200].lower() for v in (videos or [])[:30]])
 
+        def count_kw_in_text(text: str, kw: str) -> int:
+            if not text or not kw:
+                return 0
+            pattern = VN_WORD_BOUNDARY + re.escape(kw) + VN_WORD_BOUNDARY_END
+            return len(re.findall(pattern, text, re.IGNORECASE))
+
+        def phrase_matches_tag(kw_clean: str, tag: str) -> bool:
+            kw_clean = kw_clean.strip().lower()
+            tag = tag.strip().lower()
+            if not kw_clean or not tag:
+                return False
+            if kw_clean == tag:
+                return True
+            kw_words = kw_clean.split()
+            tag_words = tag.split()
+            # Only match phrase containment if the sub-phrase is at least 2 words
+            if len(tag_words) >= 2 and re.search(VN_WORD_BOUNDARY + re.escape(tag) + VN_WORD_BOUNDARY_END, kw_clean, re.IGNORECASE):
+                return True
+            if len(kw_words) >= 2 and re.search(VN_WORD_BOUNDARY + re.escape(kw_clean) + VN_WORD_BOUNDARY_END, tag, re.IGNORECASE):
+                return True
+            return False
+
         scores = {}
         for niche_key, niche_info in NICHE_PROFILES.items():
-            if niche_key in ["general", "entertainment"]:
+            if niche_key in ["general", "horror", "education", "drama_story", "finance_biz", "quotes_philosophy", "vlog", "travel"]:
                 continue
             score = 0
             for kw in niche_info.get("keywords", []):
                 kw_clean = kw.strip().lower()
                 if not kw_clean:
                     continue
-                is_short = len(kw_clean) <= 3
-                
-                # 1. Trùng trong tên kênh (Trọng số cực cao: 12đ)
-                if is_short:
-                    if re.search(r'\b' + re.escape(kw_clean) + r'\b', title_text):
-                        score += 12
-                else:
-                    if kw_clean in title_text:
-                        score += 12
 
-                # 2. Trùng trong từ khóa / hashtag kênh (Trọng số cao: 8đ)
-                if is_short:
-                    if any(kw_clean == k for k in kw_list):
-                        score += 8
-                else:
-                    if any(kw_clean in k or k in kw_clean for k in kw_list):
-                        score += 8
+                # 1. Trùng trong tên kênh (Trọng số cực cao: 20đ mỗi lần xuất hiện)
+                c_title = count_kw_in_text(title_text, kw_clean)
+                if c_title > 0:
+                    score += 20 * c_title
 
-                # 3. Trùng trong tiêu đề video (Trọng số: 4đ mỗi lần xuất hiện, tối đa 24đ)
-                if is_short:
-                    v_count = len(re.findall(r'\b' + re.escape(kw_clean) + r'\b', video_titles))
-                else:
-                    v_count = video_titles.count(kw_clean)
-                if v_count > 0:
-                    score += min(24, v_count * 4)
+                # 2. Trùng trong từ khóa / hashtag kênh (Trọng số cao: 10đ)
+                if any(phrase_matches_tag(kw_clean, k) for k in kw_list):
+                    score += 10
 
-                # 4. Trùng trong mô tả kênh hoặc mô tả video (Trọng số: 2đ)
-                if is_short:
-                    if re.search(r'\b' + re.escape(kw_clean) + r'\b', desc_text) or re.search(r'\b' + re.escape(kw_clean) + r'\b', video_descs):
-                        score += 2
-                else:
-                    if kw_clean in desc_text or kw_clean in video_descs:
-                        score += 2
+                # 3. Trùng trong tiêu đề video (Trọng số: 5đ mỗi lần xuất hiện, tối đa 35đ)
+                c_vids = count_kw_in_text(video_titles, kw_clean)
+                if c_vids > 0:
+                    score += min(35, c_vids * 5)
+
+                # 4. Trùng trong mô tả kênh hoặc mô tả video (Trọng số: 6đ)
+                c_desc = count_kw_in_text(desc_text, kw_clean)
+                if c_desc > 0:
+                    score += 8
+                elif count_kw_in_text(video_descs, kw_clean) > 0:
+                    score += 4
                     
             scores[niche_key] = score
 
@@ -460,8 +497,8 @@ class TimeService:
             return "entertainment"
 
         best_niche = max(scores, key=scores.get)
-        # Ngưỡng tin cậy: >= 5 điểm (chỉ cần trùng tên kênh, hashtag kênh hoặc 2 tiêu đề video)
-        if scores.get(best_niche, 0) < 5:
+        # Ngưỡng tin cậy: >= 8 điểm (ít nhất 1 từ khóa tên kênh/mô tả hoặc 2 lần trong tiêu đề video)
+        if scores.get(best_niche, 0) < 8:
             return "entertainment"
         return best_niche
 

@@ -251,7 +251,7 @@ def analyze_channel(req: ChannelAnalysisRequest):
         channel_info_merged["is_subs_hidden"] = stats.get("is_subs_hidden", False)
         channel_info_merged["outlier_videos"] = stats.get("outliers", [])
         channel_info_merged["recent_videos"] = videos
-        channel_info_merged["keywords"] = [k["keyword"] for k in keyword_data.get("top_keywords", [])]
+        channel_info_merged["keywords"] = keyword_data.get("copyable_tags_list") or [k["keyword"] for k in keyword_data.get("top_keywords", [])]
 
         return {
             "success": True,

@@ -310,6 +310,7 @@
             <div class="flex items-center space-x-2 shrink-0 self-start sm:self-center">
               <span class="text-slate-400 font-medium">Chủ đề ngách:</span>
               <select id="niche-selector" onchange="onNicheChanged(this.value)" class="bg-slate-900 border border-white/10 text-white text-xs font-semibold rounded-xl px-3 py-1.5 focus:outline-none focus:border-rose-500">
+                <option value="travel_vlog">✈️ Du Lịch, Ẩm Thực & Vlog Đời Sống</option>
                 <option value="entertainment">🎉 Giải Trí & Hài Hước</option>
                 <option value="learn_english">🎓 Học Tiếng Anh (English Learning & Speaking)</option>
                 <option value="spicy_18_drama">🔞 18+ & Tâm Sự Thầm Kín Đêm Muộn</option>
@@ -1220,7 +1221,7 @@
       "elderly_wisdom": 1.25, "true_crime": 1.25, "history_geopolitics": 1.30, "space_science": 1.35,
       "horror_stories": 1.10, "spicy_18_drama": 1.15, "father_inlaw_drama": 1.15,
       "mother_inlaw_drama": 1.15, "infidelity_revenge": 1.15, "drama_expose": 1.10,
-      "reddit_stories": 1.10, "buddhism": 1.05, "recap_stories": 0.95, "gaming": 0.75, "entertainment": 0.85
+      "reddit_stories": 1.10, "buddhism": 1.05, "recap_stories": 0.95, "travel_vlog": 1.15, "vlog": 1.15, "travel": 1.15, "gaming": 0.75, "entertainment": 0.85
     };
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -1974,6 +1975,17 @@
         upload_2_label: "Khung phụ: Trưa & Cuối tuần xả stress",
         best_weekdays: ["Thứ 6", "Thứ 7", "Chủ Nhật"],
         behavior_insight: "Khán giả giải trí xem nhiều nhất vào các buổi tối sau giờ tan làm và trưa cuối tuần."
+      },
+      travel_vlog: {
+        name_vi: "✈️ Du Lịch, Ẩm Thực & Vlog Đời Sống",
+        upload_1_start: 11.5,
+        upload_1_end: 13.0,
+        upload_1_label: "Khung chính: Trưa nghỉ ngơi xem ẩm thực & du lịch",
+        upload_2_start: 18.5,
+        upload_2_end: 20.3,
+        upload_2_label: "Khung phụ: Tối thư giãn giải trí sau giờ làm",
+        best_weekdays: ["Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+        behavior_insight: "Khán giả xem vlog du lịch, ẩm thực và trải nghiệm cuộc sống nhiều nhất vào giờ ăn trưa và buổi tối cuối tuần để giải trí và lên kế hoạch đi chơi."
       }
     };
 
@@ -1983,6 +1995,8 @@
     NICHE_CLIENT_PROFILES.drama_story = NICHE_CLIENT_PROFILES.infidelity_revenge;
     NICHE_CLIENT_PROFILES.finance_biz = NICHE_CLIENT_PROFILES.finance_money;
     NICHE_CLIENT_PROFILES.quotes_philosophy = NICHE_CLIENT_PROFILES.philosophy;
+    NICHE_CLIENT_PROFILES.vlog = NICHE_CLIENT_PROFILES.travel_vlog;
+    NICHE_CLIENT_PROFILES.travel = NICHE_CLIENT_PROFILES.travel_vlog;
 
     const COUNTRY_OFFSETS = {
       US: -5,
