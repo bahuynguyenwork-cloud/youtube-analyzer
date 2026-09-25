@@ -22,6 +22,7 @@ from backend.services.competitor_service import CompetitorService
 from backend.services.strategy_service import StrategyService
 from backend.services.time_service import TimeService
 from backend.services.publish_time_service import PublishTimeService
+from backend.services.ai_service import AIService
 import yt_dlp
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -82,6 +83,11 @@ def get_default_api_key() -> Optional[str]:
     key = cfg.get("youtube_api_key") or os.environ.get("YOUTUBE_API_KEY") or DEFAULT_API_KEY
     return key.strip() if key and key.strip() else None
 
+def get_default_gemini_key() -> Optional[str]:
+    cfg = load_saved_config()
+    key = cfg.get("gemini_api_key") or os.environ.get("GEMINI_API_KEY")
+    return key.strip() if key and key.strip() else None
+
 app = FastAPI(title="YouTube Channel & Trend Analyzer API", version="1.2.0")
 
 app.add_middleware(
@@ -99,6 +105,7 @@ competitor_service = CompetitorService()
 strategy_service = StrategyService()
 time_service = TimeService()
 publish_time_service = PublishTimeService()
+ai_service = AIService()
 
 class ChannelAnalysisRequest(BaseModel):
     channel_input: Optional[str] = None
@@ -109,6 +116,7 @@ class ChannelAnalysisRequest(BaseModel):
     target_country: Optional[str] = None
     niche: Optional[str] = None
     api_key: Optional[str] = None
+    gemini_api_key: Optional[str] = None
 
 class KeywordAnalysisRequest(BaseModel):
     keyword: str
@@ -122,6 +130,7 @@ class PublishTimeRequest(BaseModel):
 
 class ApiKeyPayload(BaseModel):
     api_key: Optional[str] = None
+    gemini_api_key: Optional[str] = None
 
 @app.get("/api/health")
 def health_check():
@@ -143,6 +152,27 @@ def set_saved_api_key(payload: ApiKeyPayload):
         cfg["youtube_api_key"] = clean_key
     else:
         cfg.pop("youtube_api_key", None)
+    save_config(cfg)
+    has_key = bool(clean_key)
+    masked = clean_key[:6] + "..." + clean_key[-4:] if len(clean_key) > 10 else ("***" if clean_key else "")
+    return {"success": True, "has_key": has_key, "masked_key": masked}
+
+@app.get("/api/settings/gemini-key")
+def get_gemini_key_status():
+    key = get_default_gemini_key()
+    if key:
+        masked = key[:6] + "..." + key[-4:] if len(key) > 10 else "***"
+        return {"has_key": True, "masked_key": masked, "api_key": key}
+    return {"has_key": False, "masked_key": "", "api_key": ""}
+
+@app.post("/api/settings/gemini-key")
+def set_saved_gemini_key(payload: ApiKeyPayload):
+    cfg = load_saved_config()
+    clean_key = (payload.gemini_api_key or payload.api_key or "").strip()
+    if clean_key:
+        cfg["gemini_api_key"] = clean_key
+    else:
+        cfg.pop("gemini_api_key", None)
     save_config(cfg)
     has_key = bool(clean_key)
     masked = clean_key[:6] + "..." + clean_key[-4:] if len(clean_key) > 10 else ("***" if clean_key else "")
@@ -204,14 +234,44 @@ def analyze_channel(req: ChannelAnalysisRequest):
             ch_raw_kw = [k.strip() for k in ch_raw_kw.split(",") if k.strip()]
         all_channel_kws = list(dict.fromkeys(extracted_kw + list(ch_raw_kw)))
 
+        effective_gemini_key = (req.gemini_api_key or "").strip() or get_default_gemini_key()
+        ai_niche_result = None
+        forced_niche_val = req.niche
+
+        if not forced_niche_val and effective_gemini_key:
+            try:
+                vid_titles = [v.get("title", "") for v in (videos or [])[:15]]
+                ai_niche_result = ai_service.classify_niche_with_ai(
+                    channel_title=channel_meta.get("channel_title", "") or channel_meta.get("title", ""),
+                    channel_description=channel_meta.get("description", ""),
+                    video_titles=vid_titles,
+                    api_key=effective_gemini_key
+                )
+                if ai_niche_result and ai_niche_result.get("niche_code"):
+                    forced_niche_val = ai_niche_result["niche_code"]
+                    logger.info(f"AI classified niche: {forced_niche_val} (confidence: {ai_niche_result.get('confidence')})")
+            except Exception as e:
+                logger.warning(f"AI niche classification failed: {e}")
+
         time_data = time_service.analyze_upload_times(
             videos=videos, 
             target_geo=geo,
             channel_keywords=all_channel_kws,
             channel_title=channel_meta.get("channel_title", "") or channel_meta.get("title", ""),
             channel_description=channel_meta.get("description", ""),
-            forced_niche=req.niche
+            forced_niche=forced_niche_val
         )
+
+        if ai_niche_result and ai_niche_result.get("niche_code"):
+            time_data["detected_by"] = "ai"
+            time_data["ai_reasoning"] = ai_niche_result.get("reason", "")
+            time_data["ai_confidence"] = ai_niche_result.get("confidence", 0.95)
+            time_data["ai_model"] = ai_niche_result.get("model_used", "gemini-1.5-flash")
+        else:
+            time_data["detected_by"] = "rule_based"
+            time_data["ai_reasoning"] = ""
+            time_data["ai_confidence"] = None
+            time_data["ai_model"] = None
 
         # Enrich time_data with friendly UI fields
         if "best_upload_time_vn" not in time_data or not time_data["best_upload_time_vn"]:

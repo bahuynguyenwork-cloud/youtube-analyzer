@@ -380,8 +380,12 @@ NICHE_PROFILES = {
         "behavior_insight": "Khán giả giải trí xem nhiều nhất vào các buổi tối sau giờ tan làm và trưa cuối tuần.",
         "keywords": [
             "hài hước", "giải trí", "tiểu phẩm hài", "troll vui", "thử thách", "viral clip",
-            "funny moments", "comedy", "entertainment viral", "prank", "challenge",
-            "예능", "웃긴 영상", "레전드", "バラエティ", "面白い"
+            "funny moments", "comedy", "entertainment viral", "prank", "challenge", "challenges",
+            "survive", "survival", "escape", "last to", "keeps it", "giveaway", "gave away",
+            "competition", "extreme", "trapped", "stunt", "stunts", "impossible",
+            "sinh tồn", "trốn thoát", "ai là người cuối cùng", "tiền thưởng", "giải thưởng", "đối đầu",
+            "kỷ lục", "mrbeast", "beast",
+            "예능", "웃긴 영상", "레전드", "챌린지", "서바이벌", "탈출", "バラエティ", "面白い", "チャレンジ", "サバイバル"
         ]
     }
 }
@@ -465,6 +469,7 @@ class TimeService:
             if niche_key in ["general", "horror", "education", "drama_story", "finance_biz", "quotes_philosophy", "vlog", "travel"]:
                 continue
             score = 0
+            title_hits = 0
             for kw in niche_info.get("keywords", []):
                 kw_clean = kw.strip().lower()
                 if not kw_clean:
@@ -479,18 +484,23 @@ class TimeService:
                 if any(phrase_matches_tag(kw_clean, k) for k in kw_list):
                     score += 10
 
-                # 3. Trùng trong tiêu đề video (Trọng số: 5đ mỗi lần xuất hiện, tối đa 35đ)
+                # 3. Trùng trong tiêu đề video (Trọng số chính: 6đ mỗi lần xuất hiện, tối đa 40đ)
                 c_vids = count_kw_in_text(video_titles, kw_clean)
                 if c_vids > 0:
-                    score += min(35, c_vids * 5)
+                    score += min(40, c_vids * 6)
+                    title_hits += c_vids
 
-                # 4. Trùng trong mô tả kênh hoặc mô tả video (Trọng số: 6đ)
+                # 4. Trùng trong mô tả kênh hoặc mô tả video (Trọng số phụ: 2đ cho bio, 1đ cho mô tả video, tránh bị kênh phụ làm lệch)
                 c_desc = count_kw_in_text(desc_text, kw_clean)
                 if c_desc > 0:
-                    score += 8
+                    score += 2
                 elif count_kw_in_text(video_descs, kw_clean) > 0:
-                    score += 4
-                    
+                    score += 1
+
+            # Rào chắn bảo vệ cho Gaming: Phải có ít nhất 2 video thuần game hoặc tên kênh chứa từ game
+            if niche_key == "gaming" and title_hits < 2 and count_kw_in_text(title_text, "game") == 0:
+                score = min(score, 5)
+
             scores[niche_key] = score
 
         if not scores:
