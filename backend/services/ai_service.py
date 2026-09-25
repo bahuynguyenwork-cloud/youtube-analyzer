@@ -93,8 +93,9 @@ class AIService:
             }
         }
 
-        # Ưu tiên gemini-1.5-flash hoặc gemini-2.0-flash
-        models = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"]
+        # Ưu tiên các model nhẹ, quota riêng biệt
+        models = ["gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-2.0-flash"]
+        rate_limited_count = 0
         for model in models:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}"
             try:
@@ -126,6 +127,10 @@ class AIService:
                         }
                     else:
                         logger.warning(f"AI returned invalid niche code: {niche_code}")
+                elif resp.status_code == 429:
+                    rate_limited_count += 1
+                    logger.warning(f"Gemini API rate limit (429) on model {model}. Trying next model or fallback.")
+                    continue
                 elif resp.status_code in [400, 403]:
                     logger.warning(f"Gemini API error ({resp.status_code}): {resp.text[:150]}")
                     break
@@ -136,4 +141,6 @@ class AIService:
                 logger.warning(f"Error calling Gemini AI: {e}")
                 continue
 
+        if rate_limited_count > 0:
+            return {"rate_limited": True}
         return None

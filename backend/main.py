@@ -267,11 +267,13 @@ def analyze_channel(req: ChannelAnalysisRequest):
             time_data["ai_reasoning"] = ai_niche_result.get("reason", "")
             time_data["ai_confidence"] = ai_niche_result.get("confidence", 0.95)
             time_data["ai_model"] = ai_niche_result.get("model_used", "gemini-1.5-flash")
+            time_data["ai_rate_limited"] = False
         else:
             time_data["detected_by"] = "rule_based"
             time_data["ai_reasoning"] = ""
             time_data["ai_confidence"] = None
             time_data["ai_model"] = None
+            time_data["ai_rate_limited"] = bool(ai_niche_result and ai_niche_result.get("rate_limited"))
 
         # Enrich time_data with friendly UI fields
         if "best_upload_time_vn" not in time_data or not time_data["best_upload_time_vn"]:
