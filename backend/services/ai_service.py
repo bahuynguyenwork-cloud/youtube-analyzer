@@ -23,6 +23,9 @@ VALID_NICHES = {
     "history_geopolitics": "⚔️ Lịch Sử & Địa Chính Trị (Chiến tranh, Tư liệu lịch sử, Địa chính trị quốc tế)",
     "finance_money": "💰 Tài Chính & Kiếm Tiền (Đầu tư, Kinh doanh, Khởi nghiệp, Quản lý tài chính cá nhân)",
     "philosophy": "🧘 Triết Lý & Động Lực Sống (Bài học cuộc sống, Danh ngôn, Phát triển bản thân)",
+    "christianity_bible": "✝️ Kinh Thánh & Cơ Đốc Giáo (Đọc Kinh Thánh, Lời Chúa, Cầu nguyện, Bài giảng, Thánh ca, Devotion, Audio Bible)",
+    "buddhism": "🪷 Phật Pháp & Chữa Lành (Lời Phật dạy, Thiền định, Thuyết pháp, Kinh phật, Tĩnh tâm, Chữa lành)",
+    "elderly_wisdom": "👴 Tâm Sự & Lời Khuyên Người Già (Lời khuyên cuộc sống, Dưỡng già, Tuổi trung niên, Bài học cổ nhân)",
 }
 
 class AIService:

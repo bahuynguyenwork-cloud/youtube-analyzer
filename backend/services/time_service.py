@@ -168,7 +168,24 @@ NICHE_PROFILES = {
         "keywords": [
             "phật pháp", "lời phật dạy", "chữa lành", "thích chân quang", "thích minh niệm", "thiền định", "tâm an lạc", "giác ngộ", "đạo phật", "kinh phật",
             "buddhism", "buddha teachings", "mindfulness", "healing meditation", "dharma", "monk teaching",
-            "불교", "설법", "명상", "힐링", "마음치유", "불교 설법", "仏教", "説法", "禅"
+            "불경", "불교", "스님", "명상", "힐링", "마음치유", "불교 설법", "설법", "반야심경", "사찰", "예불", "부처님", "법문", "仏教", "説法", "禅"
+        ]
+    },
+    "christianity_bible": {
+        "name_vi": "✝️ Kinh Thánh & Cơ Đốc Giáo",
+        "upload_1_start": 5.0,
+        "upload_1_end": 6.5,
+        "upload_1_label": "Khung chính: Sáng sớm tĩnh nguyện & nghe Lời Chúa",
+        "upload_2_start": 20.3,
+        "upload_2_end": 22.0,
+        "upload_2_label": "Khung phụ: Tối muộn nghe Kinh Thánh bình an trước khi ngủ",
+        "best_weekdays": ["Chủ Nhật", "Thứ 4", "Thứ 7", "Thứ 6"],
+        "behavior_insight": "Tín hữu Cơ Đốc và người nghe Kinh Thánh có thói quen tĩnh nguyện, nghe Lời Chúa vào sáng sớm (새벽기도) và tối muộn trước khi ngủ, đặc biệt cao điểm vào Chủ Nhật và Thứ 4.",
+        "keywords": [
+            "kinh thánh", "lời chúa", "cơ đốc", "cầu nguyện", "bài giảng", "đức chúa trời", "chúa jesus", "chúa giê-su", "nghe kinh thánh", "thánh ca", "tin lành", "công giáo", "kinh thánh nói", "đọc kinh thánh", "tân ước", "cựu ước", "suy ngẫm lời chúa", "phúc âm", "thánh kinh",
+            "bible", "holy bible", "scripture", "gospel", "jesus", "god's word", "bible reading", "christian", "christianity", "worship", "prayer", "devotional", "new testament", "old testament", "psalms", "proverbs", "bible audio", "audio bible", "bible study",
+            "성경", "성경듣기", "쉬운성경", "성경말씀", "신약성경", "구약성경", "성경통독", "오디오성경", "하나님", "예수님", "예수", "기도", "찬양", "말씀", "기독교", "교회", "묵상", "qt", "설교", "새벽기도", "시편", "잠언", "복음", "찬송가", "성경낭독",
+            "聖書", "キリスト教", "祈り", "福音", "イエス"
         ]
     },
     "elderly_wisdom": {
@@ -399,9 +416,26 @@ NICHE_PROFILES["finance_biz"] = NICHE_PROFILES["finance_money"]
 NICHE_PROFILES["quotes_philosophy"] = NICHE_PROFILES["philosophy"]
 NICHE_PROFILES["vlog"] = NICHE_PROFILES["travel_vlog"]
 NICHE_PROFILES["travel"] = NICHE_PROFILES["travel_vlog"]
+NICHE_PROFILES["bible"] = NICHE_PROFILES["christianity_bible"]
+NICHE_PROFILES["christianity"] = NICHE_PROFILES["christianity_bible"]
+NICHE_PROFILES["religion"] = NICHE_PROFILES["christianity_bible"]
 
 VN_WORD_BOUNDARY = r'(?<![\wàáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ])'
 VN_WORD_BOUNDARY_END = r'(?![\wàáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ])'
+
+def is_cjk(s: str) -> bool:
+    """Kiểm tra xem chuỗi có chứa ký tự CJK (Hàn Quốc Hangul, Trung/Nhật Hanzi/Kanji/Kana) không."""
+    if not s:
+        return False
+    return any(
+        '\uac00' <= ch <= '\ud7a3' or  # Hangul Syllables
+        '\u1100' <= ch <= '\u11ff' or  # Hangul Jamo
+        '\u3130' <= ch <= '\u318f' or  # Hangul Compatibility Jamo
+        '\u4e00' <= ch <= '\u9fff' or  # CJK Unified Ideographs
+        '\u3040' <= ch <= '\u309f' or  # Hiragana
+        '\u30a0' <= ch <= '\u30ff'     # Katakana
+        for ch in s
+    )
 
 def convert_local_hour_to_vn(hour: float, utc_offset: float) -> float:
     """Chuyển đổi giờ địa phương sang giờ Việt Nam (UTC+7)."""
@@ -452,6 +486,9 @@ class TimeService:
         def count_kw_in_text(text: str, kw: str) -> int:
             if not text or not kw:
                 return 0
+            # Đối với ngôn ngữ tượng hình / âm tiết dính liền như tiếng Hàn, Nhật, Trung, không dùng word boundary kiểu Latin (\w)
+            if is_cjk(kw):
+                return text.lower().count(kw.lower())
             pattern = VN_WORD_BOUNDARY + re.escape(kw) + VN_WORD_BOUNDARY_END
             return len(re.findall(pattern, text, re.IGNORECASE))
 
@@ -462,6 +499,11 @@ class TimeService:
                 return False
             if kw_clean == tag:
                 return True
+            # Ký tự Hàn / Nhật / Trung: kiểm tra quan hệ bao hàm chuỗi trực tiếp (vd: kw "하나님" nằm trong tag "하나님의")
+            if is_cjk(kw_clean) or is_cjk(tag):
+                if kw_clean in tag or tag in kw_clean:
+                    return True
+                return False
             kw_words = kw_clean.split()
             tag_words = tag.split()
             # Only match phrase containment if the sub-phrase is at least 2 words
@@ -473,7 +515,7 @@ class TimeService:
 
         scores = {}
         for niche_key, niche_info in NICHE_PROFILES.items():
-            if niche_key in ["general", "horror", "education", "drama_story", "finance_biz", "quotes_philosophy", "vlog", "travel"]:
+            if niche_key in ["general", "horror", "education", "drama_story", "finance_biz", "quotes_philosophy", "vlog", "travel", "bible", "christianity", "religion"]:
                 continue
             score = 0
             title_hits = 0

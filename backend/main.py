@@ -737,7 +737,8 @@ def get_trending_niche_tags(geo: Optional[str] = "US"):
             {"tag": "미제 사건 실화 다큐", "niche": "🕵️ Kỳ Án", "badge": "🚀 Triệu view"},
             {"tag": "AI 인공지능 툴", "niche": "🤖 Công Nghệ", "badge": "🚀 Mới"},
             {"tag": "재테크 부업 2026", "niche": "💰 Tài Chính", "badge": "🔥 Trend"},
-            {"tag": "인생 교훈 명언", "niche": "📜 Triết Lý", "badge": "🌱 Chữa lành"}
+            {"tag": "인생 교훈 명언", "niche": "📜 Triết Lý", "badge": "🌱 Chữa lành"},
+            {"tag": "성경 말씀 듣기", "niche": "✝️ Kinh Thánh", "badge": "🔥 Lời Chúa"}
         ],
         "JP": [
             {"tag": "怖い話 実話 怪談", "niche": "👻 Kinh Dị", "badge": "🔥 怪談"},
@@ -803,6 +804,17 @@ NICHE_LOCALIZED_QUERIES = {
         "KR": "불교",
         "DE": "Buddhismus Meditation",
         "DEFAULT": "buddhism teachings"
+    },
+    "christianity_bible": {
+        "VN": "lời chúa kinh thánh",
+        "US": "bible scripture reading",
+        "GB": "holy bible study",
+        "FR": "sainte bible lecture",
+        "IT": "sacra bibbia lettura",
+        "JP": "聖書 朗読",
+        "KR": "성경 말씀 듣기",
+        "DE": "Bibel Hörbuch Lesung",
+        "DEFAULT": "bible scripture reading"
     },
     "elderly_wisdom": {
         "VN": "tâm sự tuổi già",
