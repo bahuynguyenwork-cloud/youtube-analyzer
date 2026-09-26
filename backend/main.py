@@ -132,8 +132,8 @@ class ApiKeyPayload(BaseModel):
     api_key: Optional[str] = None
     gemini_api_key: Optional[str] = None
 
-@app.get("/api/health")
-def health_check():
+@app.api_route("/api/health", methods=["GET", "HEAD"])
+def health_check_api():
     return {"status": "ok", "service": "YouTube Trend & Channel Analyzer", "version": "1.2.0"}
 
 @app.get("/api/settings/api-key")
@@ -1879,7 +1879,7 @@ frontend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "fronten
 if os.path.exists(frontend_dir):
     app.mount("/static", StaticFiles(directory=frontend_dir), name="static")
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 def serve_index():
     index_path = os.path.join(frontend_dir, "index.html")
     if os.path.exists(index_path):
@@ -1900,9 +1900,9 @@ def serve_favicon():
         return FileResponse(fav_path, media_type="image/svg+xml")
     return Response(status_code=204)
 
-@app.get("/health")
-@app.get("/ping")
-def health_check():
+@app.api_route("/health", methods=["GET", "HEAD"])
+@app.api_route("/ping", methods=["GET", "HEAD"])
+def health_check_ping():
     return {"status": "ok", "service": "YouTube Trend Analyzer", "time": datetime.datetime.now(datetime.timezone.utc).isoformat()}
 
 
