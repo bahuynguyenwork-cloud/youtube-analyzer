@@ -437,7 +437,14 @@ class TimeService:
         """Tự động phân tích và nhận diện ngách nội dung của kênh từ từ khóa, tiêu đề và mô tả."""
         title_text = (channel_title or "").lower()
         desc_text = (channel_description or "").lower()
-        kw_list = [str(k).lower().strip().lstrip("#") for k in (channel_keywords or []) if str(k).strip()]
+        kw_list = []
+        for k in (channel_keywords or []):
+            if isinstance(k, dict):
+                val = str(k.get("keyword") or "").lower().strip().lstrip("#")
+            else:
+                val = str(k).lower().strip().lstrip("#")
+            if val:
+                kw_list.append(val)
         
         video_titles = " ".join([v.get("title", "").lower() for v in (videos or [])[:30]])
         video_descs = " ".join([(v.get("description", "") or "")[:200].lower() for v in (videos or [])[:30]])
