@@ -58,47 +58,69 @@
     .copy-chip:active {
       transform: scale(0.96);
     }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased selection:bg-rose-500 selection:text-white">
 
   <!-- Top Navbar -->
-  <header class="sticky top-0 z-50 glass-card border-b border-white/10 px-6 py-3.5">
-    <div class="max-w-7xl mx-auto flex items-center justify-between">
-      <div class="flex items-center space-x-3 cursor-pointer" onclick="switchNav('channel')">
-        <img src="/static/favicon.svg" class="w-10 h-10 rounded-xl shadow-lg shadow-rose-500/20 object-contain hover:scale-105 transition-transform" alt="YT Analyzer Logo" />
-        <div>
-          <div class="flex items-center space-x-2">
-            <span class="text-lg font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-rose-400 bg-clip-text text-transparent">
-              YT Analyzer
-            </span>
-            <span class="text-[10px] uppercase px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">Global Pro</span>
+  <header class="sticky top-0 z-50 glass-card border-b border-white/10 px-3 sm:px-6 py-2.5 sm:py-3.5">
+    <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2.5 sm:gap-3">
+      <!-- Top Row on Mobile / Left Section on Desktop -->
+      <div class="flex items-center justify-between w-full lg:w-auto">
+        <div class="flex items-center space-x-2.5 sm:space-x-3 cursor-pointer" onclick="switchNav('channel')">
+          <img src="/static/favicon.svg" class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl shadow-lg shadow-rose-500/20 object-contain hover:scale-105 transition-transform" alt="YT Analyzer Logo" />
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="text-base sm:text-lg font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-rose-400 bg-clip-text text-transparent">
+                YT Analyzer
+              </span>
+              <span class="text-[9px] sm:text-[10px] uppercase px-1.5 sm:px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">Global Pro</span>
+            </div>
+            <p class="text-[10px] sm:text-[11px] text-slate-400 hidden sm:block">Phân Tích Ngoại Quốc • Từ Khóa 1-Click Copy • Giờ Vàng Đăng Theo UC</p>
           </div>
-          <p class="text-[11px] text-slate-400">Phân Tích Ngoại Quốc • Từ Khóa 1-Click Copy • Giờ Vàng Đăng Theo UC</p>
+        </div>
+
+        <!-- Mobile Quick Action Buttons -->
+        <div class="flex lg:hidden items-center space-x-1.5">
+          <button id="nav-api-btn-mobile" onclick="openApiKeyModal()" class="px-2.5 py-1.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-xs font-semibold flex items-center space-x-1 border border-white/10 transition text-slate-300" title="Cài đặt API Key">
+            <i data-lucide="key" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span id="nav-api-label-mobile" class="text-[11px]">API</span>
+          </button>
+          <button onclick="exportDataJSON()" class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-all border border-white/10" title="Xuất dữ liệu JSON">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+          </button>
         </div>
       </div>
 
-      <!-- Navigation Tabs -->
-      <nav class="flex items-center space-x-1 bg-slate-900/80 p-1 rounded-xl border border-white/5">
-        <button id="nav-btn-channel" onclick="switchNav('channel')" class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all bg-rose-600 text-white shadow-sm">
+      <!-- Navigation Tabs (Horizontally scrollable with smooth touch swipe on mobile) -->
+      <nav class="w-full lg:w-auto flex items-center justify-start lg:justify-center space-x-1 bg-slate-900/80 p-1 rounded-xl border border-white/5 overflow-x-auto no-scrollbar shrink-0">
+        <button id="nav-btn-channel" onclick="switchNav('channel')" class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all bg-rose-600 text-white shadow-sm">
           <i data-lucide="line-chart" class="w-3.5 h-3.5"></i>
           <span>Phân Tích Kênh</span>
         </button>
-        <button id="nav-btn-uctime" onclick="switchNav('uctime')" class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all text-slate-400 hover:text-white hover:bg-slate-800">
+        <button id="nav-btn-uctime" onclick="switchNav('uctime')" class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all text-slate-400 hover:text-white hover:bg-slate-800">
           <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-400"></i>
           <span>Lấy Giờ Đăng (UC)</span>
         </button>
-        <button id="nav-btn-keyword" onclick="switchNav('keyword')" class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all text-slate-400 hover:text-white hover:bg-slate-800">
+        <button id="nav-btn-keyword" onclick="switchNav('keyword')" class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all text-slate-400 hover:text-white hover:bg-slate-800">
           <i data-lucide="flame" class="w-3.5 h-3.5"></i>
           <span>Đo Trend Từ Khóa</span>
         </button>
-        <button id="nav-btn-trending" onclick="switchNav('trending')" class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all text-slate-400 hover:text-white hover:bg-slate-800">
+        <button id="nav-btn-trending" onclick="switchNav('trending')" class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all text-slate-400 hover:text-white hover:bg-slate-800">
           <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
           <span>Top Thịnh Hành</span>
         </button>
       </nav>
 
-      <div class="flex items-center space-x-2">
+      <!-- Desktop Action Buttons -->
+      <div class="hidden lg:flex items-center space-x-2 shrink-0">
         <button id="nav-api-btn" onclick="openApiKeyModal()" class="px-2.5 py-1.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-xs font-semibold flex items-center space-x-1.5 border border-white/10 transition text-slate-300" title="Cài đặt YouTube API Key">
           <i data-lucide="key" class="w-3.5 h-3.5 text-amber-400"></i>
           <span id="nav-api-label">API Key: Chưa lưu</span>
@@ -201,7 +223,7 @@
               </div>
               <button 
                 onclick="exportStrategicReport()" 
-                class="px-3.5 py-2 bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white rounded-xl border border-white/10 hover:border-rose-500/40 text-xs font-semibold flex items-center space-x-2 transition shrink-0 shadow-sm" 
+                class="w-full sm:w-auto justify-center px-3.5 py-2 bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white rounded-xl border border-white/10 hover:border-rose-500/40 text-xs font-semibold flex items-center space-x-2 transition shrink-0 shadow-sm" 
                 title="Tải toàn bộ báo cáo chiến lược kênh dạng văn bản">
                 <i data-lucide="file-down" class="w-4 h-4 text-rose-400"></i>
                 <span>Xuất Báo Cáo Kênh</span>
@@ -261,32 +283,32 @@
           </div>
         </div>
 
-        <div class="flex items-center space-x-2 border-b border-white/10 pb-2 overflow-x-auto custom-scrollbar">
-          <button onclick="switchSubTab('sub-time')" id="sub-btn-time" class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 bg-rose-600/20 text-rose-300 border border-rose-500/30">
+        <div class="flex items-center space-x-2 border-b border-white/10 pb-2 overflow-x-auto no-scrollbar">
+          <button onclick="switchSubTab('sub-time')" id="sub-btn-time" class="shrink-0 whitespace-nowrap px-3.5 sm:px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 sm:space-x-2 bg-rose-600/20 text-rose-300 border border-rose-500/30">
             <i data-lucide="clock" class="w-4 h-4"></i>
             <span>⏰ 1. Giờ Đăng Vàng (Giờ VN)</span>
           </button>
-          <button onclick="switchSubTab('sub-earnings')" id="sub-btn-earnings" class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 text-slate-400 hover:text-white hover:bg-slate-800">
+          <button onclick="switchSubTab('sub-earnings')" id="sub-btn-earnings" class="shrink-0 whitespace-nowrap px-3.5 sm:px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 sm:space-x-2 text-slate-400 hover:text-white hover:bg-slate-800">
             <i data-lucide="dollar-sign" class="w-4 h-4 text-emerald-400"></i>
             <span>💰 2. Doanh Thu RPM & Tiềm Năng</span>
           </button>
-          <button onclick="switchSubTab('sub-keywords')" id="sub-btn-keywords" class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 text-slate-400 hover:text-white hover:bg-slate-800">
+          <button onclick="switchSubTab('sub-keywords')" id="sub-btn-keywords" class="shrink-0 whitespace-nowrap px-3.5 sm:px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 sm:space-x-2 text-slate-400 hover:text-white hover:bg-slate-800">
             <i data-lucide="copy" class="w-4 h-4"></i>
             <span>📋 3. Từ Khóa Bắt Trend 1-Click Copy</span>
           </button>
-          <button onclick="switchSubTab('sub-overview')" id="sub-btn-overview" class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 text-slate-400 hover:text-white hover:bg-slate-800">
+          <button onclick="switchSubTab('sub-overview')" id="sub-btn-overview" class="shrink-0 whitespace-nowrap px-3.5 sm:px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 sm:space-x-2 text-slate-400 hover:text-white hover:bg-slate-800">
             <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
             <span>📊 4. Hiệu Suất Video</span>
           </button>
-          <button onclick="switchSubTab('sub-trends')" id="sub-btn-trends" class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 text-slate-400 hover:text-white hover:bg-slate-800">
+          <button onclick="switchSubTab('sub-trends')" id="sub-btn-trends" class="shrink-0 whitespace-nowrap px-3.5 sm:px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 sm:space-x-2 text-slate-400 hover:text-white hover:bg-slate-800">
             <i data-lucide="trending-up" class="w-4 h-4"></i>
             <span>🌍 5. Google Trends Khu Vực</span>
           </button>
-          <button onclick="switchSubTab('sub-competitors')" id="sub-btn-competitors" class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 text-slate-400 hover:text-white hover:bg-slate-800">
+          <button onclick="switchSubTab('sub-competitors')" id="sub-btn-competitors" class="shrink-0 whitespace-nowrap px-3.5 sm:px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 sm:space-x-2 text-slate-400 hover:text-white hover:bg-slate-800">
             <i data-lucide="compass" class="w-4 h-4"></i>
             <span>👥 6. Kênh Đối Thủ Cùng Ngách</span>
           </button>
-          <button onclick="switchSubTab('sub-strategy')" id="sub-btn-strategy" class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-2 text-slate-400 hover:text-white hover:bg-slate-800">
+          <button onclick="switchSubTab('sub-strategy')" id="sub-btn-strategy" class="shrink-0 whitespace-nowrap px-3.5 sm:px-4 py-2 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 sm:space-x-2 text-slate-400 hover:text-white hover:bg-slate-800">
             <i data-lucide="lightbulb" class="w-4 h-4"></i>
             <span>💡 7. Mẫu Tiêu Đề & Đo Điểm CTR</span>
           </button>
@@ -294,7 +316,7 @@
 
         <!-- Subtab 1: Giờ Đăng Vàng -->
         <div id="sub-time" class="subtab-pane space-y-5">
-          <div id="target-country-strategy-banner" class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <div id="target-country-strategy-banner" class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
             <div class="flex items-start space-x-3">
               <div class="p-2 rounded-xl bg-rose-500/20 text-rose-400 shrink-0 mt-0.5">
                 <i data-lucide="compass" class="w-4 h-4"></i>
@@ -316,9 +338,9 @@
                 </div>
               </div>
             </div>
-            <div class="flex items-center space-x-2 shrink-0 self-start sm:self-center">
-              <span class="text-slate-400 font-medium">Chủ đề ngách:</span>
-              <select id="niche-selector" onchange="onNicheChanged(this.value)" class="bg-slate-900 border border-white/10 text-white text-xs font-semibold rounded-xl px-3 py-1.5 focus:outline-none focus:border-rose-500">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:space-x-2 shrink-0 w-full md:w-auto">
+              <span class="text-slate-400 font-medium whitespace-nowrap">Chủ đề ngách:</span>
+              <select id="niche-selector" onchange="onNicheChanged(this.value)" class="w-full md:w-auto max-w-full bg-slate-900 border border-white/10 text-white text-xs font-semibold rounded-xl px-3 py-2 focus:outline-none focus:border-rose-500">
                 <option value="travel_vlog">✈️ Du Lịch, Ẩm Thực & Vlog Đời Sống</option>
                 <option value="entertainment">🎉 Giải Trí & Hài Hước</option>
                 <option value="learn_english">🎓 Học Tiếng Anh (English Learning & Speaking)</option>
@@ -849,18 +871,18 @@
             <h3 id="uc-channel-title" class="text-base font-bold text-white">Danh Sách Video</h3>
             <p id="uc-meta-info" class="text-xs text-slate-400">Múi giờ: Asia/Ho_Chi_Minh (UTC+7)</p>
           </div>
-          <div class="flex flex-wrap items-center gap-2">
-            <button onclick="copyUCTableForSheets()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-emerald-600/30 transition flex items-center space-x-2">
-              <i data-lucide="clipboard" class="w-4 h-4"></i>
-              <span>📋 Copy Cho Google Sheets (Ctrl + V)</span>
+          <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            <button onclick="copyUCTableForSheets()" class="flex-1 sm:flex-initial px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-emerald-600/30 transition flex items-center justify-center space-x-2">
+              <i data-lucide="clipboard" class="w-4 h-4 shrink-0"></i>
+              <span class="whitespace-nowrap">📋 Copy Sheets (Ctrl+V)</span>
             </button>
-            <button onclick="downloadUCCSV()" class="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-white/10 transition flex items-center space-x-1.5">
-              <i data-lucide="download" class="w-4 h-4"></i>
-              <span>Tải CSV</span>
+            <button onclick="downloadUCCSV()" class="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-white/10 transition flex items-center justify-center space-x-1.5">
+              <i data-lucide="download" class="w-4 h-4 shrink-0"></i>
+              <span>CSV</span>
             </button>
-            <button onclick="openGasModal()" class="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-semibold rounded-xl border border-amber-500/20 transition flex items-center space-x-1.5">
-              <i data-lucide="code" class="w-4 h-4"></i>
-              <span>Google Apps Script</span>
+            <button onclick="openGasModal()" class="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-semibold rounded-xl border border-amber-500/20 transition flex items-center justify-center space-x-1.5">
+              <i data-lucide="code" class="w-4 h-4 shrink-0"></i>
+              <span>Apps Script</span>
             </button>
           </div>
         </div>
@@ -1001,8 +1023,8 @@
           <h2 class="text-2xl font-bold text-white">Bảng Xếp Hạng Xu Hướng YouTube Thời Gian Thực</h2>
           <p class="text-xs text-slate-400 mt-1">Quét các video đang bứt phá mạnh nhất tại các thị trường quốc tế theo thời gian thực</p>
         </div>
-        <div class="flex flex-wrap items-center gap-2">
-          <select id="feed-country" onchange="loadTrendingFeed()" class="px-3.5 py-2.5 bg-slate-900/90 border border-white/15 rounded-xl text-white text-xs focus:ring-2 focus:ring-rose-500 font-medium">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap items-center gap-2 w-full lg:w-auto">
+          <select id="feed-country" onchange="loadTrendingFeed()" class="w-full lg:w-auto px-3.5 py-2.5 bg-slate-900/90 border border-white/15 rounded-xl text-white text-xs focus:ring-2 focus:ring-rose-500 font-medium">
             <option value="US">🇺🇸 Hoa Kỳ (US)</option>
             <option value="VN">🇻🇳 Việt Nam (VN)</option>
             <option value="GB">🇬🇧 Vương Quốc Anh (UK)</option>
@@ -1016,7 +1038,7 @@
             <option value="CA">🇨🇦 Canada (CA)</option>
             <option value="AU">🇦🇺 Úc (AU)</option>
           </select>
-          <select id="feed-category" onchange="loadTrendingFeed()" class="px-3.5 py-2.5 bg-slate-900/90 border border-white/15 rounded-xl text-white text-xs focus:ring-2 focus:ring-rose-500 font-medium">
+          <select id="feed-category" onchange="loadTrendingFeed()" class="w-full lg:w-auto px-3.5 py-2.5 bg-slate-900/90 border border-white/15 rounded-xl text-white text-xs focus:ring-2 focus:ring-rose-500 font-medium">
             <option value="all">🔥 Tất cả xu hướng (Top Trending)</option>
             <option value="learn_english">🎓 Học Tiếng Anh (English Learning & Speaking)</option>
             <option value="spicy_18_drama">🔞 18+ & Tâm Sự Thầm Kín Đêm Muộn</option>
@@ -1043,23 +1065,23 @@
             <option value="fitness_health">🏋️ Thể Hình & Sức Khỏe Dinh Dưỡng</option>
             <option value="music_chill">🎧 Nhạc Chill & Lofi Thư Giãn</option>
           </select>
-          <select id="feed-time-range" onchange="loadTrendingFeed()" class="px-3.5 py-2.5 bg-slate-900/90 border border-amber-500/40 text-amber-300 rounded-xl text-xs focus:ring-2 focus:ring-amber-500 font-semibold">
+          <select id="feed-time-range" onchange="loadTrendingFeed()" class="w-full lg:w-auto px-3.5 py-2.5 bg-slate-900/90 border border-amber-500/40 text-amber-300 rounded-xl text-xs focus:ring-2 focus:ring-amber-500 font-semibold">
             <option value="7d" selected>🔥 Xu Hướng Tuần Này (7 Ngày Qua)</option>
             <option value="24h">⚡ Mới Nhất 24 - 48 Giờ Qua</option>
             <option value="30d">📅 Xu Hướng Tháng Này (30 Ngày)</option>
             <option value="all">🏛️ Mọi Thời Đại (Triệu View All-Time)</option>
           </select>
-          <select id="feed-duration" onchange="loadTrendingFeed()" class="px-3.5 py-2.5 bg-slate-900/90 border border-rose-500/30 text-rose-300 rounded-xl text-xs focus:ring-2 focus:ring-rose-500 font-semibold">
+          <select id="feed-duration" onchange="loadTrendingFeed()" class="w-full lg:w-auto px-3.5 py-2.5 bg-slate-900/90 border border-rose-500/30 text-rose-300 rounded-xl text-xs focus:ring-2 focus:ring-rose-500 font-semibold">
             <option value="long_form">⏱️ Video Dài (Bỏ Shorts, > 3 Phút)</option>
             <option value="deep_dive">🎙️ Video Sâu / Podcast (> 20 Phút)</option>
           </select>
-          <select id="feed-mode" onchange="loadTrendingFeed()" class="px-3.5 py-2.5 bg-slate-900/90 border border-emerald-500/30 text-emerald-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 font-semibold">
+          <select id="feed-mode" onchange="loadTrendingFeed()" class="w-full lg:w-auto px-3.5 py-2.5 bg-slate-900/90 border border-emerald-500/30 text-emerald-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 font-semibold">
             <option value="active_channels" selected>🟢 Ưu Tiên Kênh Ổn Định & Còn Sống</option>
             <option value="all_channels">🌐 Tất Cả Kênh Xu Hướng</option>
           </select>
-          <button onclick="loadTrendingFeed(true)" title="Làm mới dữ liệu xu hướng ngay" class="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 border border-white/10 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center space-x-1.5 transition">
+          <button onclick="loadTrendingFeed(true)" title="Làm mới dữ liệu xu hướng ngay" class="w-full sm:col-span-2 lg:w-auto px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 border border-white/10 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center space-x-1.5 transition">
             <svg class="w-3.5 h-3.5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-            <span class="hidden sm:inline">Làm Mới</span>
+            <span>Làm Mới</span>
           </button>
         </div>
       </section>
@@ -1072,26 +1094,26 @@
   </main>
 
   <!-- ==================== MODAL GOOGLE APPS SCRIPT ==================== -->
-  <div id="modal-gas" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-    <div class="glass-card rounded-3xl max-w-2xl w-full p-6 sm:p-8 border border-white/15 space-y-5 relative max-h-[90vh] flex flex-col">
-      <div class="flex items-center justify-between border-b border-white/10 pb-4">
-        <div class="flex items-center space-x-2.5">
-          <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center">
+  <div id="modal-gas" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm">
+    <div class="glass-card rounded-2xl sm:rounded-3xl max-w-2xl w-full p-4 sm:p-7 border border-white/15 space-y-4 sm:space-y-5 relative max-h-[92vh] flex flex-col">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3 sm:pb-4">
+        <div class="flex items-center space-x-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
             <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
           </div>
-          <div>
-            <h3 class="text-base font-bold text-white">Google Sheets Apps Script</h3>
-            <p class="text-xs text-slate-400">Code tự động lấy video & chuyển giờ đăng sang múi giờ VN</p>
+          <div class="min-w-0">
+            <h3 class="text-sm sm:text-base font-bold text-white truncate">Google Sheets Apps Script</h3>
+            <p class="text-[11px] sm:text-xs text-slate-400 truncate">Code tự động lấy video & chuyển giờ đăng sang múi giờ VN</p>
           </div>
         </div>
-        <button onclick="closeGasModal()" class="p-2 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition">
+        <button onclick="closeGasModal()" class="p-2 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition shrink-0">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <div class="space-y-2 text-xs text-slate-300">
+      <div class="space-y-1.5 sm:space-y-2 text-xs text-slate-300">
         <p><strong class="text-rose-400">Cách sử dụng:</strong></p>
-        <ol class="list-decimal list-inside space-y-1 text-slate-400">
+        <ol class="list-decimal list-inside space-y-1 text-slate-400 text-[11px] sm:text-xs">
           <li>Mở bảng tính <strong class="text-white">Google Sheets</strong> mới.</li>
           <li>Vào menu <strong class="text-white">Tiện ích mở rộng (Extensions)</strong> &gt; <strong class="text-white">Apps Script</strong>.</li>
           <li>Xóa code cũ, nhấn nút <strong class="text-amber-300">"Copy Toàn Bộ Code"</strong> bên dưới rồi Dán vào.</li>
@@ -1101,36 +1123,36 @@
       </div>
 
       <div class="flex-1 min-h-0 relative">
-        <pre id="gas-code-content" class="h-64 p-4 bg-slate-950 rounded-xl border border-white/10 text-xs font-mono text-slate-300 overflow-y-auto custom-scrollbar"></pre>
+        <pre id="gas-code-content" class="h-56 sm:h-64 p-3.5 sm:p-4 bg-slate-950 rounded-xl border border-white/10 text-[11px] sm:text-xs font-mono text-slate-300 overflow-y-auto custom-scrollbar"></pre>
       </div>
 
-      <div class="flex items-center justify-end space-x-3 pt-3 border-t border-white/10">
-        <button onclick="copyGasCode()" class="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-400 hover:to-rose-400 text-white font-bold text-xs rounded-xl shadow-lg transition flex items-center space-x-2">
+      <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:space-x-3 pt-3 border-t border-white/10">
+        <button onclick="closeGasModal()" class="w-full sm:w-auto px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl text-center">
+          Đóng
+        </button>
+        <button onclick="copyGasCode()" class="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-400 hover:to-rose-400 text-white font-bold text-xs rounded-xl shadow-lg transition flex items-center justify-center space-x-2">
           <i data-lucide="copy" class="w-4 h-4"></i>
           <span>Copy Toàn Bộ Code Apps Script</span>
-        </button>
-        <button onclick="closeGasModal()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl">
-          Đóng
         </button>
       </div>
     </div>
   </div>
 
   <!-- ==================== MODAL CÀI ĐẶT API KEY ==================== -->
-  <div id="api-key-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-    <div class="glass-card rounded-3xl p-6 sm:p-7 max-w-lg w-full border border-white/15 shadow-2xl relative space-y-5 animate-in fade-in zoom-in duration-200">
+  <div id="api-key-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md">
+    <div class="glass-card rounded-2xl sm:rounded-3xl p-5 sm:p-7 max-w-lg w-full border border-white/15 shadow-2xl relative space-y-4 sm:space-y-5 animate-in fade-in zoom-in duration-200 max-h-[92vh] overflow-y-auto custom-scrollbar">
       <!-- Modal Header -->
-      <div class="flex items-center justify-between border-b border-white/10 pb-4">
-        <div class="flex items-center space-x-3">
-          <div class="p-2.5 rounded-xl bg-amber-500/20 text-amber-400">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3 sm:pb-4">
+        <div class="flex items-center space-x-3 min-w-0">
+          <div class="p-2 sm:p-2.5 rounded-xl bg-amber-500/20 text-amber-400 shrink-0">
             <i data-lucide="key" class="w-5 h-5"></i>
           </div>
-          <div>
-            <h3 class="text-base font-bold text-white">Cài Đặt YouTube Data API Key</h3>
-            <p class="text-xs text-slate-400">Dán 1 lần trên thanh Header - Dùng chung cho toàn bộ website</p>
+          <div class="min-w-0">
+            <h3 class="text-sm sm:text-base font-bold text-white truncate">Cài Đặt YouTube Data API Key</h3>
+            <p class="text-[11px] sm:text-xs text-slate-400 truncate">Dán 1 lần - Dùng chung cho toàn bộ website</p>
           </div>
         </div>
-        <button onclick="closeApiKeyModal()" class="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition">
+        <button onclick="closeApiKeyModal()" class="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition shrink-0">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -1145,7 +1167,7 @@
               id="modal-api-key-input" 
               type="password" 
               placeholder="Dán mã API Key (bắt đầu bằng AIzaSy...)" 
-              class="w-full pl-10 pr-20 h-12 bg-slate-900/90 border border-white/15 rounded-xl text-white placeholder-slate-500 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 transition font-mono shadow-inner"
+              class="w-full pl-10 pr-20 h-11 sm:h-12 bg-slate-900/90 border border-white/15 rounded-xl text-white placeholder-slate-500 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 transition font-mono shadow-inner"
             />
             <div class="absolute right-2.5 flex items-center space-x-1">
               <button type="button" onclick="toggleApiKeyVisibility('modal-api-key-input')" class="p-1.5 text-slate-400 hover:text-white transition rounded" title="Hiện/Ẩn API Key">
@@ -1164,10 +1186,10 @@
 
         <!-- Gemini AI API Key Input -->
         <div class="space-y-1.5 text-left pt-3 border-t border-white/10">
-          <div class="flex items-center justify-between">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
             <label class="text-xs font-semibold text-indigo-300 flex items-center space-x-1.5">
               <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-400"></i>
-              <span>Google Gemini AI Key (Quét Ngách Bằng AI 100%):</span>
+              <span>Google Gemini AI Key (Quét Ngách AI 100%):</span>
             </label>
             <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-[11px] text-indigo-400 hover:text-indigo-300 underline font-semibold flex items-center space-x-1" title="Lấy miễn phí 100% từ Google AI Studio">
               <span>Nhận Key Miễn Phí (15 RPM)</span>
@@ -1211,25 +1233,25 @@
       </div>
 
       <!-- Modal Footer -->
-      <div class="flex items-center justify-between border-t border-white/10 pt-4 gap-2">
+      <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between border-t border-white/10 pt-4 gap-2.5">
         <button 
           type="button" 
           onclick="clearSavedApiKeyFromModal()" 
-          class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-rose-500/20 hover:text-rose-300 text-slate-400 text-xs font-semibold border border-white/5 transition flex items-center space-x-1.5">
+          class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-rose-500/20 hover:text-rose-300 text-slate-400 text-xs font-semibold border border-white/5 transition flex items-center justify-center space-x-1.5">
           <i data-lucide="trash-2" class="w-4 h-4"></i>
           <span>Xóa Key</span>
         </button>
-        <div class="flex items-center space-x-2">
+        <div class="flex items-center space-x-2 w-full sm:w-auto">
           <button 
             type="button" 
             onclick="closeApiKeyModal()" 
-            class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition">
+            class="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition text-center">
             Đóng
           </button>
           <button 
             type="button" 
             onclick="saveApiKeyFromModal()" 
-            class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold shadow-lg shadow-emerald-600/30 transition flex items-center space-x-1.5">
+            class="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold shadow-lg shadow-emerald-600/30 transition flex items-center justify-center space-x-1.5">
             <i data-lucide="check" class="w-4 h-4"></i>
             <span>Lưu API Key</span>
           </button>
@@ -1337,6 +1359,8 @@
     function updateApiKeyUI(key, geminiKey) {
       const navLabel = document.getElementById('nav-api-label');
       const navBtn = document.getElementById('nav-api-btn');
+      const navLabelMobile = document.getElementById('nav-api-label-mobile');
+      const navBtnMobile = document.getElementById('nav-api-btn-mobile');
 
       const gKey = geminiKey !== undefined ? geminiKey : savedGeminiKey;
       const hasYT = Boolean(key);
@@ -1351,11 +1375,21 @@
           navBtn.classList.remove('text-slate-300');
           navBtn.classList.add('text-emerald-400', 'border-emerald-500/30', 'bg-emerald-500/10');
         }
+        if (navLabelMobile) navLabelMobile.textContent = hasYT ? `API: ON` : `AI: ON`;
+        if (navBtnMobile) {
+          navBtnMobile.classList.remove('text-slate-300');
+          navBtnMobile.classList.add('text-emerald-400', 'border-emerald-500/30', 'bg-emerald-500/10');
+        }
       } else {
         if (navLabel) navLabel.textContent = 'API Key: Chưa lưu';
         if (navBtn) {
           navBtn.classList.remove('text-emerald-400', 'border-emerald-500/30', 'bg-emerald-500/10');
           navBtn.classList.add('text-slate-300');
+        }
+        if (navLabelMobile) navLabelMobile.textContent = 'API';
+        if (navBtnMobile) {
+          navBtnMobile.classList.remove('text-emerald-400', 'border-emerald-500/30', 'bg-emerald-500/10');
+          navBtnMobile.classList.add('text-slate-300');
         }
       }
 
@@ -3236,14 +3270,14 @@
         btn.onclick = () => quickSearchKw(item.tag);
         
         // Bên trái: Từ khóa bản xứ (Hàn, Nhật, Anh, Pháp...) | Giữa: Nghĩa Tiếng Việt | Bên phải: Badge
-        const viText = item.vi ? `<span class="text-amber-300/90 italic font-sans font-medium text-[11px] leading-snug">${item.vi}</span>` : '';
+        const viText = item.vi ? `<span class="text-amber-300/90 italic font-sans font-medium text-[11px] leading-snug break-words">${item.vi}</span>` : '';
         btn.innerHTML = `
-          <div class="flex items-center space-x-2 min-w-0 flex-1">
-            <span class="font-bold text-white group-hover:text-rose-400 transition shrink-0 whitespace-nowrap">${item.tag}</span>
-            <span class="text-slate-600 shrink-0">•</span>
+          <div class="flex flex-col sm:flex-row sm:items-center min-w-0 flex-1 gap-0.5 sm:gap-2">
+            <span class="font-bold text-white group-hover:text-rose-400 transition shrink-0">${item.tag}</span>
+            <span class="hidden sm:inline text-slate-600 shrink-0">•</span>
             ${viText}
           </div>
-          <span class="shrink-0 px-2 py-0.5 rounded text-[10px] bg-rose-500/20 text-rose-300 border border-rose-500/30 font-semibold ml-1.5">${item.badge}</span>
+          <span class="shrink-0 px-2 py-0.5 rounded text-[10px] bg-rose-500/20 text-rose-300 border border-rose-500/30 font-semibold self-start sm:self-center ml-1.5">${item.badge}</span>
         `;
         container.appendChild(btn);
       });
