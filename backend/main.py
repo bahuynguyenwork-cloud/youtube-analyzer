@@ -9,10 +9,10 @@ import requests
 import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor
 from typing import Optional, Dict, Any, List
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, Response
+from fastapi.responses import FileResponse, Response, PlainTextResponse
 from pydantic import BaseModel
 
 from backend.services.youtube_service import YouTubeService
@@ -1892,7 +1892,18 @@ if os.path.exists(frontend_dir):
     app.mount("/static", StaticFiles(directory=frontend_dir), name="static")
 
 @app.api_route("/", methods=["GET", "HEAD"])
-def serve_index():
+def serve_index(request: Request):
+    user_agent = request.headers.get("user-agent", "").lower()
+    # Nếu là bot monitor keep-alive (cron-job.org, uptimerobot, pingdom, betteruptime, curl...)
+    # hoặc HEAD request, hoặc có query ?ping=1: trả về 200 OK siêu nhẹ 2 bytes để tránh lỗi "output too large" của cron-job.org
+    is_monitor = any(bot in user_agent for bot in [
+        "cron-job", "cronjob", "uptimerobot", "pingdom", "betteruptime",
+        "healthcheck", "statuscake", "freshping", "site24x7", "node-fetch", "curl"
+    ]) or ("ping" in request.query_params)
+
+    if request.method == "HEAD" or is_monitor:
+        return PlainTextResponse("OK", status_code=200)
+
     index_path = os.path.join(frontend_dir, "index.html")
     if os.path.exists(index_path):
         return FileResponse(
@@ -1915,7 +1926,7 @@ def serve_favicon():
 @app.api_route("/health", methods=["GET", "HEAD"])
 @app.api_route("/ping", methods=["GET", "HEAD"])
 def health_check_ping():
-    return {"status": "ok", "service": "YouTube Trend Analyzer", "time": datetime.datetime.now(datetime.timezone.utc).isoformat()}
+    return PlainTextResponse("OK", status_code=200)
 
 
 
