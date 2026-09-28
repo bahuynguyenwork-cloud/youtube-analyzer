@@ -1892,6 +1892,8 @@ if os.path.exists(frontend_dir):
     app.mount("/static", StaticFiles(directory=frontend_dir), name="static")
 
 @app.api_route("/", methods=["GET", "HEAD"])
+@app.api_route("/index.html", methods=["GET", "HEAD"])
+@app.api_route("/index", methods=["GET", "HEAD"])
 def serve_index(request: Request):
     user_agent = request.headers.get("user-agent", "").lower()
     # Nếu là bot monitor keep-alive (cron-job.org, uptimerobot, pingdom, betteruptime, curl...)
