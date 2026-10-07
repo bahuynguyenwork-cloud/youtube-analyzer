@@ -69,6 +69,11 @@ COUNTRY_TIMEZONE_PROFILES = {
         "name": "Việt Nam",
         "utc_offset": 7,  # Giờ ICT (UTC+7)
         "tz_name": "ICT (Hà Nội, TP.HCM, UTC+7)",
+    },
+    "RU": {
+        "name": "Nga (Russia)",
+        "utc_offset": 3,  # Moscow (MSK, UTC+3 - chậm hơn VN 4 tiếng)
+        "tz_name": "MSK (Moscow, UTC+3)",
     }
 }
 

@@ -172,6 +172,7 @@
                 <option value="ID">🇮🇩 Khán giả Indonesia (ID)</option>
                 <option value="TH">🇹🇭 Khán giả Thái Lan (TH)</option>
                 <option value="PH">🇵🇭 Khán giả Philippines (PH)</option>
+                <option value="RU">🇷🇺 Khán giả Nga (RU)</option>
                 <option value="BR">🇧🇷 Khán giả Brazil (BR)</option>
                 <option value="VN">🇻🇳 Khán giả Việt Nam (VN)</option>
                 <option value="">🌐 Toàn Cầu (Global)</option>
@@ -941,6 +942,7 @@
             <option value="ID">Indonesia (ID)</option>
             <option value="TH">Thái Lan (TH)</option>
             <option value="PH">Philippines (PH)</option>
+            <option value="RU">Nga (RU)</option>
             <option value="VN">Việt Nam (VN)</option>
           </select>
           <button type="submit" class="px-6 py-3 bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-rose-600/30 transition">Kiểm Tra</button>
@@ -1044,6 +1046,7 @@
             <option value="ID">🇮🇩 Indonesia (ID)</option>
             <option value="TH">🇹🇭 Thái Lan (TH)</option>
             <option value="PH">🇵🇭 Philippines (PH)</option>
+            <option value="RU">🇷🇺 Nga (RU)</option>
             <option value="BR">🇧🇷 Brazil (BR)</option>
             <option value="CA">🇨🇦 Canada (CA)</option>
             <option value="AU">🇦🇺 Úc (AU)</option>
@@ -1287,7 +1290,7 @@
     const COUNTRY_NAMES = {
       "US": "Hoa Kỳ (Mỹ)", "GB": "Anh Quốc (UK)", "JP": "Nhật Bản (JP)", "KR": "Hàn Quốc (KR)",
       "DE": "Đức (DE)", "FR": "Pháp (FR)", "IT": "Ý (IT)", "IN": "Ấn Độ (IN)",
-      "ID": "Indonesia (ID)", "TH": "Thái Lan (TH)", "PH": "Philippines (PH)",
+      "ID": "Indonesia (ID)", "TH": "Thái Lan (TH)", "PH": "Philippines (PH)", "RU": "Nga (RU)",
       "BR": "Brazil (BR)", "CA": "Canada (CA)", "AU": "Úc (AU)", "VN": "Việt Nam (VN)", "": "Toàn Cầu"
     };
 
@@ -1295,7 +1298,7 @@
       "US": 3.8, "GB": 3.4, "DE": 3.2, "FR": 2.8, "IT": 2.6,
       "CA": 3.2, "AU": 3.3,
       "JP": 2.5, "KR": 2.4, "VN": 0.85, "BR": 0.95, "IN": 0.65,
-      "ID": 0.75, "TH": 0.95, "PH": 0.85,
+      "ID": 0.75, "TH": 0.95, "PH": 0.85, "RU": 1.2,
       "GLOBAL": 2.2
     };
 
@@ -3296,6 +3299,17 @@
         { tag: "paano kumita ng pera online", vi: "Cách kiếm tiền trên mạng tại Philippines", niche: "💰 Tài Chính", badge: "🔥 Hot" },
         { tag: "ai tools freelancing 2026", vi: "Công cụ AI làm freelancer kiếm tiền", niche: "🤖 Công Nghệ", badge: "🚀 Mới" },
         { tag: "bible verse tagalog christian reflection", vi: "Đọc Kinh Thánh & suy ngẫm chữa lành", niche: "✝️ Kinh Thánh", badge: "🔥 Faith" }
+      ],
+      "RU": [
+        { tag: "страшные истории на ночь ужасы", vi: "Chuyện ma rùng rợn lúc nửa đêm", niche: "👻 Kinh Dị", badge: "🔥 Крипота" },
+        { tag: "учить английский с нуля", vi: "Học tiếng Anh từ con số 0", niche: "🎓 Tiếng Anh", badge: "🚀 Đang lên" },
+        { tag: "краткий пересказ сюжета фильма", vi: "Tóm tắt phim ngắn gọn kịch tính", niche: "🎬 Tóm Tắt Phim", badge: "🔥 Triệu view" },
+        { tag: "измена месть женские истории", vi: "Ngoại tình, trả thù & tâm sự phụ nữ", niche: "💔 Ngoại Tình", badge: "⚡ Драма" },
+        { tag: "свекровь и невестка семейные драмы", vi: "Mâu thuẫn mẹ chồng nàng dâu", niche: "🏡 Gia Đình", badge: "⚡ Drama" },
+        { tag: "тру крайм криминальная россия расследование", vi: "Kỳ án True Crime có thật tại Nga", niche: "🕵️ Kỳ Án", badge: "🚀 Triệu view" },
+        { tag: "заработок в интернете 2026", vi: "Kiếm tiền online mới nhất 2026", niche: "💰 Tài Chính", badge: "🔥 Hot" },
+        { tag: "нейросети искусственный интеллект AI", vi: "Công nghệ AI & mạng nơ-ron", niche: "🤖 Công Nghệ", badge: "🚀 Mới" },
+        { tag: "философия стоицизм мудрость", vi: "Triết lý sống, khắc kỷ & thông tuệ", niche: "📜 Triết Lý", badge: "🌱 Chữa lành" }
       ],
       "DEFAULT": [
         { tag: "learn english conversation", vi: "Học giao tiếp tiếng Anh phản xạ", niche: "🎓 Learn English", badge: "🔥 Viral" },

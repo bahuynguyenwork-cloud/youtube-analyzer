@@ -24,6 +24,7 @@ class TrendService:
             "FR": ("fr", "FR"),
             "IT": ("it", "IT"),
             "VN": ("vi", "VN"),
+            "RU": ("ru", "RU"),
         }
 
     def detect_channel_language_and_origin(
@@ -58,11 +59,13 @@ class TrendService:
         hangul_count = len(re.findall(r'[\uac00-\ud7a3\u1100-\u11ff\u3130-\u318f]', combined))
         kana_count = len(re.findall(r'[\u3040-\u309f\u30a0-\u30ff]', combined))
         vi_accents = len(re.findall(r'[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ]', combined, re.I))
+        cyrillic_count = len(re.findall(r'[\u0400-\u04ff]', combined))
         latin_count = len(re.findall(r'[a-zA-Z]', combined))
 
         hangul_ratio = hangul_count / total_letters
         kana_ratio = kana_count / total_letters
         vi_ratio = vi_accents / total_letters
+        cyrillic_ratio = cyrillic_count / total_letters
         latin_ratio = latin_count / total_letters
 
         primary_origin = "US"
@@ -76,6 +79,9 @@ class TrendService:
         elif kana_count >= 3 or kana_ratio > 0.05:
             primary_origin = "JP"
             lang_name = "Nhật Bản (Tiếng Nhật)"
+        elif cyrillic_count >= 3 or cyrillic_ratio > 0.05:
+            primary_origin = "RU"
+            lang_name = "Nga (Tiếng Nga)"
         elif vi_accents >= 3 or vi_ratio > 0.03:
             primary_origin = "VN"
             lang_name = "Việt Nam (Tiếng Việt)"
@@ -149,6 +155,16 @@ class TrendService:
                 "origin_geo": origin_geo,
                 "origin_lang_name": origin_info.get("origin_lang_name", ""),
                 "reason": "Kênh dùng tiếng Nhật, lượng khán giả ngoài Nhật Bản rất hạn chế."
+            }
+
+        # Kênh tiếng Nga (RU) nhắm quốc gia khác
+        if origin_geo == "RU":
+            return {
+                "compatibility_score": 0.15,
+                "is_match": False,
+                "origin_geo": origin_geo,
+                "origin_lang_name": origin_info.get("origin_lang_name", ""),
+                "reason": "Kênh sử dụng chữ Kirin / tiếng Nga bản địa, khó tiếp cận thị trường ngoài cộng đồng nói tiếng Nga."
             }
 
         # Kênh tiếng Anh nhắm các nước khác (Anh, Mỹ, Ấn Độ, Philippines, v.v.)
