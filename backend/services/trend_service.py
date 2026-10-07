@@ -17,6 +17,9 @@ class TrendService:
             "JP": ("ja", "JP"),
             "DE": ("de", "DE"),
             "IN": ("en", "IN"),
+            "ID": ("id", "ID"),
+            "TH": ("th", "TH"),
+            "PH": ("en", "PH"),
             "BR": ("pt", "BR"),
             "FR": ("fr", "FR"),
             "IT": ("it", "IT"),
@@ -148,9 +151,9 @@ class TrendService:
                 "reason": "Kênh dùng tiếng Nhật, lượng khán giả ngoài Nhật Bản rất hạn chế."
             }
 
-        # Kênh tiếng Anh nhắm các nước khác (Anh, Mỹ, Ấn Độ, v.v.)
+        # Kênh tiếng Anh nhắm các nước khác (Anh, Mỹ, Ấn Độ, Philippines, v.v.)
         if origin_geo == "US":
-            if target in ["GB", "IN", "CA", "AU"]:
+            if target in ["GB", "IN", "CA", "AU", "PH"]:
                 return {
                     "compatibility_score": 0.90,
                     "is_match": True,

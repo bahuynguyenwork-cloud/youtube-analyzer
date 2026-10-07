@@ -35,6 +35,21 @@ COUNTRY_TIMEZONE_PROFILES = {
         "utc_offset": 5.5,  # New Delhi (chậm hơn VN 1.5 tiếng)
         "tz_name": "IST (New Delhi, UTC+5:30)",
     },
+    "ID": {
+        "name": "Indonesia",
+        "utc_offset": 7,  # Jakarta (WIB, cùng múi giờ VN UTC+7)
+        "tz_name": "WIB (Jakarta, UTC+7)",
+    },
+    "TH": {
+        "name": "Thái Lan",
+        "utc_offset": 7,  # Bangkok (ICT, cùng múi giờ VN UTC+7)
+        "tz_name": "ICT (Bangkok, UTC+7)",
+    },
+    "PH": {
+        "name": "Philippines",
+        "utc_offset": 8,  # Manila (PHT, sớm hơn VN 1 tiếng)
+        "tz_name": "PHT (Manila, UTC+8)",
+    },
     "BR": {
         "name": "Brazil",
         "utc_offset": -3,  # Sao Paulo (chậm hơn VN 10 tiếng)

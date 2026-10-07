@@ -169,6 +169,9 @@
                 <option value="FR">🇫🇷 Khán giả Pháp (FR)</option>
                 <option value="IT">🇮🇹 Khán giả Ý (IT)</option>
                 <option value="IN">🇮🇳 Khán giả Ấn Độ (IN)</option>
+                <option value="ID">🇮🇩 Khán giả Indonesia (ID)</option>
+                <option value="TH">🇹🇭 Khán giả Thái Lan (TH)</option>
+                <option value="PH">🇵🇭 Khán giả Philippines (PH)</option>
                 <option value="BR">🇧🇷 Khán giả Brazil (BR)</option>
                 <option value="VN">🇻🇳 Khán giả Việt Nam (VN)</option>
                 <option value="">🌐 Toàn Cầu (Global)</option>
@@ -934,6 +937,10 @@
             <option value="DE">Đức (DE)</option>
             <option value="JP">Nhật Bản (JP)</option>
             <option value="KR">Hàn Quốc (KR)</option>
+            <option value="IN">Ấn Độ (IN)</option>
+            <option value="ID">Indonesia (ID)</option>
+            <option value="TH">Thái Lan (TH)</option>
+            <option value="PH">Philippines (PH)</option>
             <option value="VN">Việt Nam (VN)</option>
           </select>
           <button type="submit" class="px-6 py-3 bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-rose-600/30 transition">Kiểm Tra</button>
@@ -1034,6 +1041,9 @@
             <option value="KR">🇰🇷 Hàn Quốc (KR)</option>
             <option value="DE">🇩🇪 Đức (DE)</option>
             <option value="IN">🇮🇳 Ấn Độ (IN)</option>
+            <option value="ID">🇮🇩 Indonesia (ID)</option>
+            <option value="TH">🇹🇭 Thái Lan (TH)</option>
+            <option value="PH">🇵🇭 Philippines (PH)</option>
             <option value="BR">🇧🇷 Brazil (BR)</option>
             <option value="CA">🇨🇦 Canada (CA)</option>
             <option value="AU">🇦🇺 Úc (AU)</option>
@@ -1276,12 +1286,17 @@
 
     const COUNTRY_NAMES = {
       "US": "Hoa Kỳ (Mỹ)", "GB": "Anh Quốc (UK)", "JP": "Nhật Bản (JP)", "KR": "Hàn Quốc (KR)",
-      "DE": "Đức (DE)", "FR": "Pháp (FR)", "IT": "Ý (IT)", "IN": "Ấn Độ (IN)", "BR": "Brazil (BR)", "VN": "Việt Nam (VN)", "": "Toàn Cầu"
+      "DE": "Đức (DE)", "FR": "Pháp (FR)", "IT": "Ý (IT)", "IN": "Ấn Độ (IN)",
+      "ID": "Indonesia (ID)", "TH": "Thái Lan (TH)", "PH": "Philippines (PH)",
+      "BR": "Brazil (BR)", "CA": "Canada (CA)", "AU": "Úc (AU)", "VN": "Việt Nam (VN)", "": "Toàn Cầu"
     };
 
     const GEO_BASE_RPM = {
       "US": 3.8, "GB": 3.4, "DE": 3.2, "FR": 2.8, "IT": 2.6,
-      "JP": 2.5, "KR": 2.4, "VN": 0.85, "BR": 0.95, "IN": 0.65, "GLOBAL": 2.2
+      "CA": 3.2, "AU": 3.3,
+      "JP": 2.5, "KR": 2.4, "VN": 0.85, "BR": 0.95, "IN": 0.65,
+      "ID": 0.75, "TH": 0.95, "PH": 0.85,
+      "GLOBAL": 2.2
     };
 
     const NICHE_RPM_MULTIPLIERS = {
@@ -3237,6 +3252,50 @@
         { tag: "scary horror stories", vi: "Truyện ma kinh dị rùng rợn", niche: "👻 Horror", badge: "🌙 Spooky" },
         { tag: "stoicism life lessons", vi: "Triết lý sống & bài học cuộc đời", niche: "📜 Stoicism", badge: "🌱 Wisdom" },
         { tag: "bible study audio", vi: "Đọc Kinh Thánh & suy ngẫm", niche: "✝️ Bible Faith", badge: "🔥 Faith" }
+      ],
+      "IN": [
+        { tag: "real horror stories hindi", vi: "Chuyện ma có thật rùng rợn tiếng Hindi", niche: "👻 Kinh Dị", badge: "🔥 Sachhi" },
+        { tag: "learn english speaking practice", vi: "Luyện nói tiếng Anh giao tiếp", niche: "🎓 Tiếng Anh", badge: "🚀 Đang lên" },
+        { tag: "movie explain hindi recap", vi: "Review tóm tắt phim tiếng Hindi", niche: "🎬 Phim", badge: "🔥 Triệu view" },
+        { tag: "cheating partner revenge drama", vi: "Ngoại tình & đòn trả thù", niche: "💔 Ngoại Tình", badge: "⚡ Drama" },
+        { tag: "saas bahu kalesh family drama", vi: "Mâu thuẫn mẹ chồng nàng dâu gay gắt", niche: "🏡 Gia Đình", badge: "⚡ Drama" },
+        { tag: "crime patrol real incident documentary", vi: "Hồ sơ phá án hình sự có thật", niche: "🕵️ Kỳ Án", badge: "🚀 Triệu view" },
+        { tag: "make money online side income", vi: "Kiếm tiền online & nghề tay trái", niche: "💰 Tài Chính", badge: "🔥 Hot" },
+        { tag: "artificial intelligence AI tools", vi: "Công cụ AI kiếm tiền mới nhất", niche: "🤖 Công Nghệ", badge: "🚀 Mới" },
+        { tag: "gita upanishad life wisdom", vi: "Triết lý cuộc sống & bài học tâm linh", niche: "📜 Triết Lý", badge: "🌱 Chữa lành" }
+      ],
+      "ID": [
+        { tag: "cerita horor kisah nyata", vi: "Chuyện ma rùng rợn có thật", niche: "👻 Kinh Dị", badge: "🔥 Viral" },
+        { tag: "belajar bahasa inggris percakapan", vi: "Học giao tiếp tiếng Anh", niche: "🎓 Tiếng Anh", badge: "🚀 Đang lên" },
+        { tag: "alur cerita film recap", vi: "Tóm tắt review phim kịch tính", niche: "🎬 Tóm Tắt Phim", badge: "🔥 Triệu view" },
+        { tag: "balas dendam perselingkuhan", vi: "Bắt gian ngoại tình & trả thù", niche: "💔 Ngoại Tình", badge: "⚡ Drama" },
+        { tag: "drama mertua menantu keluarga", vi: "Mâu thuẫn mẹ chồng nàng dâu", niche: "🏡 Gia Đình", badge: "⚡ Drama" },
+        { tag: "kasus kejahatan nyata dokumenter", vi: "Kỳ án có thật tại Indonesia", niche: "🕵️ Kỳ Án", badge: "🚀 Deep Dive" },
+        { tag: "cara menghasilkan uang online", vi: "Kiếm tiền online & đầu tư", niche: "💰 Tài Chính", badge: "🔥 Hot" },
+        { tag: "teknologi AI kecerdasan buatan", vi: "Công cụ trí tuệ nhân tạo AI", niche: "🤖 Công Nghệ", badge: "🚀 Mới" },
+        { tag: "renungan firman tuhan alkitab", vi: "Lời Chúa Kinh Thánh chữa lành", niche: "✝️ Kinh Thánh", badge: "🌱 Bình an" }
+      ],
+      "TH": [
+        { tag: "เรื่องผี เรื่องเล่าสยองขวัญ เดอะโกส", vi: "Chuyện ma kinh dị rùng rợn The Ghost", niche: "👻 Kinh Dị", badge: "🔥 หลอน" },
+        { tag: "เรียนภาษาอังกฤษ ฝึกพูด", vi: "Học giao tiếp tiếng Anh phản xạ", niche: "🎓 Tiếng Anh", badge: "🚀 Đang lên" },
+        { tag: "สปอยหนัง เล่าเรื่องย่อหนัง", vi: "Review tóm tắt phim triệu view", niche: "🎬 Tóm Tắt Phim", badge: "🔥 Triệu view" },
+        { tag: "แก้แค้นคนนอกใจ เอาคืนสามีชั่ว", vi: "Ngoại tình & đòn trả thù kịch tính", niche: "💔 Ngoại Tình", badge: "⚡ ดราม่า" },
+        { tag: "ดราม่าแม่ผัวลูกสะใภ้", vi: "Mâu thuẫn mẹ chồng nàng dâu", niche: "🏡 Gia Đình", badge: "⚡ Drama" },
+        { tag: "คดีฆาตกรรม เรื่องจริง สารคดี", vi: "Vụ án mạng có thật & bí ẩn", niche: "🕵️ Kỳ Án", badge: "🚀 Triệu view" },
+        { tag: "หาเงินออนไลน์ การเงินการลงทุน", vi: "Kiếm tiền online & đầu tư", niche: "💰 Tài Chính", badge: "🔥 Hot" },
+        { tag: "ปัญญาประดิษฐ์ เทคโนโลยี AI", vi: "Trí tuệ nhân tạo công nghệ AI", niche: "🤖 Công Nghệ", badge: "🚀 Mới" },
+        { tag: "ธรรมะสอนใจ คติธรรม", vi: "Phật pháp & lời dạy chữa lành", niche: "🪷 Phật Pháp", badge: "🌱 Bình an" }
+      ],
+      "PH": [
+        { tag: "kwentong kababalaghan totoong horror", vi: "Chuyện ma rùng rợn có thật", niche: "👻 Kinh Dị", badge: "🔥 Takot" },
+        { tag: "learn english speaking fluency", vi: "Luyện phản xạ tiếng Anh lưu loát", niche: "🎓 Tiếng Anh", badge: "🚀 Đang lên" },
+        { tag: "movie recap tagalog dubbed", vi: "Tóm tắt phim lồng tiếng Tagalog", niche: "🎬 Tóm Tắt Phim", badge: "🔥 Triệu view" },
+        { tag: "huli sa akto kabit revenge drama", vi: "Bắt gian ngoại tình & trả thù", niche: "💔 Ngoại Tình", badge: "⚡ Drama" },
+        { tag: "biyenan at manugang away pamilya", vi: "Mâu thuẫn mẹ chồng nàng dâu", niche: "🏡 Gia Đình", badge: "⚡ Drama" },
+        { tag: "true crime documentary unsolved philippines", vi: "Kỳ án bí ẩn có thật tại Philippines", niche: "🕵️ Kỳ Án", badge: "🚀 Triệu view" },
+        { tag: "paano kumita ng pera online", vi: "Cách kiếm tiền trên mạng tại Philippines", niche: "💰 Tài Chính", badge: "🔥 Hot" },
+        { tag: "ai tools freelancing 2026", vi: "Công cụ AI làm freelancer kiếm tiền", niche: "🤖 Công Nghệ", badge: "🚀 Mới" },
+        { tag: "bible verse tagalog christian reflection", vi: "Đọc Kinh Thánh & suy ngẫm chữa lành", niche: "✝️ Kinh Thánh", badge: "🔥 Faith" }
       ],
       "DEFAULT": [
         { tag: "learn english conversation", vi: "Học giao tiếp tiếng Anh phản xạ", niche: "🎓 Learn English", badge: "🔥 Viral" },
