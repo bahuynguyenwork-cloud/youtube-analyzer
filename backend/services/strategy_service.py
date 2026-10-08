@@ -17,6 +17,8 @@ GEO_BASE_RPM = {
     "TH": 0.95,
     "PH": 0.85,
     "RU": 1.2,
+    "PL": 1.9,
+    "IR": 0.8,
     "GLOBAL": 2.2
 }
 
@@ -29,6 +31,11 @@ NICHE_RPM_MULTIPLIERS = {
     "true_crime": 1.25,
     "history_geopolitics": 1.30,
     "space_science": 1.35,
+    "real_life_stories": 1.20,
+    "life_stories": 1.20,
+    "audio_stories": 1.20,
+    "podcast": 1.20,
+    "confession_stories": 1.20,
     "horror_stories": 1.10,
     "spicy_18_drama": 1.15,
     "father_inlaw_drama": 1.15,

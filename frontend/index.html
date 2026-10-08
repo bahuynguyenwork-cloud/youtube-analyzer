@@ -173,6 +173,7 @@
                 <option value="TH">🇹🇭 Khán giả Thái Lan (TH)</option>
                 <option value="PH">🇵🇭 Khán giả Philippines (PH)</option>
                 <option value="RU">🇷🇺 Khán giả Nga (RU)</option>
+                <option value="PL">🇵🇱 Khán giả Ba Lan (PL)</option>
                 <option value="BR">🇧🇷 Khán giả Brazil (BR)</option>
                 <option value="VN">🇻🇳 Khán giả Việt Nam (VN)</option>
                 <option value="">🌐 Toàn Cầu (Global)</option>
@@ -943,6 +944,7 @@
             <option value="TH">Thái Lan (TH)</option>
             <option value="PH">Philippines (PH)</option>
             <option value="RU">Nga (RU)</option>
+            <option value="PL">Ba Lan (PL)</option>
             <option value="VN">Việt Nam (VN)</option>
           </select>
           <button type="submit" class="px-6 py-3 bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-rose-600/30 transition">Kiểm Tra</button>
@@ -1047,12 +1049,14 @@
             <option value="TH">🇹🇭 Thái Lan (TH)</option>
             <option value="PH">🇵🇭 Philippines (PH)</option>
             <option value="RU">🇷🇺 Nga (RU)</option>
+            <option value="PL">🇵🇱 Ba Lan (PL)</option>
             <option value="BR">🇧🇷 Brazil (BR)</option>
             <option value="CA">🇨🇦 Canada (CA)</option>
             <option value="AU">🇦🇺 Úc (AU)</option>
           </select>
           <select id="feed-category" onchange="loadTrendingFeed()" class="w-full lg:w-auto px-3.5 py-2.5 bg-slate-900/90 border border-white/15 rounded-xl text-white text-xs focus:ring-2 focus:ring-rose-500 font-medium">
             <option value="all">🔥 Tất cả xu hướng (Top Trending)</option>
+            <option value="real_life_stories">🎙️ Kể Chuyện Thật & Podcast Tâm Sự (Real Life Stories)</option>
             <option value="learn_english">🎓 Học Tiếng Anh (English Learning & Speaking)</option>
             <option value="spicy_18_drama">🔞 18+ & Tâm Sự Thầm Kín Đêm Muộn</option>
             <option value="father_inlaw_drama">🏡 Bố Chồng Nàng Dâu (Gia Đình Cay Đắng)</option>
@@ -1291,6 +1295,7 @@
       "US": "Hoa Kỳ (Mỹ)", "GB": "Anh Quốc (UK)", "JP": "Nhật Bản (JP)", "KR": "Hàn Quốc (KR)",
       "DE": "Đức (DE)", "FR": "Pháp (FR)", "IT": "Ý (IT)", "IN": "Ấn Độ (IN)",
       "ID": "Indonesia (ID)", "TH": "Thái Lan (TH)", "PH": "Philippines (PH)", "RU": "Nga (RU)",
+      "PL": "Ba Lan (PL)", "IR": "Iran (IR)",
       "BR": "Brazil (BR)", "CA": "Canada (CA)", "AU": "Úc (AU)", "VN": "Việt Nam (VN)", "": "Toàn Cầu"
     };
 
@@ -1299,12 +1304,14 @@
       "CA": 3.2, "AU": 3.3,
       "JP": 2.5, "KR": 2.4, "VN": 0.85, "BR": 0.95, "IN": 0.65,
       "ID": 0.75, "TH": 0.95, "PH": 0.85, "RU": 1.2,
+      "PL": 1.9, "IR": 0.8,
       "GLOBAL": 2.2
     };
 
     const NICHE_RPM_MULTIPLIERS = {
       "finance_money": 2.3, "tech_ai": 1.85, "learn_english": 1.45, "philosophy": 1.35,
       "elderly_wisdom": 1.25, "true_crime": 1.25, "history_geopolitics": 1.30, "space_science": 1.35,
+      "real_life_stories": 1.20, "life_stories": 1.20, "audio_stories": 1.20, "podcast": 1.20,
       "horror_stories": 1.10, "spicy_18_drama": 1.15, "father_inlaw_drama": 1.15,
       "mother_inlaw_drama": 1.15, "infidelity_revenge": 1.15, "drama_expose": 1.10,
       "reddit_stories": 1.10, "buddhism": 1.05, "christianity_bible": 1.05, "bible": 1.05, "christianity": 1.05, "recap_stories": 0.95, "travel_vlog": 1.15, "vlog": 1.15, "travel": 1.15, "gaming": 0.75, "entertainment": 0.85
@@ -3311,7 +3318,20 @@
         { tag: "нейросети искусственный интеллект AI", vi: "Công nghệ AI & mạng nơ-ron", niche: "🤖 Công Nghệ", badge: "🚀 Mới" },
         { tag: "философия стоицизм мудрость", vi: "Triết lý sống, khắc kỷ & thông tuệ", niche: "📜 Triết Lý", badge: "🌱 Chữa lành" }
       ],
+      "PL": [
+        { tag: "prawdziwe historie z życia podcast", vi: "Kể chuyện cuộc đời & tâm sự thính giả", niche: "🎙️ Kể Chuyện Thật", badge: "🔥 Historie" },
+        { tag: "nauka angielskiego od podstaw", vi: "Học tiếng Anh từ cơ bản đến giao tiếp", niche: "🎓 Tiếng Anh", badge: "🚀 Đang lên" },
+        { tag: "streszczenie filmu recap po polsku", vi: "Tóm tắt phim ngắn gọn tiếng Ba Lan", niche: "🎬 Tóm Tắt Phim", badge: "🔥 Triệu view" },
+        { tag: "zdrada zemsta prawdziwe historie", vi: "Ngoại tình, trả thù & câu chuyện có thật", niche: "💔 Ngoại Tình", badge: "⚡ Drama" },
+        { tag: "konflikt z teściową dramaty rodzinne", vi: "Mâu thuẫn mẹ chồng nàng dâu gay gắt", niche: "🏡 Gia Đình", badge: "⚡ Drama" },
+        { tag: "prawdziwe zbrodnie kryminalne sprawy", vi: "Kỳ án True Crime có thật tại Ba Lan", niche: "🕵️ Kỳ Án", badge: "🚀 Triệu view" },
+        { tag: "zarabianie przez internet 2026", vi: "Kiếm tiền online mới nhất 2026", niche: "💰 Tài Chính", badge: "🔥 Hot" },
+        { tag: "sztuczna inteligencja narzędzia ai", vi: "Công nghệ AI & công cụ trí tuệ nhân tạo", niche: "🤖 Công Nghệ", badge: "🚀 Mới" },
+        { tag: "stoicyzm mądrość życiowa filozofia", vi: "Triết lý sống, khắc kỷ & thông tuệ", niche: "📜 Triết Lý", badge: "🌱 Chữa lành" },
+        { tag: "straszne historie horror z życia wzięte", vi: "Truyện ma kinh dị rùng rợn có thật", niche: "👻 Kinh Dị", badge: "🌙 Mroczne" }
+      ],
       "DEFAULT": [
+        { tag: "real life stories podcast", vi: "Kể chuyện đời thực & podcast tâm sự", niche: "🎙️ Real Life Stories", badge: "🔥 Breakout" },
         { tag: "learn english conversation", vi: "Học giao tiếp tiếng Anh phản xạ", niche: "🎓 Learn English", badge: "🔥 Viral" },
         { tag: "english speaking practice", vi: "Luyện nói tiếng Anh hàng ngày", niche: "🎓 Learn English", badge: "🚀 High View" },
         { tag: "revenge stories", vi: "Chuyện trả thù kịch tính", niche: "💔 Revenge", badge: "🔥 Breakout" },

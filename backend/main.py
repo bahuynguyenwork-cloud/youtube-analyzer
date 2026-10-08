@@ -595,7 +595,8 @@ def analyze_keyword(req: KeywordAnalysisRequest):
             "US": ("en", "US"), "GB": ("en", "GB"), "CA": ("en", "CA"), "AU": ("en", "AU"),
             "VN": ("vi", "VN"), "FR": ("fr", "FR"), "IT": ("it", "IT"), "DE": ("de", "DE"),
             "JP": ("ja", "JP"), "KR": ("ko", "KR"), "BR": ("pt", "BR"), "IN": ("en", "IN"),
-            "ID": ("id", "ID"), "TH": ("th", "TH"), "PH": ("en", "PH"), "RU": ("ru", "RU")
+            "ID": ("id", "ID"), "TH": ("th", "TH"), "PH": ("en", "PH"), "RU": ("ru", "RU"),
+            "PL": ("pl", "PL"), "IR": ("fa", "IR")
         }
         hl_lang, gl_country = geo_lang_map.get(geo, ("en", geo))
 
@@ -817,6 +818,18 @@ def get_trending_niche_tags(geo: Optional[str] = "US"):
             {"tag": "нейросети искусственный интеллект AI", "niche": "🤖 Công Nghệ", "badge": "🚀 Mới"},
             {"tag": "философия стоицизм мудрость", "niche": "📜 Triết Lý", "badge": "🌱 Chữa lành"}
         ],
+        "PL": [
+            {"tag": "prawdziwe historie z życia podcast", "niche": "🎙️ Kể Chuyện Thật", "badge": "🔥 Historie"},
+            {"tag": "nauka angielskiego od podstaw", "niche": "🎓 Tiếng Anh", "badge": "🚀 Đang lên"},
+            {"tag": "streszczenie filmu recap po polsku", "niche": "🎬 Tóm Tắt Phim", "badge": "🔥 Triệu view"},
+            {"tag": "zdrada zemsta prawdziwe historie", "niche": "💔 Ngoại Tình", "badge": "⚡ Drama"},
+            {"tag": "konflikt z teściową dramaty rodzinne", "niche": "🏡 Gia Đình", "badge": "⚡ Drama"},
+            {"tag": "prawdziwe zbrodnie kryminalne sprawy", "niche": "🕵️ Kỳ Án", "badge": "🚀 Triệu view"},
+            {"tag": "zarabianie przez internet 2026", "niche": "💰 Tài Chính", "badge": "🔥 Hot"},
+            {"tag": "sztuczna inteligencja narzędzia ai", "niche": "🤖 Công Nghệ", "badge": "🚀 Mới"},
+            {"tag": "stoicyzm mądrość życiowa filozofia", "niche": "📜 Triết Lý", "badge": "🌱 Chữa lành"},
+            {"tag": "straszne historie horror z życia wzięte", "niche": "👻 Kinh Dị", "badge": "🌙 Mroczne"}
+        ],
         "DEFAULT": [
             {"tag": "learn english conversation", "niche": "🎓 Learn English", "badge": "🔥 Viral"},
             {"tag": "english speaking practice", "niche": "🎓 Learn English", "badge": "🚀 High View"},
@@ -853,6 +866,7 @@ NICHE_LOCALIZED_QUERIES = {
         "TH": "ปรัชญา ข้อคิดชีวิต",
         "PH": "stoicism life lessons philosophy",
         "RU": "философия стоицизм мудрость жизни",
+        "PL": "stoicyzm mądrość życiowa filozofia",
         "DEFAULT": "stoicism philosophy"
     },
     "buddhism": {
@@ -869,6 +883,7 @@ NICHE_LOCALIZED_QUERIES = {
         "TH": "ธรรมะสอนใจ คติธรรม",
         "PH": "buddhism mindfulness peace",
         "RU": "буддизм учение медитация осознанность",
+        "PL": "buddyzm nauki medytacja",
         "DEFAULT": "buddhism teachings"
     },
     "christianity_bible": {
@@ -885,6 +900,7 @@ NICHE_LOCALIZED_QUERIES = {
         "TH": "พระคัมภีร์คริสเตียน ฟังพระวจนะ",
         "PH": "bible reading tagalog christian worship songs",
         "RU": "библия чтение святое писание слово божье",
+        "PL": "czytanie pisma świętego biblia",
         "DEFAULT": "bible scripture reading"
     },
     "elderly_wisdom": {
@@ -901,6 +917,7 @@ NICHE_LOCALIZED_QUERIES = {
         "TH": "ข้อคิดคนเฒ่าคนแก่ ชีวิต",
         "PH": "buhay matanda advice life lessons",
         "RU": "мудрость стариков жизненный опыт",
+        "PL": "mądrość życiowa seniorów rady",
         "DEFAULT": "elderly wisdom"
     },
     "reddit_stories": {
@@ -917,6 +934,7 @@ NICHE_LOCALIZED_QUERIES = {
         "TH": "เรื่องเล่าพันทิป pantip เรื่องสยอง",
         "PH": "phinvest offmychestph reddit stories",
         "RU": "истории с реддит апвоут reddit",
+        "PL": "historie z reddit wyznania",
         "DEFAULT": "reddit stories"
     },
     "drama_expose": {
@@ -933,6 +951,7 @@ NICHE_LOCALIZED_QUERIES = {
         "TH": "แฉดราม่า ประเด็นร้อน",
         "PH": "expose scandal documentary philippines",
         "RU": "разоблачение скандал расследование док",
+        "PL": "afera skandal exposé śledztwo",
         "DEFAULT": "downfall documentary"
     },
     "true_crime": {
@@ -949,6 +968,7 @@ NICHE_LOCALIZED_QUERIES = {
         "TH": "คดีฆาตกรรม เรื่องจริง สารคดี",
         "PH": "true crime documentary philippines unsolved",
         "RU": "тру крайм криминальная россия расследование",
+        "PL": "prawdziwe zbrodnie kryminalne sprawy",
         "DEFAULT": "true crime documentary"
     },
     "horror_stories": {
@@ -965,6 +985,7 @@ NICHE_LOCALIZED_QUERIES = {
         "TH": "เรื่องผี เรื่องเล่าสยองขวัญ เดอะโกส",
         "PH": "kwentong kababalaghan totoong horror stories tagalog",
         "RU": "страшные истории на ночь мистика ужасы",
+        "PL": "straszne historie horror z życia wzięte",
         "DEFAULT": "scary horror stories"
     },
     "history_geopolitics": {
@@ -981,6 +1002,7 @@ NICHE_LOCALIZED_QUERIES = {
         "TH": "ประวัติศาสตร์ ภูมิรัฐศาสตร์ สงคราม",
         "PH": "philippine history geopolitics documentary",
         "RU": "история геополитика документальный фильм",
+        "PL": "historia geopolityka wojna dokument",
         "DEFAULT": "history geopolitics"
     },
     "space_science": {
@@ -997,6 +1019,7 @@ NICHE_LOCALIZED_QUERIES = {
         "TH": "ความลับอวกาศ วิทยาศาสตร์ดาราศาสตร์",
         "PH": "space science mysteries documentary",
         "RU": "тайны космоса вселенная наука",
+        "PL": "tajemnice kosmosu nauka dokument",
         "DEFAULT": "space science documentary"
     },
     "finance_money": {
@@ -1013,6 +1036,7 @@ NICHE_LOCALIZED_QUERIES = {
         "TH": "หาเงินออนไลน์ การเงินการลงทุน",
         "PH": "paano kumita ng pera online finance",
         "RU": "финансы инвестиции заработок в интернете",
+        "PL": "zarabianie przez internet finanse inwestycje",
         "DEFAULT": "personal finance investing"
     },
     "tech_ai": {
@@ -1029,6 +1053,7 @@ NICHE_LOCALIZED_QUERIES = {
         "TH": "ปัญญาประดิษฐ์ เทคโนโลยี AI",
         "PH": "artificial intelligence AI tools 2026",
         "RU": "нейросети искусственный интеллект AI",
+        "PL": "sztuczna inteligencja narzędzia ai",
         "DEFAULT": "artificial intelligence AI"
     },
     "recap_stories": {
@@ -1045,6 +1070,7 @@ NICHE_LOCALIZED_QUERIES = {
         "TH": "สปอยหนัง เล่าเรื่องย่อหนัง",
         "PH": "movie recap tagalog dubbed",
         "RU": "краткий пересказ фильма сюжет",
+        "PL": "streszczenie filmu recap po polsku",
         "DEFAULT": "movie recap"
     },
     "gaming": {
@@ -1061,6 +1087,7 @@ NICHE_LOCALIZED_QUERIES = {
         "TH": "ไฮไลท์เกม แคสเกม",
         "PH": "gaming highlights pinoy mobile legends",
         "RU": "летсплей нарезка стримов гейминг",
+        "PL": "gaming zagrajmy w gry gameplay",
         "DEFAULT": "gaming highlights"
     },
     "entertainment": {
@@ -1077,6 +1104,7 @@ NICHE_LOCALIZED_QUERIES = {
         "TH": "ตลก ขำขัน คลายเครียด รายการตลก",
         "PH": "nakakatawa viral funny pinoy comedy",
         "RU": "приколы юмор смешное шоу",
+        "PL": "śmieszne filmiki kabaret komedia",
         "DEFAULT": "entertainment funny viral"
     },
     "spicy_18_drama": {
@@ -1093,6 +1121,7 @@ NICHE_LOCALIZED_QUERIES = {
         "JP": "大人の恋愛 浮気",
         "KR": "19금 썰",
         "RU": "истории измен тайные признания 18+",
+        "PL": "sekretne zdrady dramaty miłosne",
         "DEFAULT": "relationship drama stories"
     },
     "father_inlaw_drama": {
@@ -1109,6 +1138,7 @@ NICHE_LOCALIZED_QUERIES = {
         "JP": "義父と嫁 家族",
         "KR": "시아버지 며느리",
         "RU": "семейная драма свекор невестка конфликты",
+        "PL": "teść synowa dramaty rodzinne",
         "DEFAULT": "father in law family drama"
     },
     "mother_inlaw_drama": {
@@ -1125,6 +1155,7 @@ NICHE_LOCALIZED_QUERIES = {
         "JP": "義母と婿 家族",
         "KR": "장모 사위",
         "RU": "свекровь и невестка война в семье",
+        "PL": "teściowa zięć konflikty rodzinne",
         "DEFAULT": "mother in law family drama"
     },
     "infidelity_revenge": {
@@ -1141,6 +1172,7 @@ NICHE_LOCALIZED_QUERIES = {
         "JP": "浮気 修羅場 復讐",
         "KR": "바람 불륜 참교육",
         "RU": "измена мужа месть расплата",
+        "PL": "zdrada zemsta przyłapany na zdradzie",
         "DEFAULT": "cheating revenge drama"
     },
     "learn_english": {
@@ -1160,6 +1192,7 @@ NICHE_LOCALIZED_QUERIES = {
         "CA": "learn english speaking",
         "AU": "learn english speaking",
         "RU": "английский язык с нуля разговорный",
+        "PL": "nauka angielskiego od podstaw rozmówki",
         "DEFAULT": "learn english speaking"
     },
     "luxury_lifestyle": {
@@ -1176,6 +1209,7 @@ NICHE_LOCALIZED_QUERIES = {
         "TH": "ชีวิตมหาเศรษฐี ไฮโซ",
         "PH": "billionaire luxury lifestyle philippines",
         "RU": "роскошная жизнь миллиардеров богачи",
+        "PL": "luksusowe życie miliarderzy bogactwo",
         "DEFAULT": "luxury lifestyle billionaire"
     },
     "travel_food": {
@@ -1192,6 +1226,7 @@ NICHE_LOCALIZED_QUERIES = {
         "TH": "สตรีทฟู้ด ตะลุยกิน ของอร่อย",
         "PH": "pinoy street food food trip travel",
         "RU": "уличная еда путешествия влог",
+        "PL": "street food podróże kulinaria",
         "DEFAULT": "travel street food"
     },
     "fitness_health": {
@@ -1208,7 +1243,25 @@ NICHE_LOCALIZED_QUERIES = {
         "TH": "ออกกำลังกาย ลดน้ำหนัก ฟิตเนส",
         "PH": "gym workout weight loss diet pinoy",
         "RU": "тренировки фитнес похудение питание",
+        "PL": "trening w domu siłownia odchudzanie",
         "DEFAULT": "fitness workout gym"
+    },
+        "real_life_stories": {
+        "VN": "kể chuyện đời thực podcast tâm sự",
+        "US": "real life stories true story podcast",
+        "GB": "true stories podcast storytime",
+        "FR": "histoires vraies podcast témoignages",
+        "IT": "storie vere podcast testimonianze",
+        "JP": "本当にあった話 実話 朗読",
+        "KR": "실화 사연 인생 라디오",
+        "DE": "wahre Geschichten Podcast Lebensgeschichten",
+        "IN": "real life true stories emotional podcast hindi",
+        "ID": "cerita kisah nyata podcast kehidupan",
+        "TH": "เรื่องจริงจากชีวิต เล่าเรื่องจริง",
+        "PH": "totoong kwento ng buhay tagalog podcast",
+        "RU": "истории из жизни реальные судьбы подкаст",
+        "PL": "prawdziwe historie z życia podcast",
+        "DEFAULT": "real life stories true story podcast"
     },
     "music_chill": {
         "VN": "nhạc lofi chill",
@@ -1224,6 +1277,7 @@ NICHE_LOCALIZED_QUERIES = {
         "TH": "เพลงฟังสบาย ชิลๆ lofi ผ่อนคลาย",
         "PH": "opm lofi chill beats tagalog playlist",
         "RU": "расслабляющая музыка лофи чилл",
+        "PL": "muzyka relaksacyjna lofi chill",
         "DEFAULT": "lofi chill beats"
     }
 }
@@ -1517,6 +1571,15 @@ def is_video_matching_country(item: dict, ch_info: dict, target_geo: str) -> boo
         if ch_country in ['VN', 'JP', 'KR', 'TH', 'IN', 'ID', 'PH']:
             return False
 
+    # 15. Thị trường Ba Lan (PL)
+    elif geo == 'PL':
+        if has_south_asian or has_hangul or has_kana or has_cyrillic or has_arabic or has_thai or has_vn:
+            return False
+        if audio_lang and not audio_lang.startswith(('pl', 'en', 'zxx')):
+            return False
+        if ch_country in ['VN', 'RU', 'JP', 'KR', 'TH', 'IN', 'ID', 'PH']:
+            return False
+
     return True
 
 @app.get("/api/trending/feed")
@@ -1618,6 +1681,7 @@ def get_trending_feed(
                         "TH": "คลิปมาแรง วิดีโอยอดนิยม สารคดี พอดแคสต์",
                         "PH": "trending viral video philippines podcast",
                         "RU": "тренды популярные видео россия документальный подкаст",
+                        "PL": "trendy popularne filmy polska podcast dokument",
                         "BR": "documentario podcast brasil"
                     }
                     q_term = country_names.get(geo_code, "trending viral video")
@@ -1626,7 +1690,8 @@ def get_trending_feed(
                     "US": "en", "GB": "en", "CA": "en", "AU": "en",
                     "VN": "vi", "JP": "ja", "KR": "ko", "DE": "de",
                     "BR": "pt", "IN": "en", "FR": "fr", "IT": "it",
-                    "ID": "id", "TH": "th", "PH": "en", "RU": "ru"
+                    "ID": "id", "TH": "th", "PH": "en", "RU": "ru",
+                    "PL": "pl"
                 }
                 lang_param = GEO_LANG_MAP.get(geo_code, "en")
 
@@ -1790,6 +1855,7 @@ def get_trending_feed(
                 "TH": "คลิปมาแรง thailand",
                 "PH": "trending philippines",
                 "RU": "в тренде россия",
+                "PL": "na czasie polska",
                 "VN": "thịnh hành việt nam",
                 "JP": "話題 トレンド",
                 "KR": "이슈 트렌드",
@@ -1809,7 +1875,8 @@ def get_trending_feed(
                 "US": "en", "GB": "en", "CA": "en", "AU": "en",
                 "VN": "vi", "JP": "ja", "KR": "ko", "DE": "de",
                 "BR": "pt", "IN": "en", "FR": "fr", "IT": "it",
-                "ID": "id", "TH": "th", "PH": "en", "RU": "ru"
+                "ID": "id", "TH": "th", "PH": "en", "RU": "ru",
+                "PL": "pl"
             }
             hl_code = GEO_LANG_MAP.get(geo_code, "en")
 

@@ -74,6 +74,16 @@ COUNTRY_TIMEZONE_PROFILES = {
         "name": "Nga (Russia)",
         "utc_offset": 3,  # Moscow (MSK, UTC+3 - chậm hơn VN 4 tiếng)
         "tz_name": "MSK (Moscow, UTC+3)",
+    },
+    "PL": {
+        "name": "Ba Lan (Poland)",
+        "utc_offset": 1,  # Warsaw (CET, UTC+1 - chậm hơn VN 6 tiếng)
+        "tz_name": "CET / CEST (Warszawa, UTC+1)",
+    },
+    "IR": {
+        "name": "Iran (Ba Tư)",
+        "utc_offset": 3.5,  # Tehran (IRST, UTC+3:30 - chậm hơn VN 3.5 tiếng)
+        "tz_name": "IRST (Tehran, UTC+3:30)",
     }
 }
 
@@ -424,6 +434,25 @@ NICHE_PROFILES = {
             "kỷ lục", "mrbeast", "beast",
             "예능", "웃긴 영상", "레전드", "챌린지", "서바이벌", "탈출", "バラエティ", "面白い", "チャレンジ", "サバイバル"
         ]
+    },
+    "real_life_stories": {
+        "name_vi": "🎙️ Kể Chuyện Thật & Podcast Tâm Sự",
+        "upload_1_start": 20.0,
+        "upload_1_end": 22.0,
+        "upload_1_label": "Khung chính: Đêm muộn lắng đọng, nghe podcast trước khi ngủ",
+        "upload_2_start": 11.5,
+        "upload_2_end": 13.0,
+        "upload_2_label": "Khung phụ: Trưa nghỉ ngơi thư giãn nghe tâm sự",
+        "best_weekdays": ["Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+        "behavior_insight": "Khán giả nghe podcast tâm sự và kể chuyện đời thực có thói quen nghe tập trung nhất vào ban đêm trước khi ngủ hoặc giờ nghỉ trưa yên tĩnh.",
+        "keywords": [
+            "kể chuyện có thật", "chuyện đời có thật", "tâm sự đời thực", "podcast tâm sự", "truyện audio", "số phận cuộc đời", "tâm sự đêm muộn", "chuyện có thật", "nghe truyện tâm sự", "chuyện tình trắc trở", "góc khuất cuộc đời", "chuyện đời", "tâm sự cuộc sống", "nghe kể chuyện", "chuyện người thật việc thật", "truyện ngắn cuộc sống", "tiểu thuyết ngôn tình đời thực",
+            "real life stories", "storytime", "life story podcast", "true stories", "confession podcast", "audio story", "emotional stories", "heart touching stories", "true story podcast", "stories from life", "animated story time", "narrated stories",
+            "داستان واقعی", "داستان", "پادکست", "داستان ارسالی", "سرنوشت", "رمان", "روایت واقعی", "قصه واقعی", "داستان صوتی", "dastan", "sarnevesht", "پادکست داستان", "داستانهای واقعی",
+            "prawdziwe historie", "opowieści z życia", "historie z życia wzięte", "podcast historie", "opowiadania audio",
+            "истории из жизни", "жизненные истории", "реальные истории", "подкаст истории", "аудиорассказы", "жизненные драмы",
+            "실화 사연", "인생 사연", "오디오 드라마", "사연 라디오", "사연 읽어주는", "감동 사연"
+        ]
     }
 }
 
@@ -439,6 +468,10 @@ NICHE_PROFILES["travel"] = NICHE_PROFILES["travel_vlog"]
 NICHE_PROFILES["bible"] = NICHE_PROFILES["christianity_bible"]
 NICHE_PROFILES["christianity"] = NICHE_PROFILES["christianity_bible"]
 NICHE_PROFILES["religion"] = NICHE_PROFILES["christianity_bible"]
+NICHE_PROFILES["life_stories"] = NICHE_PROFILES["real_life_stories"]
+NICHE_PROFILES["audio_stories"] = NICHE_PROFILES["real_life_stories"]
+NICHE_PROFILES["podcast"] = NICHE_PROFILES["real_life_stories"]
+NICHE_PROFILES["confession_stories"] = NICHE_PROFILES["real_life_stories"]
 
 VN_WORD_BOUNDARY = r'(?<![\wàáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ])'
 VN_WORD_BOUNDARY_END = r'(?![\wàáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ])'

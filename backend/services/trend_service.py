@@ -25,6 +25,8 @@ class TrendService:
             "IT": ("it", "IT"),
             "VN": ("vi", "VN"),
             "RU": ("ru", "RU"),
+            "PL": ("pl", "PL"),
+            "IR": ("fa", "IR"),
         }
 
     def detect_channel_language_and_origin(
@@ -60,12 +62,16 @@ class TrendService:
         kana_count = len(re.findall(r'[\u3040-\u309f\u30a0-\u30ff]', combined))
         vi_accents = len(re.findall(r'[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ]', combined, re.I))
         cyrillic_count = len(re.findall(r'[\u0400-\u04ff]', combined))
+        arabic_count = len(re.findall(r'[\u0600-\u06ff]', combined))
+        polish_chars = len(re.findall(r'[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]', combined))
         latin_count = len(re.findall(r'[a-zA-Z]', combined))
 
         hangul_ratio = hangul_count / total_letters
         kana_ratio = kana_count / total_letters
         vi_ratio = vi_accents / total_letters
         cyrillic_ratio = cyrillic_count / total_letters
+        arabic_ratio = arabic_count / total_letters
+        polish_ratio = polish_chars / total_letters
         latin_ratio = latin_count / total_letters
 
         primary_origin = "US"
@@ -82,9 +88,21 @@ class TrendService:
         elif cyrillic_count >= 3 or cyrillic_ratio > 0.05:
             primary_origin = "RU"
             lang_name = "Nga (Tiếng Nga)"
+        elif arabic_count >= 3 or arabic_ratio > 0.04:
+            # Nhận diện tiếng Ba Tư (Farsi - Iran) qua ký tự đặc thù [گچپژ] hoặc từ vựng Farsi
+            is_farsi = bool(re.search(r'[گچپژ]|\b(?:داستان|پادکست|رمان|سرنوشت|واقعی|کتاب)\b', combined))
+            if is_farsi:
+                primary_origin = "IR"
+                lang_name = "Iran / Ba Tư (Tiếng Farsi)"
+            else:
+                primary_origin = "AE"
+                lang_name = "Ả Rập (Tiếng Arabic)"
         elif vi_accents >= 3 or vi_ratio > 0.03:
             primary_origin = "VN"
             lang_name = "Việt Nam (Tiếng Việt)"
+        elif polish_chars >= 2 or polish_ratio > 0.015:
+            primary_origin = "PL"
+            lang_name = "Ba Lan (Tiếng Ba Lan)"
         elif latin_ratio > 0.40:
             primary_origin = "US"
             lang_name = "Tiếng Anh (Latin)"
@@ -165,6 +183,26 @@ class TrendService:
                 "origin_geo": origin_geo,
                 "origin_lang_name": origin_info.get("origin_lang_name", ""),
                 "reason": "Kênh sử dụng chữ Kirin / tiếng Nga bản địa, khó tiếp cận thị trường ngoài cộng đồng nói tiếng Nga."
+            }
+
+        # Kênh tiếng Ba Lan (PL) nhắm quốc gia khác
+        if origin_geo == "PL":
+            return {
+                "compatibility_score": 0.18,
+                "is_match": False,
+                "origin_geo": origin_geo,
+                "origin_lang_name": origin_info.get("origin_lang_name", ""),
+                "reason": "Kênh sử dụng tiếng Ba Lan bản địa, khó tiếp cận thị trường ngoài Ba Lan nếu không có phụ đề tiếng Anh."
+            }
+
+        # Kênh tiếng Ba Tư / Ả Rập (IR, AE) nhắm quốc gia khác
+        if origin_geo in ["IR", "AE"]:
+            return {
+                "compatibility_score": 0.12,
+                "is_match": False,
+                "origin_geo": origin_geo,
+                "origin_lang_name": origin_info.get("origin_lang_name", ""),
+                "reason": "Kênh sử dụng chữ Ả Rập / Ba Tư (Farsi), tệp khán giả khu biệt trong cộng đồng nói tiếng Ba Tư / Trung Đông."
             }
 
         # Kênh tiếng Anh nhắm các nước khác (Anh, Mỹ, Ấn Độ, Philippines, v.v.)
