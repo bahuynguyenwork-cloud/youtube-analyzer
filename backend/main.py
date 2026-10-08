@@ -1398,6 +1398,7 @@ SP_MAP = {
     "48h": "CAMSBAgCEAE%3D",  # 24-48h, sorted by viewCount
     "7d":  "CAMSBAgDEAE%3D",  # This week / last 7 days, sorted by viewCount
     "30d": "CAMSBAgEEAE%3D",  # This month / last 30 days, sorted by viewCount
+    "90d": "CAMSBAgFEAE%3D",  # This year / ~90 days, sorted by viewCount
     "all": "CAMSAhAB"         # All time, sorted by viewCount
 }
 
@@ -1481,6 +1482,14 @@ def is_published_age_matching_range(pub_text: str, t_range: str) -> bool:
             months = int(m_match.group(1))
             if months > 1:
                 return False
+
+    # 6. Với 90d: Chấp nhận tối đa 3 tháng (loại bỏ từ 4 tháng trở lên)
+    if t_range == '90d':
+        m_match = re.search(r'(\d+)\s*(?:tháng|month|mo|monat|mois|개월|か月)', p)
+        if m_match:
+            months = int(m_match.group(1))
+            if months > 3:
+                return False
                 
     return True
 
@@ -1509,6 +1518,9 @@ def format_published_age(pub_iso: str) -> str:
             return f"🔥 {diff_days} ngày trước • Xu hướng tuần"
         elif diff_days <= 30:
             return f"📅 {diff_days} ngày trước • Tháng này"
+        elif diff_days <= 90:
+            months = max(1, diff_days // 30)
+            return f"🗓️ {months} tháng trước • 90 ngày qua"
         elif diff_days < 365:
             months = max(1, diff_days // 30)
             return f"⏳ {months} tháng trước"
@@ -1759,6 +1771,9 @@ def get_trending_feed(
     elif t_range == "30d":
         cutoff_dt = now - datetime.timedelta(days=30)
         published_after_str = cutoff_dt.strftime('%Y-%m-%dT%H:%M:%SZ')
+    elif t_range == "90d":
+        cutoff_dt = now - datetime.timedelta(days=90)
+        published_after_str = cutoff_dt.strftime('%Y-%m-%dT%H:%M:%SZ')
     elif t_range == "all":
         cutoff_dt = None
         published_after_str = None
@@ -1913,7 +1928,7 @@ def get_trending_feed(
 
                     # 4. LỌC VIEW TỐI THIỂU: Đã là xu hướng (Trending) thì không thể chỉ có vài chục view
                     view_cnt = int(stats.get("viewCount", 0))
-                    if t_range in ["7d", "24h", "48h", "30d"] and view_cnt < 500:
+                    if t_range in ["7d", "24h", "48h", "30d", "90d"] and view_cnt < 500:
                         continue
 
                     # Kiểm tra kênh hoạt động & ổn định
@@ -2119,15 +2134,15 @@ def get_trending_feed(
 
                                 # Lượt xem
                                 v_cnt = parse_views_str(views_str)
-                                if t_range in ["7d", "24h", "48h", "30d"] and v_cnt < 200:
+                                if t_range in ["7d", "24h", "48h", "30d", "90d"] and v_cnt < 200:
                                     continue
 
                                 # KIỂM TRA THỜI GIAN NGHIÊM NGẶT: Không bao giờ cho phép video cũ xuất hiện
                                 if not is_published_age_matching_range(pub_age, t_range):
                                     continue
 
-                                # Loại bỏ các video/phim cũ có năm phát hành cũ trong tiêu đề khi lọc 24h hoặc 7d
-                                if t_range in ["24h", "48h", "7d"] and re.search(r'\b(19\d\d|200\d|201\d|202[0-3])\b', t):
+                                # Loại bỏ các video/phim cũ có năm phát hành cũ trong tiêu đề khi lọc ngắn hạn
+                                if t_range in ["24h", "48h", "7d", "30d", "90d"] and re.search(r'\b(19\d\d|200\d|201\d|202[0-3])\b', t):
                                     continue
 
                                 # Lọc quốc gia và ngôn ngữ
@@ -2260,11 +2275,13 @@ def get_trending_feed(
                                     age_str = "⚡ 24 giờ qua • Mới"
                                 elif t_range == "30d":
                                     age_str = "📅 Xu hướng tháng này"
+                                elif t_range == "90d":
+                                    age_str = "🗓️ Xu hướng 90 ngày qua"
                                 else:
                                     age_str = "🔥 Xu hướng gần đây"
 
                             v_cnt = int(e.get('view_count') or 0)
-                            if t_range in ["7d", "24h", "48h", "30d"] and v_cnt < 300:
+                            if t_range in ["7d", "24h", "48h", "30d", "90d"] and v_cnt < 300:
                                 continue
 
                             thumb = ""

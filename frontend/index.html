@@ -1095,6 +1095,7 @@
             <option value="7d" selected>🔥 Xu Hướng Tuần Này (7 Ngày Qua)</option>
             <option value="24h">⚡ Mới Nhất 24 - 48 Giờ Qua</option>
             <option value="30d">📅 Xu Hướng Tháng Này (30 Ngày)</option>
+            <option value="90d">🗓️ Xu Hướng 90 Ngày (3 Tháng Qua)</option>
             <option value="all">🏛️ Mọi Thời Đại (Triệu View All-Time)</option>
           </select>
           <select id="feed-duration" onchange="loadTrendingFeed()" class="w-full lg:w-auto px-3.5 py-2.5 bg-slate-900/90 border border-rose-500/30 text-rose-300 rounded-xl text-xs focus:ring-2 focus:ring-rose-500 font-semibold">
@@ -3614,6 +3615,7 @@
         '24h': '24 - 48 giờ qua',
         '7d': '7 ngày qua',
         '30d': '30 ngày qua',
+        '90d': '90 ngày qua (3 tháng)',
         'all': 'mọi thời đại'
       }[timeRange] || '7 ngày qua';
 
