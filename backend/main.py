@@ -394,6 +394,21 @@ def format_duration_display(seconds: int) -> str:
         return f"{h}:{m:02d}:{s:02d}"
     return f"{m:02d}:{s:02d}"
 
+def format_views_display(views: int) -> str:
+    if not views:
+        return "0 views"
+    try:
+        v = int(views)
+        if v >= 1_000_000_000:
+            return f"{v / 1_000_000_000:.1f}B views"
+        if v >= 1_000_000:
+            return f"{v / 1_000_000:.1f}M views"
+        if v >= 1_000:
+            return f"{v / 1_000:.1f}K views"
+        return f"{v} views"
+    except Exception:
+        return f"{views} views"
+
 def is_stream_video(item: dict) -> bool:
     """Kiểm tra video có phải là livestream, restream hoặc phát trực tiếp không."""
     snippet = item.get("snippet", {})
@@ -530,7 +545,7 @@ def fetch_top_keyword_channels_and_videos(kw: str, gl_country: str, hl_lang: str
                                 'channel_id': ch_id,
                                 'channel_handle': f"@{v_channel.replace(' ', '')}",
                                 'views': v_views,
-                                'views_formatted': f"{v_views:,} views",
+                                'views_formatted': format_views_display(v_views),
                                 'url': v_url,
                                 'thumbnail': thumb,
                                 'duration_seconds': dur_sec,
@@ -549,7 +564,7 @@ def fetch_top_keyword_channels_and_videos(kw: str, gl_country: str, hl_lang: str
                                     'top_video_id': vid,
                                     'top_video_title': v_title,
                                     'top_video_views': v_views,
-                                    'top_video_views_formatted': f"{v_views:,} views",
+                                    'top_video_views_formatted': format_views_display(v_views),
                                     'top_video_duration': dur_fmt,
                                     'top_video_url': v_url,
                                     'top_video_thumbnail': thumb,
@@ -563,7 +578,7 @@ def fetch_top_keyword_channels_and_videos(kw: str, gl_country: str, hl_lang: str
                                     channels_map[ch_key]['top_video_id'] = vid
                                     channels_map[ch_key]['top_video_title'] = v_title
                                     channels_map[ch_key]['top_video_views'] = v_views
-                                    channels_map[ch_key]['top_video_views_formatted'] = f"{v_views:,} views"
+                                    channels_map[ch_key]['top_video_views_formatted'] = format_views_display(v_views)
                                     channels_map[ch_key]['top_video_duration'] = dur_fmt
                                     channels_map[ch_key]['top_video_url'] = v_url
                                     channels_map[ch_key]['top_video_thumbnail'] = thumb
@@ -647,7 +662,7 @@ def fetch_top_keyword_channels_and_videos(kw: str, gl_country: str, hl_lang: str
                                 'channel_id': ch_id,
                                 'channel_handle': ch_handle,
                                 'views': v_cnt,
-                                'views_formatted': views_str or f"{v_cnt:,} views",
+                                'views_formatted': format_views_display(v_cnt),
                                 'url': v_url,
                                 'thumbnail': thumb_url,
                                 'duration_seconds': dur_sec,
@@ -667,7 +682,7 @@ def fetch_top_keyword_channels_and_videos(kw: str, gl_country: str, hl_lang: str
                                     'top_video_id': v_id,
                                     'top_video_title': t,
                                     'top_video_views': v_cnt,
-                                    'top_video_views_formatted': views_str or f"{v_cnt:,} views",
+                                    'top_video_views_formatted': format_views_display(v_cnt),
                                     'top_video_duration': dur_str,
                                     'top_video_url': v_url,
                                     'top_video_thumbnail': thumb_url,
@@ -683,7 +698,7 @@ def fetch_top_keyword_channels_and_videos(kw: str, gl_country: str, hl_lang: str
                                     channels_map[ch_key]['top_video_id'] = v_id
                                     channels_map[ch_key]['top_video_title'] = t
                                     channels_map[ch_key]['top_video_views'] = v_cnt
-                                    channels_map[ch_key]['top_video_views_formatted'] = views_str or f"{v_cnt:,} views"
+                                    channels_map[ch_key]['top_video_views_formatted'] = format_views_display(v_cnt)
                                     channels_map[ch_key]['top_video_duration'] = dur_str
                                     channels_map[ch_key]['top_video_url'] = v_url
                                     channels_map[ch_key]['top_video_thumbnail'] = thumb_url
