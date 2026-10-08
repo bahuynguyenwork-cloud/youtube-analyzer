@@ -910,24 +910,24 @@ NICHE_LOCALIZED_QUERIES = {
         "DEFAULT": "stoicism philosophy"
     },
     "buddhism": {
-        "VN": "lời phật dạy",
-        "US": "buddhism teachings",
-        "GB": "buddhism mindfulness",
-        "FR": "bouddhisme enseignement",
-        "IT": "buddismo meditazione",
-        "JP": "仏教 法話",
-        "KR": "불교",
-        "DE": "Buddhismus Meditation",
+        "VN": "lời phật dạy triết lý tĩnh tâm",
+        "US": "buddhist wisdom philosophy",
+        "GB": "zen buddhism mindfulness philosophy",
+        "FR": "bouddhisme sagesse enseignement",
+        "IT": "buddismo meditazione saggezza",
+        "JP": "仏教 法話 心の教え",
+        "KR": "불교 마음공부 명상",
+        "DE": "Buddhismus Weisheit Meditation",
         "IN": "buddha teachings mindfulness meditation",
-        "ID": "ajaran buddha meditasi",
+        "ID": "ajaran buddha meditasi ketenangan",
         "TH": "ธรรมะสอนใจ คติธรรม",
         "PH": "buddhism mindfulness peace",
-        "RU": "буддизм учение медитация осознанность",
-        "PL": "buddyzm nauki medytacja",
-        "ES": "budismo meditacion ensenanzas",
-        "PT": "budismo meditacao ensinamentos",
-        "IR": "بودیسم مدیتیشن آرامش ذهن",
-        "DEFAULT": "buddhism teachings"
+        "RU": "буддизм мудрость медитация осознанность",
+        "PL": "buddyzm nauki mądrość medytacja",
+        "ES": "budismo meditacion ensenanzas sabiduria",
+        "PT": "budismo meditacao ensinamentos sabedoria",
+        "IR": "بودیسم مدیتیشن آرامش ذهن و خرد",
+        "DEFAULT": "buddhist wisdom philosophy"
     },
     "christianity_bible": {
         "VN": "lời chúa kinh thánh",
@@ -1599,9 +1599,35 @@ def is_video_matching_country(item: dict, ch_info: dict, target_geo: str) -> boo
     has_kana = bool(re.search(r'[\u3040-\u30ff]', combined_title))
     has_cyrillic = bool(re.search(r'[\u0400-\u04ff]', combined_title))
     has_arabic = bool(re.search(r'[\u0600-\u06ff]', combined_title))
+    has_chinese = bool(re.search(r'[\u4e00-\u9fff]', combined_title))
     
+    # Bảng chữ cái Miến Điện (Burmese/Myanmar), Campuchia (Khmer), Lào, Sri Lanka (Sinhala), Tây Tạng, Ge'ez, Armenia, Georgia
+    has_burmese = bool(re.search(r'[\u1000-\u109f\uaa60-\uaa7f]', combined_title))
+    has_khmer = bool(re.search(r'[\u1780-\u17ff]', combined_title))
+    has_lao = bool(re.search(r'[\u0e80-\u0eff]', combined_title))
+    has_sinhala = bool(re.search(r'[\u0d80-\u0dff]', combined_title))
+    has_tibetan = bool(re.search(r'[\u0f00-\u0fff]', combined_title))
+    has_exotic_script = (
+        has_burmese or has_khmer or has_lao or has_sinhala or has_tibetan or
+        bool(re.search(r'[\u1200-\u137f\u10a0-\u10ff\u0530-\u058f\u0590-\u05ff]', combined_title))
+    )
+
     # Tiếng Việt đặc thù (tránh nhầm với từ mượn Pháp/Tây Ban Nha như Pokémon, café)
     has_vn = bool(re.search(r'[đươĐƯƠ]', combined_title)) or len(re.findall(r'[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵ]', combined_title, re.I)) >= 3
+
+    # Dấu hiệu từ khóa & họ tên đặc trưng Nam Á / Ấn Độ / bộ tộc Mizo viết bằng chữ Latin / kênh tin tức Nam Á
+    has_south_asian_keywords = bool(re.search(
+        r'\b(hindi|tamil|telugu|bengali|marathi|kannada|malayalam|urdu|punjabi|gujarati|bhojpuri|odia|mizo|desh|vlog hindi|in hindi|in telugu|in tamil|puithiam|pawisa|chingpen|hnem|kaise|kare|karo|nahi|hoga|bjp|modi|yogi|mandir|aaj tak|zee news|ndtv|soni traveling|tluangi ralte|millat times|khabar dar khabar|vande mataram|sansad tv|lallantop|republic bharat|abp news|times of india|wion)\b',
+        combined_title,
+        re.I
+    ))
+
+    # Dấu hiệu tiếng Tagalog / Philippines đặc trưng
+    has_tagalog = bool(re.search(
+        r'\b(ang\s+[a-z]+|mga\s+[a-z]+|para\s+sa|dahil\s+sa|nahukay|dinala\s+kay|bibilhin|boss\s+toyo|kuya|ate|pilipinas|pinoy|tagalog|ano\s+ba|paano|bakit|kelan|kailan)\b',
+        combined_title,
+        re.I
+    ))
 
     # 1. Video tiếng Thái: TUYỆT ĐỐI KHÔNG xuất hiện ở bất kỳ quốc gia nào ngoài Thái Lan (TH)
     if has_thai or audio_lang.startswith('th') or default_lang.startswith('th') or ch_country == 'TH':
@@ -1610,20 +1636,22 @@ def is_video_matching_country(item: dict, ch_info: dict, target_geo: str) -> boo
 
     # 2. Thị trường Mỹ & tiếng Anh (US, GB, CA, AU)
     if geo in ['US', 'GB', 'CA', 'AU']:
-        if has_south_asian or has_hangul or has_kana or has_cyrillic or has_arabic or has_vn:
+        if (has_south_asian or has_hangul or has_kana or has_cyrillic or has_arabic or 
+            has_vn or has_exotic_script or has_south_asian_keywords or has_tagalog or has_chinese):
             return False
         if audio_lang and not audio_lang.startswith(('en', 'es', 'zxx')):
             return False
-        if ch_country in ['IN', 'VN', 'RU', 'PK', 'BD', 'ID', 'KR', 'JP', 'TH']:
+        if ch_country in ['IN', 'VN', 'RU', 'PK', 'BD', 'ID', 'KR', 'JP', 'TH', 'MM', 'LK', 'NP', 'LA', 'KH', 'PH', 'CN', 'TW', 'HK']:
             return False
 
     # 3. Thị trường Đức (DE)
     elif geo == 'DE':
-        if has_south_asian or has_hangul or has_kana or has_cyrillic or has_arabic or has_vn:
+        if (has_south_asian or has_hangul or has_kana or has_cyrillic or has_arabic or 
+            has_vn or has_exotic_script or has_south_asian_keywords or has_tagalog or has_chinese):
             return False
         if audio_lang and not audio_lang.startswith(('de', 'en', 'zxx')):
             return False
-        if ch_country in ['IN', 'VN', 'RU', 'PK', 'BD', 'ID', 'KR', 'JP', 'TH']:
+        if ch_country in ['IN', 'VN', 'RU', 'PK', 'BD', 'ID', 'KR', 'JP', 'TH', 'MM', 'LK', 'NP', 'PH', 'CN', 'TW', 'HK']:
             return False
 
     # 4. Thị trường Ấn Độ (IN)
@@ -2098,13 +2126,20 @@ def get_trending_feed(
             # Tạo danh sách các từ khóa tìm kiếm: từ khóa chính + biến thể chất lượng
             candidate_queries = [search_query]
             words = search_query.split()
-            if len(words) >= 3:
-                candidate_queries.append(' '.join(words[:2]))
-                candidate_queries.append(' '.join(words[-2:]))
-                candidate_queries.append(words[0])
-            elif len(words) == 2:
-                candidate_queries.append(words[0])
-                candidate_queries.append(words[1])
+            if cat != "all":
+                if len(words) >= 3:
+                    candidate_queries.append(' '.join(words[:2]))
+                    candidate_queries.append(f"{words[0]} {words[-1]}")
+                elif len(words) == 2:
+                    candidate_queries.append(search_query)
+            else:
+                if len(words) >= 3:
+                    candidate_queries.append(' '.join(words[:2]))
+                    candidate_queries.append(' '.join(words[-2:]))
+                    candidate_queries.append(words[0])
+                elif len(words) == 2:
+                    candidate_queries.append(words[0])
+                    candidate_queries.append(words[1])
 
             if cat == "all":
                 secondary_queries = {
@@ -2125,7 +2160,8 @@ def get_trending_feed(
             # BƯỚC 2.1: Truy vấn trực tiếp YouTube Web UI lấy ytInitialData (nhanh ~300ms, có nhãn ngày đăng thật)
             direct_headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept-Language': f"{hl_code}-{geo_code},{hl_code};q=0.9,en;q=0.8"
+                'Accept-Language': f"{hl_code}-{geo_code},{hl_code};q=0.9,en;q=0.8",
+                'Cookie': f"PREF=gl={geo_code}&hl={hl_code};"
             }
             
             existing_vids = {v["video_id"] for v in videos}
@@ -2138,7 +2174,7 @@ def get_trending_feed(
                 # Quét rộng đủ nguồn ứng viên đa kênh để loại trừ trùng lặp
                 if len(videos) >= 48:
                     break
-                search_url = f"https://www.youtube.com/results?search_query={requests.utils.quote(cand_query)}&sp={sp_param}"
+                search_url = f"https://www.youtube.com/results?search_query={requests.utils.quote(cand_query)}&sp={sp_param}&gl={geo_code}&hl={hl_code}"
                 try:
                     web_resp = http_session.get(search_url, headers=direct_headers, timeout=6)
                     if web_resp.status_code == 200:
@@ -2208,6 +2244,11 @@ def get_trending_feed(
                                 if dur_sec > 36000:
                                     continue
 
+                                # Lọc nội dung Game khi danh mục không phải Game
+                                if cat not in ["gaming", "all"]:
+                                    if any(gkw in t.lower() for gkw in ['blox fruits', 'roblox', 'minecraft', 'free fire', 'pubg', 'gta 5', 'gameplay']):
+                                        continue
+
                                 # Lượt xem
                                 v_cnt = parse_views_str(views_str)
                                 min_v = 50 if t_range == "24h" else 150
@@ -2228,7 +2269,7 @@ def get_trending_feed(
                                 }
                                 pseudo_ch = {
                                     'snippet': {
-                                        'country': geo_code
+                                        'country': ''
                                     }
                                 }
                                 if not is_video_matching_country(pseudo_item, pseudo_ch, geo_code):
@@ -2298,6 +2339,11 @@ def get_trending_feed(
                             if dur_filter == "deep_dive" and dur > 0 and dur < 1200:
                                 continue
 
+                            # Lọc nội dung Game khi danh mục không phải Game
+                            if cat not in ["gaming", "all"]:
+                                if any(gkw in t.lower() for gkw in ['blox fruits', 'roblox', 'minecraft', 'free fire', 'pubg', 'gta 5', 'gameplay']):
+                                    continue
+
                             if e.get('live_status') in ['is_live', 'is_upcoming', 'was_live', 'post_live']:
                                 continue
                             stream_kw = ['restream', 'livestream', 'live stream', 'trực tiếp', '🔴', 'buổi stream', 'phát trực tiếp', 'streamed live']
@@ -2312,7 +2358,7 @@ def get_trending_feed(
                             }
                             pseudo_ch = {
                                 'snippet': {
-                                    'country': e.get('channel_country') or geo_code
+                                    'country': e.get('channel_country') or ''
                                 }
                             }
                             if not is_video_matching_country(pseudo_item, pseudo_ch, geo_code):
