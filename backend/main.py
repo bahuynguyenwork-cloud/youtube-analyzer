@@ -1670,6 +1670,50 @@ def format_published_age(pub_iso: str) -> str:
     except Exception:
         return pub_iso[:10]
 
+def translate_published_age_to_vi(text: str) -> str:
+    """Chuyển đổi thời gian đăng (tiếng Anh hoặc viết tắt 6d ago, 2w ago...) sang tiếng Việt chuẩn."""
+    if not text:
+        return ""
+    s = str(text).strip()
+    if any(kw in s for kw in ["trước", "ngày", "giờ", "tuần", "tháng", "năm", "Vừa", "Hôm"]):
+        return s
+
+    is_streamed = bool(re.search(r'streamed', s, re.I))
+    prefix = "Đã phát " if is_streamed else ""
+
+    m = re.search(r'(\d+)\s*(?:d|day|days)\s*ago', s, re.I)
+    if m:
+        return f"{prefix}{m.group(1)} ngày trước"
+
+    m = re.search(r'(\d+)\s*(?:w|week|weeks)\s*ago', s, re.I)
+    if m:
+        return f"{prefix}{m.group(1)} tuần trước"
+
+    m = re.search(r'(\d+)\s*(?:mo|month|months|mths)\s*ago', s, re.I)
+    if m:
+        return f"{prefix}{m.group(1)} tháng trước"
+
+    m = re.search(r'(\d+)\s*(?:y|year|years|yr|yrs)\s*ago', s, re.I)
+    if m:
+        return f"{prefix}{m.group(1)} năm trước"
+
+    m = re.search(r'(\d+)\s*(?:h|hour|hours|hr|hrs)\s*ago', s, re.I)
+    if m:
+        return f"{prefix}{m.group(1)} giờ trước"
+
+    m = re.search(r'(\d+)\s*(?:m|min|mins|minute|minutes)\s*ago', s, re.I)
+    if m:
+        return f"{prefix}{m.group(1)} phút trước"
+
+    if re.search(r'just now|moments ago', s, re.I):
+        return "Vừa xong"
+    if re.search(r'yesterday', s, re.I):
+        return "Hôm qua"
+    if re.search(r'today', s, re.I):
+        return "Hôm nay"
+
+    return s
+
 def compute_trending_score(view_count: int, pub_iso: str = "", pub_age_str: str = "") -> float:
     """
     Tính điểm xu hướng bứt phá (Trending Velocity Score):
@@ -2439,7 +2483,7 @@ def get_trending_feed(
                                     "duration_seconds": dur_sec,
                                     "duration_formatted": dur_str or format_duration_display(dur_sec),
                                     "published_at": "",
-                                    "published_age": pub_age or ("🔥 Xu hướng tuần này" if t_range == "7d" else "⚡ 24h qua"),
+                                    "published_age": translate_published_age_to_vi(pub_age) or ("🔥 Xu hướng tuần này" if t_range == "7d" else "⚡ 24h qua"),
                                     "url": f"https://www.youtube.com/watch?v={v_id}",
                                     "thumbnail": thumb_url
                                 })

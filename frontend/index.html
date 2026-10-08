@@ -1020,17 +1020,6 @@
           <div id="kw-longtail-list" class="flex flex-wrap gap-2 text-xs"></div>
         </div>
 
-        <div id="kw-top-videos-container" class="hidden glass-card rounded-2xl p-5 space-y-3">
-          <div class="flex items-center justify-between">
-            <div>
-              <h4 class="text-xs font-bold text-white">Video Đang Thu Hút View Hàng Đầu Của Từ Khóa Này</h4>
-              <p class="text-[10px] text-slate-400">Video thực tế trên YouTube theo thị trường đã chọn</p>
-            </div>
-            <span class="text-[10px] text-rose-400 font-semibold bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20">Thời gian thực</span>
-          </div>
-          <div id="kw-top-videos-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
-        </div>
-
         <!-- Top 20-25 Kênh Thu Hút View Hàng Đầu Của Từ Khóa Này -->
         <div id="kw-top-channels-container" class="hidden glass-card rounded-2xl p-5 space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/5 pb-3">
@@ -1670,6 +1659,51 @@
       if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
       if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
       return n.toLocaleString();
+    }
+
+    function formatPublishedAgeVi(pubAge) {
+      if (!pubAge) return '';
+      const s = String(pubAge).trim();
+      if (s.includes('trước') || s.includes('Vừa') || s.includes('ngày') || s.includes('giờ') || s.includes('tuần') || s.includes('tháng') || s.includes('năm') || s.includes('Hôm')) {
+        return s;
+      }
+
+      const isStreamed = /streamed/i.test(s);
+      const prefix = isStreamed ? 'Đã phát ' : '';
+
+      let m;
+      if ((m = s.match(/(\d+)\s*(?:d|day|days)\s*ago/i))) {
+        return `${prefix}${m[1]} ngày trước`;
+      }
+      if ((m = s.match(/(\d+)\s*(?:w|week|weeks)\s*ago/i))) {
+        return `${prefix}${m[1]} tuần trước`;
+      }
+      if ((m = s.match(/(\d+)\s*(?:mo|month|months|mths)\s*ago/i))) {
+        return `${prefix}${m[1]} tháng trước`;
+      }
+      if ((m = s.match(/(\d+)\s*(?:y|year|years|yr|yrs)\s*ago/i))) {
+        return `${prefix}${m[1]} năm trước`;
+      }
+      if ((m = s.match(/(\d+)\s*(?:h|hour|hours|hr|hrs)\s*ago/i))) {
+        return `${prefix}${m[1]} giờ trước`;
+      }
+      if ((m = s.match(/(\d+)\s*(?:m|min|mins|minute|minutes)\s*ago/i))) {
+        return `${prefix}${m[1]} phút trước`;
+      }
+      if ((m = s.match(/(\d+)\s*(?:s|sec|secs|second|seconds)\s*ago/i))) {
+        return `${prefix}${m[1]} giây trước`;
+      }
+      if (/just now|moments ago/i.test(s)) {
+        return 'Vừa xong';
+      }
+      if (/yesterday/i.test(s)) {
+        return 'Hôm qua';
+      }
+      if (/today/i.test(s)) {
+        return 'Hôm nay';
+      }
+
+      return s;
     }
 
     function switchNav(navId) {
@@ -3190,7 +3224,6 @@
         renderKwChart(data.timeline_data || data.trend_points || []);
         renderKwTags(data.recommended_tags || []);
         renderLongTailKeywords(data.long_tail_keywords || []);
-        renderKwTopVideos(data.top_youtube_videos || []);
         renderKwTopChannels(data.top_channels || []);
         showToast('Tra cứu từ khóa hoàn tất!');
       } catch (err) {
@@ -3571,53 +3604,6 @@
       }
     }
 
-    function renderKwTopVideos(videos) {
-      const container = document.getElementById('kw-top-videos-container');
-      const el = document.getElementById('kw-top-videos-list');
-      if (!container || !el) return;
-
-      // Lọc bỏ triệt để video Shorts và kênh chuyên Shorts
-      const validVideos = (videos || []).filter(v => {
-        const t = (v.title || '').toLowerCase();
-        const ch = (v.channel || '').toLowerCase();
-        const u = (v.url || '').toLowerCase();
-        if (u.includes('/shorts/')) return false;
-        if (v.duration_seconds && v.duration_seconds > 0 && v.duration_seconds < 180) return false;
-        if (t.includes('#shorts') || t.includes('#short') || t.includes('#쇼츠') || ch.includes('shorts') || ch.includes('쇼츠')) return false;
-        return true;
-      });
-
-      if (!validVideos.length) {
-        container.classList.add('hidden');
-        return;
-      }
-      container.classList.remove('hidden');
-      el.innerHTML = '';
-      validVideos.slice(0, 12).forEach(v => {
-        const div = document.createElement('div');
-        div.className = 'p-3 bg-slate-900/70 rounded-xl border border-white/5 flex space-x-3 items-center hover:border-rose-500/30 transition';
-        div.innerHTML = `
-          <div class="relative w-20 h-12 shrink-0 rounded-lg overflow-hidden bg-slate-800">
-            <img src="${v.thumbnail || 'https://via.placeholder.com/120x68'}" class="w-full h-full object-cover" />
-            ${v.duration_formatted ? `<span class="absolute bottom-1 right-1 px-1 py-0.5 bg-black/80 text-white rounded text-[9px] font-mono leading-none">${v.duration_formatted}</span>` : ''}
-          </div>
-          <div class="flex-1 min-w-0 space-y-1">
-            <a href="${v.url}" target="_blank" class="text-xs font-semibold text-white hover:text-rose-400 line-clamp-1" title="${v.title}">${v.title}</a>
-            <div class="flex items-center space-x-2 text-[10px] text-slate-400">
-              <span class="truncate max-w-[100px]">${v.channel || 'YouTube Creator'}</span>
-              <span>•</span>
-              <span class="text-amber-400 font-bold">${formatNumber(v.views)} views</span>
-            </div>
-          </div>
-          <a href="${v.url}" target="_blank" class="p-1 text-slate-400 hover:text-rose-400 transition shrink-0" title="Mở video">
-            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-          </a>
-        `;
-        el.appendChild(div);
-      });
-      lucide.createIcons();
-    }
-
     function renderKwTopChannels(channels) {
       const container = document.getElementById('kw-top-channels-container');
       const el = document.getElementById('kw-top-channels-list');
@@ -3761,7 +3747,7 @@
           const views = v.view_count || v.views || 0;
           const durBadge = v.duration_formatted || 'Video Dài';
           const chBadge = v.channel_badge || '🟢 Kênh Hoạt Động';
-          const pubAge = v.published_age || '';
+          const pubAge = formatPublishedAgeVi(v.published_age || '');
 
           let subsText = '';
           if (chSubs >= 1000000) {
