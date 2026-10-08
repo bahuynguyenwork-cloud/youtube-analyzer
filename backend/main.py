@@ -854,6 +854,18 @@ def get_trending_niche_tags(geo: Optional[str] = "US"):
             {"tag": "estoicismo filosofia sabedoria de vida", "niche": "📜 Triết Lý", "badge": "🌱 Sabedoria"},
             {"tag": "historias de terror reais portugal", "niche": "👻 Kinh Dị", "badge": "🌙 Terror"}
         ],
+        "IR": [
+            {"tag": "داستان واقعی پادکست زندگی", "niche": "🎙️ Kể Chuyện Thật", "badge": "🔥 داستان"},
+            {"tag": "آموزش زبان انگلیسی از صفر", "niche": "🎓 Tiếng Anh", "badge": "🚀 Đang lên"},
+            {"tag": "خلاصه فیلم به فارسی در چند دقیقه", "niche": "🎬 Tóm Tắt Phim", "badge": "🔥 Triệu view"},
+            {"tag": "خیانت و انتقام داستان واقعی", "niche": "💔 Ngoại Tình", "badge": "⚡ Drama"},
+            {"tag": "مادر شوهر و عروس دعوای خانوادگی", "niche": "🏡 Gia Đình", "badge": "⚡ Drama"},
+            {"tag": "پرونده های جنایی واقعی مرموز", "niche": "🕵️ Kỳ Án", "badge": "🚀 Triệu view"},
+            {"tag": "کسب درآمد دلاری از اینترنت 2026", "niche": "💰 Tài Chính", "badge": "🔥 Hot"},
+            {"tag": "هوش مصنوعی ابزارهای هوش مصنوعی", "niche": "🤖 Công Nghệ", "badge": "🚀 Mới"},
+            {"tag": "فلسفه رواقی گری درس های زندگی", "niche": "📜 Triết Lý", "badge": "🌱 Chữa lành"},
+            {"tag": "داستان های ترسناک واقعی وحشتناک", "niche": "👻 Kinh Dị", "badge": "🌙 ترسناک"}
+        ],
         "DEFAULT": [
             {"tag": "learn english conversation", "niche": "🎓 Learn English", "badge": "🔥 Viral"},
             {"tag": "english speaking practice", "niche": "🎓 Learn English", "badge": "🚀 High View"},
@@ -893,6 +905,7 @@ NICHE_LOCALIZED_QUERIES = {
         "PL": "stoicyzm mądrość życiowa filozofia",
         "ES": "estoicismo filosofia lecciones de vida",
         "PT": "estoicismo filosofia sabedoria de vida",
+        "IR": "فلسفه رواقی گری درس های زندگی حکمت",
         "DEFAULT": "stoicism philosophy"
     },
     "buddhism": {
@@ -912,6 +925,7 @@ NICHE_LOCALIZED_QUERIES = {
         "PL": "buddyzm nauki medytacja",
         "ES": "budismo meditacion ensenanzas",
         "PT": "budismo meditacao ensinamentos",
+        "IR": "بودیسم مدیتیشن آرامش ذهن",
         "DEFAULT": "buddhism teachings"
     },
     "christianity_bible": {
@@ -931,6 +945,7 @@ NICHE_LOCALIZED_QUERIES = {
         "PL": "czytanie pisma świętego biblia",
         "ES": "lectura de la biblia palabra de dios",
         "PT": "leitura da biblia sagrada palavra de deus",
+        "IR": "کتاب مقدس عیسی مسیح انجیل صوتی",
         "DEFAULT": "bible scripture reading"
     },
     "elderly_wisdom": {
@@ -950,6 +965,7 @@ NICHE_LOCALIZED_QUERIES = {
         "PL": "mądrość życiowa seniorów rady",
         "ES": "sabiduria de los ancianos lecciones",
         "PT": "sabedoria dos idosos conselhos de vida",
+        "IR": "پند بزرگان تجربه های زندگی کهنسالان",
         "DEFAULT": "elderly wisdom"
     },
     "reddit_stories": {
@@ -969,6 +985,7 @@ NICHE_LOCALIZED_QUERIES = {
         "PL": "historie z reddit wyznania",
         "ES": "historias de reddit confesiones",
         "PT": "historias do reddit relatos",
+        "IR": "داستان های ردیت اعترافات عجیب",
         "DEFAULT": "reddit stories"
     },
     "drama_expose": {
@@ -988,6 +1005,7 @@ NICHE_LOCALIZED_QUERIES = {
         "PL": "afera skandal exposé śledztwo",
         "ES": "documental escandalo caida de",
         "PT": "documentario escandalo polemica",
+        "IR": "افشاگری مستند جنجالی سقوط",
         "DEFAULT": "downfall documentary"
     },
     "true_crime": {
@@ -1007,6 +1025,7 @@ NICHE_LOCALIZED_QUERIES = {
         "PL": "prawdziwe zbrodnie kryminalne sprawy",
         "ES": "crimenes reales casos sin resolver documental",
         "PT": "crimes reais casos misteriosos documental",
+        "IR": "پرونده های جنایی واقعی قتل های مرموز",
         "DEFAULT": "true crime documentary"
     },
     "horror_stories": {
@@ -1026,6 +1045,7 @@ NICHE_LOCALIZED_QUERIES = {
         "PL": "straszne historie horror z życia wzięte",
         "ES": "historias de terror reales miedo para no dormir",
         "PT": "historias de terror reais medo para dormir",
+        "IR": "داستان های ترسناک واقعی جن و ارواح",
         "DEFAULT": "scary horror stories"
     },
     "history_geopolitics": {
@@ -1045,6 +1065,7 @@ NICHE_LOCALIZED_QUERIES = {
         "PL": "historia geopolityka wojna dokument",
         "ES": "historia geopolitica guerras documental",
         "PT": "historia geopolitica guerras documental",
+        "IR": "تاریخ جهان ژئوپلیتیک جنگ های بزرگ",
         "DEFAULT": "history geopolitics"
     },
     "space_science": {
@@ -1064,6 +1085,7 @@ NICHE_LOCALIZED_QUERIES = {
         "PL": "tajemnice kosmosu nauka dokument",
         "ES": "misterios del espacio universo ciencia documental",
         "PT": "misterios do espaco universo ciencia documental",
+        "IR": "شگفتی های کهکشان رازهای کیهان نجوم",
         "DEFAULT": "space science documentary"
     },
     "finance_money": {
@@ -1083,6 +1105,7 @@ NICHE_LOCALIZED_QUERIES = {
         "PL": "zarabianie przez internet finanse inwestycje",
         "ES": "finanzas personales invertir dinero por internet",
         "PT": "financas pessoais investimentos ganhar dinheiro online",
+        "IR": "کسب درآمد دلاری آموزش سرمایه گذاری",
         "DEFAULT": "personal finance investing"
     },
     "tech_ai": {
@@ -1102,6 +1125,7 @@ NICHE_LOCALIZED_QUERIES = {
         "PL": "sztuczna inteligencja narzędzia ai",
         "ES": "inteligencia artificial herramientas ai 2026",
         "PT": "inteligencia artificial ferramentas ai 2026",
+        "IR": "ابزارهای هوش مصنوعی تکنولوژی جدید",
         "DEFAULT": "artificial intelligence AI"
     },
     "recap_stories": {
@@ -1121,6 +1145,7 @@ NICHE_LOCALIZED_QUERIES = {
         "PL": "streszczenie filmu recap po polsku",
         "ES": "resumen de peliculas en minutos",
         "PT": "resumo de filmes em minutos",
+        "IR": "خلاصه فیلم سینمایی در چند دقیقه",
         "DEFAULT": "movie recap"
     },
     "gaming": {
@@ -1140,6 +1165,7 @@ NICHE_LOCALIZED_QUERIES = {
         "PL": "gaming zagrajmy w gry gameplay",
         "ES": "gameplay mejores momentos juegos",
         "PT": "gameplay melhores momentos jogos",
+        "IR": "گیم پلی بازی های ویدیویی هایلایت",
         "DEFAULT": "gaming highlights"
     },
     "entertainment": {
@@ -1159,6 +1185,7 @@ NICHE_LOCALIZED_QUERIES = {
         "PL": "śmieszne filmiki kabaret komedia",
         "ES": "comedia videos divertidos risa viral",
         "PT": "comedia videos engracados pegadinhas viral",
+        "IR": "طنز خنده دار کلیپ سرگرمی دوربین مخفی",
         "DEFAULT": "entertainment funny viral"
     },
     "spicy_18_drama": {
@@ -1178,6 +1205,7 @@ NICHE_LOCALIZED_QUERIES = {
         "PL": "sekretne zdrady dramaty miłosne",
         "ES": "historias de infidelidad confesiones de pareja",
         "PT": "historias de traicao confissoes de casal",
+        "IR": "اعترافات عشق های پنهان روابط عاشقانه",
         "DEFAULT": "relationship drama stories"
     },
     "father_inlaw_drama": {
@@ -1197,6 +1225,7 @@ NICHE_LOCALIZED_QUERIES = {
         "PL": "teść synowa dramaty rodzinne",
         "ES": "suegro y nuera drama familiar",
         "PT": "sogro e nora drama familiar",
+        "IR": "پدر شوهر و عروس اختلافات خانوادگی",
         "DEFAULT": "father in law family drama"
     },
     "mother_inlaw_drama": {
@@ -1216,6 +1245,7 @@ NICHE_LOCALIZED_QUERIES = {
         "PL": "teściowa zięć konflikty rodzinne",
         "ES": "suegra y nuera conflictos familiares",
         "PT": "sogra e nora conflitos familiares",
+        "IR": "مادر شوهر و عروس ماجراهای خانوادگی",
         "DEFAULT": "mother in law family drama"
     },
     "infidelity_revenge": {
@@ -1235,6 +1265,7 @@ NICHE_LOCALIZED_QUERIES = {
         "PL": "zdrada zemsta przyłapany na zdradzie",
         "ES": "infidelidad venganza caught cheating espanol",
         "PT": "traicao vinganca apanhado traindo",
+        "IR": "خیانت همسر انتقام داستان واقعی",
         "DEFAULT": "cheating revenge drama"
     },
     "learn_english": {
@@ -1257,6 +1288,7 @@ NICHE_LOCALIZED_QUERIES = {
         "PL": "nauka angielskiego od podstaw rozmówki",
         "ES": "aprender ingles conversacion pronunciacion",
         "PT": "aprender ingles conversacao pronuncia",
+        "IR": "آموزش مکالمه انگلیسی از صفر تلفظ",
         "DEFAULT": "learn english speaking"
     },
     "luxury_lifestyle": {
@@ -1276,6 +1308,7 @@ NICHE_LOCALIZED_QUERIES = {
         "PL": "luksusowe życie miliarderzy bogactwo",
         "ES": "estilo de vida multimillonarios lujo",
         "PT": "estilo de vida bilionarios luxo",
+        "IR": "زندگی ثروتمندان و میلیاردرهای جهان",
         "DEFAULT": "luxury lifestyle billionaire"
     },
     "travel_food": {
@@ -1295,6 +1328,7 @@ NICHE_LOCALIZED_QUERIES = {
         "PL": "street food podróże kulinaria",
         "ES": "comida callejera viajes gastronomia",
         "PT": "comida de rua viagens gastronomia",
+        "IR": "غذای خیابانی ولاگ سفر آشپزی",
         "DEFAULT": "travel street food"
     },
     "fitness_health": {
@@ -1314,6 +1348,7 @@ NICHE_LOCALIZED_QUERIES = {
         "PL": "trening w domu siłownia odchudzanie",
         "ES": "ejercicios en casa entrenamiento gimnasio",
         "PT": "exercicios em casa treino academia",
+        "IR": "تمرین در خانه بدنسازی کاهش وزن",
         "DEFAULT": "fitness workout gym"
     },
         "real_life_stories": {
@@ -1333,6 +1368,7 @@ NICHE_LOCALIZED_QUERIES = {
         "PL": "prawdziwe historie z życia podcast",
         "ES": "historias de la vida real podcast testimonios",
         "PT": "historias reais de vida podcast relatos",
+        "IR": "داستان واقعی پادکست سرگذشت زندگی",
         "DEFAULT": "real life stories true story podcast"
     },
     "music_chill": {
@@ -1352,6 +1388,7 @@ NICHE_LOCALIZED_QUERIES = {
         "PL": "muzyka relaksacyjna lofi chill",
         "ES": "musica relajante lofi chill beats",
         "PT": "musica relaxante lofi chill beats",
+        "IR": "موزیک آرامش بخش لوفای بی کلام",
         "DEFAULT": "lofi chill beats"
     }
 }
@@ -1672,6 +1709,15 @@ def is_video_matching_country(item: dict, ch_info: dict, target_geo: str) -> boo
         if ch_country in ['VN', 'RU', 'JP', 'KR', 'TH', 'IN', 'ID', 'PH']:
             return False
 
+    # 18. Thị trường Iran / Ba Tư (IR)
+    elif geo == 'IR':
+        if has_south_asian or has_hangul or has_kana or has_cyrillic or has_thai or has_vn:
+            return False
+        if audio_lang and not audio_lang.startswith(('fa', 'en', 'zxx')):
+            return False
+        if ch_country in ['VN', 'RU', 'JP', 'KR', 'TH', 'IN', 'ID', 'PH']:
+            return False
+
     return True
 
 @app.get("/api/trending/feed")
@@ -1776,6 +1822,7 @@ def get_trending_feed(
                         "PL": "trendy popularne filmy polska podcast dokument",
                         "ES": "tendencias videos populares espana podcast documental",
                         "PT": "tendencias videos populares portugal podcast documental",
+                        "IR": "ترندهای یوتیوب فارسی پادکست مستند",
                         "BR": "documentario podcast brasil"
                     }
                     q_term = country_names.get(geo_code, "trending viral video")
@@ -1785,7 +1832,7 @@ def get_trending_feed(
                     "VN": "vi", "JP": "ja", "KR": "ko", "DE": "de",
                     "BR": "pt", "IN": "en", "FR": "fr", "IT": "it",
                     "ID": "id", "TH": "th", "PH": "en", "RU": "ru",
-                    "PL": "pl", "ES": "es", "PT": "pt"
+                    "PL": "pl", "ES": "es", "PT": "pt", "IR": "fa"
                 }
                 lang_param = GEO_LANG_MAP.get(geo_code, "en")
 
@@ -1952,6 +1999,7 @@ def get_trending_feed(
                 "PL": "na czasie polska",
                 "ES": "en tendencias espana",
                 "PT": "em alta portugal",
+                "IR": "ترندهای یوتیوب فارسی",
                 "VN": "thịnh hành việt nam",
                 "JP": "話題 トレンド",
                 "KR": "이슈 트렌드",
@@ -1972,7 +2020,7 @@ def get_trending_feed(
                 "VN": "vi", "JP": "ja", "KR": "ko", "DE": "de",
                 "BR": "pt", "IN": "en", "FR": "fr", "IT": "it",
                 "ID": "id", "TH": "th", "PH": "en", "RU": "ru",
-                "PL": "pl", "ES": "es", "PT": "pt"
+                "PL": "pl", "ES": "es", "PT": "pt", "IR": "fa"
             }
             hl_code = GEO_LANG_MAP.get(geo_code, "en")
 
