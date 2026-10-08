@@ -1030,6 +1030,27 @@
           </div>
           <div id="kw-top-videos-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
         </div>
+
+        <!-- Top 20-25 Kênh Thu Hút View Hàng Đầu Của Từ Khóa Này -->
+        <div id="kw-top-channels-container" class="hidden glass-card rounded-2xl p-5 space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/5 pb-3">
+            <div>
+              <h4 class="text-xs font-bold text-white flex items-center space-x-2">
+                <i data-lucide="crown" class="w-4 h-4 text-amber-400"></i>
+                <span>Gợi Ý 20–25 Kênh Thu Hút View Hàng Đầu Của Từ Khóa Này</span>
+                <span id="kw-top-channels-count" class="px-2 py-0.5 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full text-[10px] font-bold">25 Kênh</span>
+              </h4>
+              <p class="text-[10px] text-slate-400 mt-0.5">Các kênh đang có video đạt view cao nhất với từ khóa này. Bấm "Phân tích kênh" để giải mã chiến lược nội dung.</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="text-[10px] text-emerald-400 font-semibold bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 flex items-center space-x-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Thời gian thực</span>
+              </span>
+            </div>
+          </div>
+          <div id="kw-top-channels-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5"></div>
+        </div>
       </div>
     </div>
 
@@ -3170,6 +3191,7 @@
         renderKwTags(data.recommended_tags || []);
         renderLongTailKeywords(data.long_tail_keywords || []);
         renderKwTopVideos(data.top_youtube_videos || []);
+        renderKwTopChannels(data.top_channels || []);
         showToast('Tra cứu từ khóa hoàn tất!');
       } catch (err) {
         alert('Lỗi: ' + err.message);
@@ -3571,7 +3593,7 @@
       }
       container.classList.remove('hidden');
       el.innerHTML = '';
-      validVideos.slice(0, 6).forEach(v => {
+      validVideos.slice(0, 12).forEach(v => {
         const div = document.createElement('div');
         div.className = 'p-3 bg-slate-900/70 rounded-xl border border-white/5 flex space-x-3 items-center hover:border-rose-500/30 transition';
         div.innerHTML = `
@@ -3594,6 +3616,95 @@
         el.appendChild(div);
       });
       lucide.createIcons();
+    }
+
+    function renderKwTopChannels(channels) {
+      const container = document.getElementById('kw-top-channels-container');
+      const el = document.getElementById('kw-top-channels-list');
+      const countBadge = document.getElementById('kw-top-channels-count');
+      if (!container || !el) return;
+
+      const validChannels = (channels || []).filter(c => c && c.channel_name);
+      if (!validChannels.length) {
+        container.classList.add('hidden');
+        return;
+      }
+
+      container.classList.remove('hidden');
+      if (countBadge) countBadge.textContent = `${validChannels.length} Kênh`;
+      el.innerHTML = '';
+
+      validChannels.forEach((ch, idx) => {
+        const rank = idx + 1;
+        let rankBadgeClass = 'bg-slate-800 text-slate-300 border-white/10';
+        if (rank === 1) rankBadgeClass = 'bg-amber-500/20 text-amber-300 border-amber-500/40 ring-1 ring-amber-500/40 font-black';
+        else if (rank === 2) rankBadgeClass = 'bg-slate-300/20 text-slate-100 border-slate-300/40 font-bold';
+        else if (rank === 3) rankBadgeClass = 'bg-amber-700/25 text-amber-400 border-amber-700/40 font-bold';
+
+        const div = document.createElement('div');
+        div.className = 'p-3.5 bg-slate-900/80 rounded-xl border border-white/5 hover:border-amber-500/40 transition flex flex-col justify-between space-y-3 group shadow-sm';
+        
+        const chTarget = (ch.channel_handle || ch.channel_id || ch.channel_name || '').replace(/'/g, "\\'");
+
+        div.innerHTML = `
+          <div class="flex items-start justify-between gap-2.5">
+            <div class="flex items-center space-x-3 min-w-0">
+              <div class="relative shrink-0">
+                <span class="absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full ${rankBadgeClass} border text-[10px] flex items-center justify-center z-10 shadow-sm">
+                  ${rank}
+                </span>
+                <div class="w-11 h-11 rounded-full overflow-hidden bg-slate-800 border border-white/10 shrink-0">
+                  <img src="${ch.avatar || 'https://via.placeholder.com/48'}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/48'" />
+                </div>
+              </div>
+              <div class="min-w-0 flex-1">
+                <a href="${ch.channel_url}" target="_blank" class="text-xs font-bold text-white hover:text-amber-400 transition truncate block" title="${ch.channel_name}">
+                  ${ch.channel_name}
+                </a>
+                <p class="text-[10px] text-slate-400 truncate mt-0.5">${ch.channel_handle || '@youtube'}</p>
+              </div>
+            </div>
+            <a href="${ch.channel_url}" target="_blank" class="p-1.5 text-slate-400 hover:text-amber-400 transition shrink-0 rounded-lg hover:bg-white/5" title="Mở kênh trên YouTube">
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+
+          <!-- Video Đỉnh Của Kênh Với Từ Khóa Này -->
+          <div class="p-2.5 bg-slate-950/60 rounded-lg border border-white/5 space-y-1.5">
+            <div class="flex items-center justify-between text-[10px]">
+              <span class="text-slate-400 font-medium">Video đỉnh:</span>
+              <span class="text-amber-400 font-bold">${ch.top_video_views_formatted || formatNumber(ch.top_video_views) + ' views'}</span>
+            </div>
+            <a href="${ch.top_video_url}" target="_blank" class="text-[11px] font-medium text-slate-200 hover:text-rose-400 transition line-clamp-1 block" title="${ch.top_video_title}">
+              ${ch.top_video_title}
+            </a>
+          </div>
+
+          <!-- Nút Hành Động: 1-Click Phân Tích Kênh -->
+          <div class="pt-1 flex items-center justify-between gap-2 border-t border-white/5">
+            <button onclick="inspectChannelFromKw('${chTarget}')" class="w-full py-1.5 px-3 bg-gradient-to-r from-rose-600/20 to-amber-600/20 hover:from-rose-600 hover:to-amber-600 text-rose-300 hover:text-white rounded-lg border border-rose-500/30 text-[11px] font-semibold transition flex items-center justify-center space-x-1.5 shadow-sm">
+              <i data-lucide="search" class="w-3 h-3"></i>
+              <span>Phân tích kênh này</span>
+            </button>
+          </div>
+        `;
+        el.appendChild(div);
+      });
+      lucide.createIcons();
+    }
+
+    function inspectChannelFromKw(chIdentifier) {
+      if (!chIdentifier) return;
+      switchNav('channel');
+      const inputEl = document.getElementById('channel-input');
+      if (inputEl) {
+        inputEl.value = chIdentifier;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        const form = document.getElementById('search-form');
+        if (form) {
+          form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+        }
+      }
     }
 
     // ==========================================

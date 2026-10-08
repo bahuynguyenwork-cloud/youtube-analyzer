@@ -9,7 +9,7 @@ import requests
 import concurrent.futures
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from typing import Optional, Dict, Any, List, Union
+from typing import Optional, Dict, Any, List, Union, Tuple
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -456,36 +456,57 @@ def is_short_video_or_channel(
 
     return False
 
-def fetch_top_youtube_videos(kw: str, gl_country: str, hl_lang: str, api_key: Optional[str]) -> List[dict]:
-    """Lấy danh sách các video dài thu hút view hàng đầu cho từ khóa (loại bỏ hoàn toàn Shorts)."""
-    yt_results = []
+def fetch_top_keyword_channels_and_videos(kw: str, gl_country: str, hl_lang: str, api_key: Optional[str]) -> Tuple[List[dict], List[dict]]:
+    """Lấy danh sách các video dài thu hút view hàng đầu và 20-25 kênh hàng đầu cho từ khóa (loại bỏ hoàn toàn Shorts)."""
+    channels_map = {}
+    videos_list = []
+    seen_video_ids = set()
+
+    def parse_views_str_local(v_str: str) -> int:
+        if not v_str:
+            return 0
+        s = str(v_str).lower().replace(',', '').replace('.', '').replace('views', '').replace('view', '').strip()
+        m_k = re.search(r'([\d\.]+)\s*k', s)
+        if m_k:
+            return int(float(m_k.group(1)) * 1000)
+        m_m = re.search(r'([\d\.]+)\s*m', s)
+        if m_m:
+            return int(float(m_m.group(1)) * 1000000)
+        m_b = re.search(r'([\d\.]+)\s*b', s)
+        if m_b:
+            return int(float(m_b.group(1)) * 1000000000)
+        digits = re.sub(r'[^\d]', '', s)
+        return int(digits) if digits else 0
+
     # 1. Ưu tiên cao nhất: Dùng YouTube Data API v3 (Siêu tốc ~200-300ms, chính xác 100%)
     if api_key:
         try:
             encoded_kw = requests.utils.quote(kw)
             search_url = (
                 f"https://www.googleapis.com/youtube/v3/search?part=snippet&type=video"
-                f"&maxResults=25&q={encoded_kw}&regionCode={gl_country}&relevanceLanguage={hl_lang}&key={api_key}"
+                f"&maxResults=50&q={encoded_kw}&regionCode={gl_country}&relevanceLanguage={hl_lang}&key={api_key}"
             )
             s_resp = http_session.get(search_url, timeout=5)
             if s_resp.status_code == 200:
                 items = s_resp.json().get("items", [])
                 v_ids = [it["id"]["videoId"] for it in items if it.get("id", {}).get("videoId")]
                 if v_ids:
-                    d_url = f"https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics,liveStreamingDetails&id={','.join(v_ids[:25])}&key={api_key}"
+                    d_url = f"https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics,liveStreamingDetails&id={','.join(v_ids[:50])}&key={api_key}"
                     d_resp = http_session.get(d_url, timeout=5)
                     if d_resp.status_code == 200:
                         detail_items = d_resp.json().get("items", [])
                         for v in detail_items:
                             vid = v.get("id")
-                            if not vid:
+                            if not vid or vid in seen_video_ids:
                                 continue
+                            seen_video_ids.add(vid)
                             snip = v.get("snippet", {})
                             content_det = v.get("contentDetails", {})
                             stats = v.get("statistics", {})
                             
                             v_title = snip.get("title", "")
                             v_channel = snip.get("channelTitle", "")
+                            ch_id = snip.get("channelId", "")
                             dur_iso = content_det.get("duration", "")
                             dur_sec = parse_iso_duration(dur_iso)
                             v_url = f"https://www.youtube.com/watch?v={vid}"
@@ -498,84 +519,186 @@ def fetch_top_youtube_videos(kw: str, gl_country: str, hl_lang: str, api_key: Op
                             if is_short_video_or_channel(title=v_title, channel_title=v_channel, duration_sec=dur_sec, url=v_url):
                                 continue
 
+                            v_views = int(stats.get("viewCount", 0))
                             thumb = (snip.get("thumbnails", {}).get("high") or snip.get("thumbnails", {}).get("medium") or {}).get("url") or f"https://i.ytimg.com/vi/{vid}/hqdefault.jpg"
-                            yt_results.append({
+                            dur_fmt = format_duration_display(dur_sec)
+
+                            videos_list.append({
                                 'id': vid,
                                 'title': v_title,
                                 'channel': v_channel,
-                                'views': int(stats.get("viewCount", 0)),
+                                'channel_id': ch_id,
+                                'channel_handle': f"@{v_channel.replace(' ', '')}",
+                                'views': v_views,
+                                'views_formatted': f"{v_views:,} views",
                                 'url': v_url,
                                 'thumbnail': thumb,
                                 'duration_seconds': dur_sec,
-                                'duration_formatted': format_duration_display(dur_sec)
+                                'duration_formatted': dur_fmt
                             })
 
-                if yt_results:
-                    # Sắp xếp theo view giảm dần để đưa các video thu hút view nhất lên đầu
-                    yt_results.sort(key=lambda x: x.get('views', 0), reverse=True)
-                    return yt_results[:6]
+                            ch_key = ch_id if ch_id else v_channel.lower()
+                            ch_url = f"https://www.youtube.com/channel/{ch_id}" if ch_id else f"https://www.youtube.com/results?search_query={encoded_kw}"
+                            if ch_key not in channels_map:
+                                channels_map[ch_key] = {
+                                    'channel_id': ch_id,
+                                    'channel_name': v_channel,
+                                    'channel_handle': f"@{v_channel.replace(' ', '')}",
+                                    'avatar': '',
+                                    'channel_url': ch_url,
+                                    'top_video_id': vid,
+                                    'top_video_title': v_title,
+                                    'top_video_views': v_views,
+                                    'top_video_views_formatted': f"{v_views:,} views",
+                                    'top_video_duration': dur_fmt,
+                                    'top_video_url': v_url,
+                                    'top_video_thumbnail': thumb,
+                                    'total_views': v_views,
+                                    'video_count_in_top': 1
+                                }
+                            else:
+                                channels_map[ch_key]['total_views'] += v_views
+                                channels_map[ch_key]['video_count_in_top'] += 1
+                                if v_views > channels_map[ch_key]['top_video_views']:
+                                    channels_map[ch_key]['top_video_id'] = vid
+                                    channels_map[ch_key]['top_video_title'] = v_title
+                                    channels_map[ch_key]['top_video_views'] = v_views
+                                    channels_map[ch_key]['top_video_views_formatted'] = f"{v_views:,} views"
+                                    channels_map[ch_key]['top_video_duration'] = dur_fmt
+                                    channels_map[ch_key]['top_video_url'] = v_url
+                                    channels_map[ch_key]['top_video_thumbnail'] = thumb
         except Exception as ex_api:
             logger.warning(f"Lỗi truy vấn YouTube API search cho '{kw}': {ex_api}")
 
-    # 2. Fallback siêu tốc qua yt-dlp ytsearch25 (Chạy trực tiếp thay vì cào HTML)
-    try:
-        ydl_opts = {
-            'quiet': True,
-            'skip_download': True,
-            'extract_flat': True,
-            'socket_timeout': 6,
-            'playlist_items': '1-25',
-            'http_headers': {
-                'Accept-Language': f"{hl_lang}-{gl_country},{hl_lang};q=0.9,en;q=0.8"
-            }
+    # 2. Bổ sung hoặc Quét trực tiếp bằng Web Engine (Đảm bảo luôn có đủ 20-25 kênh chất lượng cao)
+    if len(channels_map) < 20:
+        direct_headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept-Language': f"{hl_lang}-{gl_country},{hl_lang};q=0.9,en;q=0.8",
+            'Cookie': f"PREF=gl={gl_country}&hl={hl_lang};"
         }
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            search_res = ydl.extract_info(f"ytsearch25:{kw}", download=False)
-            if search_res and search_res.get('entries'):
-                for e in search_res['entries']:
-                    if not e:
-                        continue
-                    v_id = e.get('id')
-                    if not v_id:
-                        continue
-                    v_title = e.get('title') or ''
-                    v_channel = e.get('channel') or e.get('uploader') or ''
-                    dur = e.get('duration') or 0
-                    v_url = e.get('url') or f"https://www.youtube.com/watch?v={v_id}"
+        encoded_kw = requests.utils.quote(kw)
+        search_urls = [
+            f"https://www.youtube.com/results?search_query={encoded_kw}&sp=CAMSAhAB&gl={gl_country}&hl={hl_lang}",
+            f"https://www.youtube.com/results?search_query={encoded_kw}&gl={gl_country}&hl={hl_lang}",
+            f"https://www.youtube.com/results?search_query={encoded_kw}%20tips&gl={gl_country}&hl={hl_lang}"
+        ]
 
-                    # Lọc bỏ Livestream
-                    if e.get('live_status') in ['is_live', 'is_upcoming', 'was_live', 'post_live']:
-                        continue
-                    if any(kw_str in v_title.lower() for kw_str in ['restream', 'livestream', 'live stream', 'trực tiếp', '🔴', 'buổi stream', 'phát trực tiếp']):
-                        continue
+        for s_url in search_urls:
+            if len(channels_map) >= 30:
+                break
+            try:
+                web_resp = http_session.get(s_url, headers=direct_headers, timeout=6)
+                if web_resp.status_code == 200:
+                    m = re.search(r'ytInitialData\s*=\s*({.+?});</script>', web_resp.text)
+                    if not m:
+                        m = re.search(r'ytInitialData\s*=\s*({.+?});', web_resp.text)
+                    if m:
+                        data = json.loads(m.group(1))
+                        raw_vrs = []
+                        def extract_vrs(obj):
+                            if isinstance(obj, dict):
+                                if 'videoRenderer' in obj:
+                                    raw_vrs.append(obj['videoRenderer'])
+                                for val in obj.values():
+                                    extract_vrs(val)
+                            elif isinstance(obj, list):
+                                for it in obj:
+                                    extract_vrs(it)
+                        extract_vrs(data)
 
-                    # LỌC NGHIÊM NGẶT: Tuyệt đối không lấy Shorts hoặc Kênh Shorts
-                    if is_short_video_or_channel(title=v_title, channel_title=v_channel, duration_sec=dur, url=v_url):
-                        continue
+                        for vr in raw_vrs:
+                            v_id = vr.get('videoId')
+                            if not v_id or v_id in seen_video_ids:
+                                continue
 
-                    thumb = ""
-                    thumbs = e.get('thumbnails', [])
-                    if thumbs:
-                        thumb = thumbs[-1].get('url') or thumbs[0].get('url', '')
-                    elif v_id:
-                        thumb = f"https://i.ytimg.com/vi/{v_id}/hqdefault.jpg"
+                            runs = vr.get('ownerText', {}).get('runs', [{}])
+                            ch_name = runs[0].get('text', '').strip()
+                            if not ch_name:
+                                continue
 
-                    yt_results.append({
-                        'id': v_id,
-                        'title': v_title,
-                        'channel': v_channel,
-                        'views': e.get('view_count') or 0,
-                        'url': v_url,
-                        'thumbnail': thumb,
-                        'duration_seconds': dur,
-                        'duration_formatted': format_duration_display(dur)
-                    })
-                    if len(yt_results) >= 6:
-                        break
-    except Exception as yt_err:
-        logger.warning(f"Lỗi khi search YouTube yt-dlp cho từ khóa '{kw}': {yt_err}")
+                            t = ''.join(r.get('text', '') for r in vr.get('title', {}).get('runs', [])).strip()
+                            if 'shorts' in t.lower() or 'shorts' in ch_name.lower():
+                                continue
 
-    return yt_results
+                            dur_str = vr.get('lengthText', {}).get('simpleText', '')
+                            dur_sec = parse_duration_str_to_seconds(dur_str)
+                            v_url = f"https://www.youtube.com/watch?v={v_id}"
+
+                            if is_short_video_or_channel(title=t, channel_title=ch_name, duration_sec=dur_sec, url=v_url):
+                                continue
+
+                            seen_video_ids.add(v_id)
+                            ch_id = runs[0].get('navigationEndpoint', {}).get('browseEndpoint', {}).get('browseId', '')
+                            ch_handle = runs[0].get('navigationEndpoint', {}).get('browseEndpoint', {}).get('canonicalBaseUrl', '')
+                            views_str = vr.get('viewCountText', {}).get('simpleText', '')
+                            v_cnt = parse_views_str_local(views_str)
+
+                            thumbs = vr.get('thumbnail', {}).get('thumbnails', [])
+                            thumb_url = thumbs[-1].get('url') if thumbs else f"https://i.ytimg.com/vi/{v_id}/hqdefault.jpg"
+
+                            avatar_nodes = vr.get('channelThumbnailSupportedRenderers', {}).get('channelThumbnailWithLinkRenderer', {}).get('thumbnail', {}).get('thumbnails', [])
+                            avatar = avatar_nodes[-1].get('url') if avatar_nodes else ''
+
+                            video_obj = {
+                                'id': v_id,
+                                'title': t,
+                                'channel': ch_name,
+                                'channel_id': ch_id,
+                                'channel_handle': ch_handle,
+                                'views': v_cnt,
+                                'views_formatted': views_str or f"{v_cnt:,} views",
+                                'url': v_url,
+                                'thumbnail': thumb_url,
+                                'duration_seconds': dur_sec,
+                                'duration_formatted': dur_str or format_duration_display(dur_sec)
+                            }
+                            videos_list.append(video_obj)
+
+                            ch_key = ch_id if ch_id else ch_name.lower()
+                            ch_url = f"https://www.youtube.com{ch_handle}" if ch_handle else (f"https://www.youtube.com/channel/{ch_id}" if ch_id else f"https://www.youtube.com/results?search_query={requests.utils.quote(ch_name)}")
+                            if ch_key not in channels_map:
+                                channels_map[ch_key] = {
+                                    'channel_id': ch_id,
+                                    'channel_name': ch_name,
+                                    'channel_handle': ch_handle or f"@{ch_name.replace(' ', '')}",
+                                    'avatar': avatar,
+                                    'channel_url': ch_url,
+                                    'top_video_id': v_id,
+                                    'top_video_title': t,
+                                    'top_video_views': v_cnt,
+                                    'top_video_views_formatted': views_str or f"{v_cnt:,} views",
+                                    'top_video_duration': dur_str,
+                                    'top_video_url': v_url,
+                                    'top_video_thumbnail': thumb_url,
+                                    'total_views': v_cnt,
+                                    'video_count_in_top': 1
+                                }
+                            else:
+                                channels_map[ch_key]['total_views'] += v_cnt
+                                channels_map[ch_key]['video_count_in_top'] += 1
+                                if avatar and not channels_map[ch_key].get('avatar'):
+                                    channels_map[ch_key]['avatar'] = avatar
+                                if v_cnt > channels_map[ch_key]['top_video_views']:
+                                    channels_map[ch_key]['top_video_id'] = v_id
+                                    channels_map[ch_key]['top_video_title'] = t
+                                    channels_map[ch_key]['top_video_views'] = v_cnt
+                                    channels_map[ch_key]['top_video_views_formatted'] = views_str or f"{v_cnt:,} views"
+                                    channels_map[ch_key]['top_video_duration'] = dur_str
+                                    channels_map[ch_key]['top_video_url'] = v_url
+                                    channels_map[ch_key]['top_video_thumbnail'] = thumb_url
+            except Exception as e:
+                logger.warning(f"Lỗi direct scraping khi tìm kênh cho '{kw}': {e}")
+
+    # Sắp xếp kênh theo lượt xem video đỉnh cao nhất của từ khóa đó
+    sorted_channels = sorted(channels_map.values(), key=lambda x: x['top_video_views'], reverse=True)
+    sorted_videos = sorted(videos_list, key=lambda x: x.get('views', 0), reverse=True)
+    return sorted_videos[:12], sorted_channels[:25]
+
+def fetch_top_youtube_videos(kw: str, gl_country: str, hl_lang: str, api_key: Optional[str]) -> List[dict]:
+    """Tương thích ngược: Lấy top video cho từ khóa."""
+    vids, _ = fetch_top_keyword_channels_and_videos(kw, gl_country, hl_lang, api_key)
+    return vids
 
 @app.post("/api/analyze/keyword")
 def analyze_keyword(req: KeywordAnalysisRequest):
@@ -605,11 +728,11 @@ def analyze_keyword(req: KeywordAnalysisRequest):
         with ThreadPoolExecutor(max_workers=3) as executor:
             fut_trend = executor.submit(trend_service.get_keyword_trend, kw, geo=geo)
             fut_suggest = executor.submit(fetch_google_suggestions, kw, hl_lang, gl_country)
-            fut_yt = executor.submit(fetch_top_youtube_videos, kw, gl_country, hl_lang, api_key)
+            fut_yt = executor.submit(fetch_top_keyword_channels_and_videos, kw, gl_country, hl_lang, api_key)
 
             trend_res = fut_trend.result()
             suggest_tags_raw = fut_suggest.result()
-            yt_results = fut_yt.result()
+            yt_results, top_channels = fut_yt.result()
 
         suggested_tags = [kw]
         seen_tags = {kw.lower()}
@@ -682,7 +805,8 @@ def analyze_keyword(req: KeywordAnalysisRequest):
             "recommended_tags": suggested_tags[:25],
             "long_tail_keywords": long_tail,
             "related_queries": trend_res.get("related_queries", []),
-            "top_youtube_videos": yt_results
+            "top_youtube_videos": yt_results,
+            "top_channels": top_channels
         }
         set_to_cache(_KEYWORD_ANALYSIS_CACHE, cache_key, final_result, ttl_seconds=900)
         return final_result
