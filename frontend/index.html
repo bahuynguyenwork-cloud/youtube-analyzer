@@ -1106,6 +1106,10 @@
             <option value="active_channels" selected>🟢 Ưu Tiên Kênh Ổn Định & Còn Sống</option>
             <option value="all_channels">🌐 Tất Cả Kênh Xu Hướng</option>
           </select>
+          <select id="feed-unique-channel" onchange="loadTrendingFeed()" class="w-full lg:w-auto px-3.5 py-2.5 bg-slate-900/90 border border-cyan-500/30 text-cyan-300 rounded-xl text-xs focus:ring-2 focus:ring-cyan-500 font-semibold" title="Khử trùng lặp kênh để tối đa hóa ý tưởng sáng tạo">
+            <option value="true" selected>✨ 1 Video / 1 Kênh (Đa Dạng)</option>
+            <option value="false">👥 Cho Phép Trùng Kênh</option>
+          </select>
           <button onclick="loadTrendingFeed(true)" title="Làm mới dữ liệu xu hướng ngay" class="w-full sm:col-span-2 lg:w-auto px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 border border-white/10 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center space-x-1.5 transition">
             <svg class="w-3.5 h-3.5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
             <span>Làm Mới</span>
@@ -3601,12 +3605,14 @@
       const timeRangeEl = document.getElementById('feed-time-range');
       const durationEl = document.getElementById('feed-duration');
       const modeEl = document.getElementById('feed-mode');
+      const uniqueEl = document.getElementById('feed-unique-channel');
       
       const country = countryEl ? countryEl.value : 'US';
       const category = categoryEl ? categoryEl.value : 'all';
       const timeRange = timeRangeEl ? timeRangeEl.value : '7d';
       const duration = durationEl ? durationEl.value : 'long_form';
       const mode = modeEl ? modeEl.value : 'active_channels';
+      const isUnique = uniqueEl ? uniqueEl.value : 'true';
 
       const el = document.getElementById('trending-feed-list');
       if (!el) return;
@@ -3619,11 +3625,11 @@
         'all': 'mọi thời đại'
       }[timeRange] || '7 ngày qua';
 
-      el.innerHTML = `<div class="col-span-3 text-center py-16 text-slate-400 text-xs space-y-3"><div class="w-8 h-8 rounded-full border-2 border-rose-500/20 border-t-rose-500 animate-spin mx-auto"></div><p class="font-medium text-slate-300">Đang quét video xu hướng trong ${timeRangeText}...</p><p class="text-[11px] text-slate-500">Tự động loại bỏ video Shorts, ưu tiên các kênh ổn định</p></div>`;
+      el.innerHTML = `<div class="col-span-3 text-center py-16 text-slate-400 text-xs space-y-3"><div class="w-8 h-8 rounded-full border-2 border-rose-500/20 border-t-rose-500 animate-spin mx-auto"></div><p class="font-medium text-slate-300">Đang quét video xu hướng trong ${timeRangeText}...</p><p class="text-[11px] text-slate-500">Tự động loại bỏ video Shorts, ưu tiên các kênh ổn định & khử trùng lặp kênh</p></div>`;
 
       try {
         const refreshParam = isRefresh ? '&refresh=true' : '';
-        const res = await fetch(`/api/trending/feed?country=${country}&category=${category}&time_range=${timeRange}&duration=${duration}&feed_mode=${mode}${refreshParam}`);
+        const res = await fetch(`/api/trending/feed?country=${country}&category=${category}&time_range=${timeRange}&duration=${duration}&feed_mode=${mode}&unique_channel=${isUnique}${refreshParam}`);
         const data = await res.json();
         const videos = data.videos || data.trending_videos || [];
         el.innerHTML = '';

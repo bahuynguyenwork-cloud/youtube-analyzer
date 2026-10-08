@@ -8,7 +8,7 @@ import logging
 import requests
 import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Union
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -1530,6 +1530,55 @@ def format_published_age(pub_iso: str) -> str:
     except Exception:
         return pub_iso[:10]
 
+def compute_trending_score(view_count: int, pub_iso: str = "", pub_age_str: str = "") -> float:
+    """
+    Tính điểm xu hướng bứt phá (Trending Velocity Score):
+    Kết hợp giữa tổng lượt xem và hệ số gia tốc thời gian đăng (Freshness Multiplier).
+    Video mới đăng bùng nổ view trong 24h-7d được ưu tiên xếp hạng cao.
+    """
+    v = max(1, view_count)
+    multiplier = 1.0
+    
+    if pub_iso:
+        try:
+            dt = datetime.datetime.fromisoformat(pub_iso.replace("Z", "+00:00"))
+            now = datetime.datetime.now(datetime.timezone.utc)
+            hours_old = max(1, (now - dt).total_seconds() / 3600)
+            
+            if hours_old <= 24:
+                multiplier = 2.5   # Bùng nổ trong 24h
+            elif hours_old <= 72:
+                multiplier = 2.0   # Bùng nổ trong 3 ngày
+            elif hours_old <= 168:
+                multiplier = 1.5   # Bùng nổ trong 7 ngày
+            elif hours_old <= 720:
+                multiplier = 1.2   # Trong 30 ngày
+            elif hours_old <= 2160:
+                multiplier = 1.05  # Trong 90 ngày
+            else:
+                multiplier = 0.95  # Cũ hơn
+        except Exception:
+            pass
+    elif pub_age_str:
+        p = pub_age_str.lower()
+        if any(w in p for w in ['giờ', 'hour', 'phút', 'min', 'vừa đăng']):
+            multiplier = 2.5
+        elif any(w in p for w in ['1 ngày', '1 day', '2 ngày', '2 days']):
+            multiplier = 2.0
+        elif any(w in p for w in ['ngày', 'day', 'tuần', 'week', 'wk']):
+            multiplier = 1.5
+        elif any(w in p for w in ['tháng', 'month', 'mo']):
+            multiplier = 1.15
+            
+    return v * multiplier
+
+def get_channel_key(ch_id: str, ch_name: str) -> str:
+    """Tạo khóa định danh duy nhất cho kênh để khử trùng lặp chính xác."""
+    if ch_id and ch_id.strip().startswith(('UC', 'uc', '@')):
+        return ch_id.strip().lower()
+    clean = re.sub(r'[^a-zA-Z0-9\u0600-\u06FF\u0400-\u04FF\u4E00-\u9FFF\u3040-\u30FF\uAC00-\uD7AF]', '', ch_name.lower())
+    return clean or ch_name.strip().lower()
+
 def is_video_matching_country(item: dict, ch_info: dict, target_geo: str) -> bool:
     """Kiểm tra nghiêm ngặt ngôn ngữ, bảng chữ cái và quốc gia kênh để ngăn chặn video ngoại lai."""
     geo = (target_geo or 'US').upper().strip()
@@ -1740,6 +1789,7 @@ def get_trending_feed(
     time_range: Optional[str] = "7d",
     duration: Optional[str] = "long_form",
     feed_mode: Optional[str] = "active_channels",
+    unique_channel: Optional[Union[bool, str]] = True,
     refresh: Optional[bool] = False
 ):
     geo_code = (country or geo or "US").upper()
@@ -1747,9 +1797,10 @@ def get_trending_feed(
     t_range = (time_range or "7d").lower()
     dur_filter = (duration or "long_form").lower()
     mode = (feed_mode or "active_channels").lower()
+    is_unique = str(unique_channel).lower() in ["true", "1", "yes"] if unique_channel is not None else True
     api_key = get_default_api_key()
 
-    cache_key = f"{geo_code}_{cat}_{t_range}_{dur_filter}_{mode}"
+    cache_key = f"{geo_code}_{cat}_{t_range}_{dur_filter}_{mode}_{is_unique}"
     if not refresh:
         cached_feed = get_from_cache(_TRENDING_FEED_CACHE, cache_key)
         if cached_feed:
@@ -1968,6 +2019,7 @@ def get_trending_feed(
                         continue
 
                     thumb = (snippet.get("thumbnails", {}).get("high") or snippet.get("thumbnails", {}).get("medium") or {}).get("url") or f"https://i.ytimg.com/vi/{v_id}/hqdefault.jpg"
+                    score = compute_trending_score(view_cnt, pub_iso=pub_at)
 
                     videos.append({
                         "video_id": v_id,
@@ -1983,6 +2035,7 @@ def get_trending_feed(
                         "is_active_channel": is_active_channel,
                         "view_count": view_cnt,
                         "views": view_cnt,
+                        "trending_score": score,
                         "duration_seconds": dur_seconds,
                         "duration_formatted": format_duration_display(dur_seconds),
                         "published_at": pub_at[:10],
@@ -1991,8 +2044,8 @@ def get_trending_feed(
                         "thumbnail": thumb
                     })
 
-                # Sắp xếp theo view count giảm dần để top video bứt phá nhất lên đầu
-                videos.sort(key=lambda x: x["view_count"], reverse=True)
+                # Sắp xếp theo Trending Score giảm dần để ưu tiên video bứt phá lan truyền
+                videos.sort(key=lambda x: x.get("trending_score", x.get("view_count", 0)), reverse=True)
 
         except Exception as api_err:
             logger.warning(f"Lỗi truy vấn trending qua YouTube Data API: {api_err}")
@@ -2039,17 +2092,15 @@ def get_trending_feed(
             }
             hl_code = GEO_LANG_MAP.get(geo_code, "en")
 
-            # Tạo danh sách các từ khóa tìm kiếm: từ khóa chính + biến thể ngắn gọn
+            # Tạo danh sách các từ khóa tìm kiếm: từ khóa chính + biến thể chất lượng
             candidate_queries = [search_query]
-            
-            # Tự động thêm các biến thể từ khóa ngắn hơn nếu từ khóa hiện tại dài hơn 1 từ
             words = search_query.split()
-            if len(words) > 1:
+            if len(words) >= 3:
+                candidate_queries.append(' '.join(words[:2]))
+                candidate_queries.append(' '.join(words[-2:]))
+            elif len(words) == 2:
                 candidate_queries.append(words[0])
-                if len(words) >= 2:
-                    candidate_queries.append(' '.join(words[:2]))
-                if len(words) >= 3:
-                    candidate_queries.append(words[1])
+                candidate_queries.append(words[1])
 
             if cat == "all":
                 secondary_queries = {
@@ -2074,8 +2125,10 @@ def get_trending_feed(
             }
             
             existing_vids = set()
+            channel_candidate_count = defaultdict(int)
             for cand_query in candidate_queries:
-                if len(videos) >= 18:
+                # Quét rộng đủ nguồn ứng viên đa kênh để loại trừ trùng lặp
+                if len(videos) >= 48:
                     break
                 search_url = f"https://www.youtube.com/results?search_query={requests.utils.quote(cand_query)}&sp={sp_param}"
                 try:
@@ -2109,13 +2162,28 @@ def get_trending_feed(
                                 pub_age = vr.get('publishedTimeText', {}).get('simpleText', '')
                                 views_str = vr.get('viewCountText', {}).get('simpleText', '')
                                 dur_str = vr.get('lengthText', {}).get('simpleText', '')
-                                ch_name = ''.join(r.get('text', '') for r in vr.get('ownerText', {}).get('runs', [])) or 'YouTube Creator'
+                                
+                                runs = vr.get('ownerText', {}).get('runs', [])
+                                if runs:
+                                    first_run_text = runs[0].get('text', '').strip()
+                                    full_text = ''.join(r.get('text', '') for r in runs).strip()
+                                    if ' and ' in full_text or ' & ' in full_text:
+                                        ch_name = first_run_text or full_text
+                                    else:
+                                        ch_name = full_text or 'YouTube Creator'
+                                else:
+                                    ch_name = 'YouTube Creator'
                                 
                                 ch_id = ''
                                 try:
                                     ch_id = vr.get('ownerText', {}).get('runs', [{}])[0].get('navigationEndpoint', {}).get('browseEndpoint', {}).get('browseId', '')
                                 except Exception:
                                     pass
+
+                                # Lọc kênh: Giới hạn tối đa 2 video ứng viên từ cùng 1 kênh trong raw pool
+                                ch_key = get_channel_key(ch_id, ch_name)
+                                if is_unique and channel_candidate_count[ch_key] >= 2:
+                                    continue
 
                                 # Kiểm tra livestream
                                 is_live = any(b.get('metadataBadgeRenderer', {}).get('label') in ['TRỰC TIẾP', 'LIVE'] for b in vr.get('badges', []))
@@ -2165,7 +2233,9 @@ def get_trending_feed(
                                 thumb_url = thumbs[-1].get('url') if thumbs else f"https://i.ytimg.com/vi/{v_id}/hqdefault.jpg"
 
                                 is_ver = any("BADGE_STYLE_TYPE_VERIFIED" in str(b) for b in vr.get('ownerBadges', []))
+                                score = compute_trending_score(v_cnt, pub_age_str=pub_age)
 
+                                channel_candidate_count[ch_key] += 1
                                 existing_vids.add(v_id)
                                 videos.append({
                                     "video_id": v_id,
@@ -2180,6 +2250,7 @@ def get_trending_feed(
                                     "is_active_channel": True,
                                     "view_count": v_cnt,
                                     "views": v_cnt,
+                                    "trending_score": score,
                                     "duration_seconds": dur_sec,
                                     "duration_formatted": dur_str or format_duration_display(dur_sec),
                                     "published_at": "",
@@ -2292,6 +2363,7 @@ def get_trending_feed(
                                 thumb = f"https://i.ytimg.com/vi/{v_id}/hqdefault.jpg"
 
                             f_subs = int(e.get('channel_follower_count') or 0)
+                            score = compute_trending_score(v_cnt, pub_iso=pub_str, pub_age_str=age_str)
                             videos.append({
                                 "video_id": v_id,
                                 "id": v_id,
@@ -2304,6 +2376,7 @@ def get_trending_feed(
                                 "is_active_channel": True,
                                 "view_count": v_cnt,
                                 "views": v_cnt,
+                                "trending_score": score,
                                 "duration_seconds": dur,
                                 "duration_formatted": format_duration_display(dur),
                                 "published_at": pub_str,
@@ -2312,9 +2385,43 @@ def get_trending_feed(
                                 "thumbnail": thumb
                             })
 
-            videos.sort(key=lambda x: x["view_count"], reverse=True)
+            videos.sort(key=lambda x: x.get("trending_score", x.get("view_count", 0)), reverse=True)
         except Exception as yt_err:
             logger.error(f"Lỗi khi lấy trending fallback: {yt_err}")
+
+    # 1. Sắp xếp toàn bộ video theo Trending Velocity Score giảm dần (ưu tiên bứt phá & tốc độ lan truyền)
+    videos.sort(key=lambda x: x.get("trending_score", x.get("view_count", 0)), reverse=True)
+
+    # 2. KHỬ TRÙNG LẶP KÊNH (Channel Deduplication): Mỗi kênh chỉ hiển thị duy nhất 1 video tốt nhất
+    if is_unique:
+        unique_videos = []
+        seen_channels = set()
+        for v in videos:
+            cid = (v.get("channel_id") or "").strip().lower()
+            cname = (v.get("channel_title") or v.get("channel") or "").strip().lower()
+            cname_norm = re.sub(r'[^a-zA-Z0-9\u0600-\u06FF\u0400-\u04FF\u4E00-\u9FFF\u3040-\u30FF\uAC00-\uD7AF]', '', cname)
+            
+            is_dup = False
+            if cid and cid.startswith(('uc', '@')) and cid in seen_channels:
+                is_dup = True
+            elif cname_norm and cname_norm in seen_channels:
+                is_dup = True
+            elif cname and cname in seen_channels:
+                is_dup = True
+                
+            if is_dup:
+                continue
+                
+            if cid and cid.startswith(('uc', '@')):
+                seen_channels.add(cid)
+            if cname_norm:
+                seen_channels.add(cname_norm)
+            if cname:
+                seen_channels.add(cname)
+                
+            unique_videos.append(v)
+            
+        videos = unique_videos
 
     final_feed = {
         "success": True,
@@ -2324,6 +2431,7 @@ def get_trending_feed(
         "time_range": t_range,
         "duration_filter": dur_filter,
         "mode": mode,
+        "unique_channel": is_unique,
         "total": len(videos),
         "videos": videos[:24],
         "trending_videos": videos[:24]
