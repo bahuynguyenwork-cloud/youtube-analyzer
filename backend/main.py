@@ -7,6 +7,7 @@ import json
 import logging
 import requests
 import concurrent.futures
+from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from typing import Optional, Dict, Any, List, Union
 from fastapi import FastAPI, HTTPException, Request
@@ -1977,9 +1978,10 @@ def get_trending_feed(
                     if dur_filter == "deep_dive" and dur_seconds < 1200:
                         continue
 
-                    # 4. LỌC VIEW TỐI THIỂU: Đã là xu hướng (Trending) thì không thể chỉ có vài chục view
+                    # 4. LỌC VIEW TỐI THIỂU: Đảm bảo có tương tác nhưng không chặn video vừa mới lên
                     view_cnt = int(stats.get("viewCount", 0))
-                    if t_range in ["7d", "24h", "48h", "30d", "90d"] and view_cnt < 500:
+                    min_views = 50 if t_range == "24h" else 150
+                    if t_range in ["7d", "24h", "48h", "30d", "90d"] and view_cnt < min_views:
                         continue
 
                     # Kiểm tra kênh hoạt động & ổn định
@@ -1995,7 +1997,7 @@ def get_trending_feed(
                     subs_count = int(ch_stats.get("subscriberCount") or 0)
                     total_vids = int(ch_stats.get("videoCount") or 0)
                     
-                    is_active_channel = (subs_count >= 1000 and total_vids >= 5) or (view_cnt >= 5000)
+                    is_active_channel = (subs_count >= 300 and total_vids >= 3) or (view_cnt >= 1000) or (subs_count == 0 and view_cnt >= 500)
                     is_very_stable = subs_count >= 10000 and total_vids >= 20
                     
                     if is_very_stable:
@@ -2050,8 +2052,9 @@ def get_trending_feed(
         except Exception as api_err:
             logger.warning(f"Lỗi truy vấn trending qua YouTube Data API: {api_err}")
 
-    # 2. Nếu không có API Key hoặc API trả về rỗng, dùng fallback thông minh qua URL lọc sp chính xác của YouTube
-    if not videos:
+    # 2. Nếu không có API Key hoặc số lượng video từ API chưa đủ (ít hơn 16),
+    # tự động bổ sung thêm video bằng Web Engine thông minh qua URL lọc sp của YouTube
+    if len(videos) < 16:
         try:
             fallback_country_queries = {
                 "US": "trending usa",
@@ -2098,6 +2101,7 @@ def get_trending_feed(
             if len(words) >= 3:
                 candidate_queries.append(' '.join(words[:2]))
                 candidate_queries.append(' '.join(words[-2:]))
+                candidate_queries.append(words[0])
             elif len(words) == 2:
                 candidate_queries.append(words[0])
                 candidate_queries.append(words[1])
@@ -2124,8 +2128,12 @@ def get_trending_feed(
                 'Accept-Language': f"{hl_code}-{geo_code},{hl_code};q=0.9,en;q=0.8"
             }
             
-            existing_vids = set()
+            existing_vids = {v["video_id"] for v in videos}
             channel_candidate_count = defaultdict(int)
+            for v in videos:
+                k = get_channel_key(v.get("channel_id", ""), v.get("channel_title", ""))
+                channel_candidate_count[k] += 1
+
             for cand_query in candidate_queries:
                 # Quét rộng đủ nguồn ứng viên đa kênh để loại trừ trùng lặp
                 if len(videos) >= 48:
@@ -2202,15 +2210,12 @@ def get_trending_feed(
 
                                 # Lượt xem
                                 v_cnt = parse_views_str(views_str)
-                                if t_range in ["7d", "24h", "48h", "30d", "90d"] and v_cnt < 200:
+                                min_v = 50 if t_range == "24h" else 150
+                                if t_range in ["7d", "24h", "48h", "30d", "90d"] and v_cnt < min_v:
                                     continue
 
                                 # KIỂM TRA THỜI GIAN NGHIÊM NGẶT: Không bao giờ cho phép video cũ xuất hiện
                                 if not is_published_age_matching_range(pub_age, t_range):
-                                    continue
-
-                                # Loại bỏ các video/phim cũ có năm phát hành cũ trong tiêu đề khi lọc ngắn hạn
-                                if t_range in ["24h", "48h", "7d", "30d", "90d"] and re.search(r'\b(19\d\d|200\d|201\d|202[0-3])\b', t):
                                     continue
 
                                 # Lọc quốc gia và ngôn ngữ
@@ -2261,8 +2266,8 @@ def get_trending_feed(
                 except Exception as direct_err:
                     logger.warning(f"Direct trending scraping failed for {cand_query}: {direct_err}")
 
-            # BƯỚC 2.2: Nếu direct scraping chưa đủ video (ít hơn 4), dùng yt-dlp trên đúng URL đã gắn sp filter
-            if len(videos) < 4:
+            # BƯỚC 2.2: Nếu direct scraping chưa đủ video (ít hơn 6), dùng yt-dlp trên đúng URL đã gắn sp filter
+            if len(videos) < 6:
                 ydl_opts = {
                     'quiet': True,
                     'skip_download': True,
@@ -2291,9 +2296,6 @@ def get_trending_feed(
                             if is_short_video_or_channel(title=t, channel_title=ch_name, duration_sec=dur, url=e.get('url', '')):
                                 continue
                             if dur_filter == "deep_dive" and dur > 0 and dur < 1200:
-                                continue
-
-                            if t_range in ["24h", "48h", "7d"] and re.search(r'\b(19\d\d|200\d|201\d|202[0-3])\b', t):
                                 continue
 
                             if e.get('live_status') in ['is_live', 'is_upcoming', 'was_live', 'post_live']:
@@ -2352,7 +2354,8 @@ def get_trending_feed(
                                     age_str = "🔥 Xu hướng gần đây"
 
                             v_cnt = int(e.get('view_count') or 0)
-                            if t_range in ["7d", "24h", "48h", "30d", "90d"] and v_cnt < 300:
+                            min_v = 50 if t_range == "24h" else 150
+                            if t_range in ["7d", "24h", "48h", "30d", "90d"] and v_cnt < min_v:
                                 continue
 
                             thumb = ""
