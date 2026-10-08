@@ -174,6 +174,8 @@
                 <option value="PH">🇵🇭 Khán giả Philippines (PH)</option>
                 <option value="RU">🇷🇺 Khán giả Nga (RU)</option>
                 <option value="PL">🇵🇱 Khán giả Ba Lan (PL)</option>
+                <option value="ES">🇪🇸 Khán giả Tây Ban Nha (ES)</option>
+                <option value="PT">🇵🇹 Khán giả Bồ Đào Nha (PT)</option>
                 <option value="BR">🇧🇷 Khán giả Brazil (BR)</option>
                 <option value="VN">🇻🇳 Khán giả Việt Nam (VN)</option>
                 <option value="">🌐 Toàn Cầu (Global)</option>
@@ -945,6 +947,8 @@
             <option value="PH">Philippines (PH)</option>
             <option value="RU">Nga (RU)</option>
             <option value="PL">Ba Lan (PL)</option>
+            <option value="ES">Tây Ban Nha (ES)</option>
+            <option value="PT">Bồ Đào Nha (PT)</option>
             <option value="VN">Việt Nam (VN)</option>
           </select>
           <button type="submit" class="px-6 py-3 bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-rose-600/30 transition">Kiểm Tra</button>
@@ -1050,6 +1054,8 @@
             <option value="PH">🇵🇭 Philippines (PH)</option>
             <option value="RU">🇷🇺 Nga (RU)</option>
             <option value="PL">🇵🇱 Ba Lan (PL)</option>
+            <option value="ES">🇪🇸 Tây Ban Nha (ES)</option>
+            <option value="PT">🇵🇹 Bồ Đào Nha (PT)</option>
             <option value="BR">🇧🇷 Brazil (BR)</option>
             <option value="CA">🇨🇦 Canada (CA)</option>
             <option value="AU">🇦🇺 Úc (AU)</option>
@@ -1296,6 +1302,7 @@
       "DE": "Đức (DE)", "FR": "Pháp (FR)", "IT": "Ý (IT)", "IN": "Ấn Độ (IN)",
       "ID": "Indonesia (ID)", "TH": "Thái Lan (TH)", "PH": "Philippines (PH)", "RU": "Nga (RU)",
       "PL": "Ba Lan (PL)", "IR": "Iran (IR)",
+      "ES": "Tây Ban Nha (ES)", "PT": "Bồ Đào Nha (PT)",
       "BR": "Brazil (BR)", "CA": "Canada (CA)", "AU": "Úc (AU)", "VN": "Việt Nam (VN)", "": "Toàn Cầu"
     };
 
@@ -1305,6 +1312,7 @@
       "JP": 2.5, "KR": 2.4, "VN": 0.85, "BR": 0.95, "IN": 0.65,
       "ID": 0.75, "TH": 0.95, "PH": 0.85, "RU": 1.2,
       "PL": 1.9, "IR": 0.8,
+      "ES": 2.5, "PT": 2.2,
       "GLOBAL": 2.2
     };
 
@@ -3329,6 +3337,30 @@
         { tag: "sztuczna inteligencja narzędzia ai", vi: "Công nghệ AI & công cụ trí tuệ nhân tạo", niche: "🤖 Công Nghệ", badge: "🚀 Mới" },
         { tag: "stoicyzm mądrość życiowa filozofia", vi: "Triết lý sống, khắc kỷ & thông tuệ", niche: "📜 Triết Lý", badge: "🌱 Chữa lành" },
         { tag: "straszne historie horror z życia wzięte", vi: "Truyện ma kinh dị rùng rợn có thật", niche: "👻 Kinh Dị", badge: "🌙 Mroczne" }
+      ],
+      "ES": [
+        { tag: "historias de la vida real podcast", vi: "Kể chuyện cuộc đời & podcast tâm sự", niche: "🎙️ Kể Chuyện Thật", badge: "🔥 Historias" },
+        { tag: "aprender ingles desde cero", vi: "Học tiếng Anh từ con số 0", niche: "🎓 Tiếng Anh", badge: "🚀 En auge" },
+        { tag: "resumen de peliculas en minutos", vi: "Tóm tắt phim ngắn gọn kịch tính", niche: "🎬 Tóm Tắt Phim", badge: "🔥 Millones" },
+        { tag: "infidelidad venganza historias reales", vi: "Ngoại tình, trả thù & câu chuyện có thật", niche: "💔 Ngoại Tình", badge: "⚡ Drama" },
+        { tag: "suegra y nuera dramas familiares", vi: "Xung đột mẹ chồng nàng dâu gay gắt", niche: "🏡 Gia Đình", badge: "⚡ Conflicto" },
+        { tag: "casos reales de crimenes misterio documental", vi: "Kỳ án True Crime có thật bí ẩn", niche: "🕵️ Kỳ Án", badge: "🚀 Misterio" },
+        { tag: "ganar dinero por internet 2026", vi: "Kiếm tiền online mới nhất 2026", niche: "💰 Tài Chính", badge: "🔥 Top" },
+        { tag: "inteligencia artificial herramientas ai", vi: "Công nghệ AI & công cụ trí tuệ nhân tạo", niche: "🤖 Công Nghệ", badge: "🚀 Nuevo" },
+        { tag: "estoicismo filosofia lecciones de vida", vi: "Triết lý sống, khắc kỷ & thông tuệ", niche: "📜 Triết Lý", badge: "🌱 Sabiduría" },
+        { tag: "historias de terror reales miedo", vi: "Truyện ma kinh dị rùng rợn có thật", niche: "👻 Kinh Dị", badge: "🌙 Terror" }
+      ],
+      "PT": [
+        { tag: "historias reais de vida podcast", vi: "Kể chuyện cuộc đời & podcast tâm sự", niche: "🎙️ Kể Chuyện Thật", badge: "🔥 Histórias" },
+        { tag: "aprender ingles do zero", vi: "Học tiếng Anh từ con số 0", niche: "🎓 Tiếng Anh", badge: "🚀 Em alta" },
+        { tag: "resumo de filmes em minutos", vi: "Tóm tắt phim ngắn gọn kịch tính", niche: "🎬 Tóm Tắt Phim", badge: "🔥 Milhões" },
+        { tag: "traicao vinganca historias reais", vi: "Ngoại tình, trả thù & câu chuyện có thật", niche: "💔 Ngoại Tình", badge: "⚡ Drama" },
+        { tag: "conflitos de sogra e nora familia", vi: "Xung đột mẹ chồng nàng dâu gay gắt", niche: "🏡 Gia Đình", badge: "⚡ Conflito" },
+        { tag: "crimes reais casos misteriosos portugal", vi: "Kỳ án True Crime bí ẩn Bồ Đào Nha", niche: "🕵️ Kỳ Án", badge: "🚀 Mistério" },
+        { tag: "ganhar dinheiro online 2026", vi: "Kiếm tiền online mới nhất 2026", niche: "💰 Tài Chính", badge: "🔥 Top" },
+        { tag: "inteligencia artificial ferramentas ai", vi: "Công nghệ AI & công cụ trí tuệ nhân tạo", niche: "🤖 Công Nghệ", badge: "🚀 Novo" },
+        { tag: "estoicismo filosofia sabedoria de vida", vi: "Triết lý sống, khắc kỷ & thông tuệ", niche: "📜 Triết Lý", badge: "🌱 Sabedoria" },
+        { tag: "historias de terror reais portugal", vi: "Truyện ma kinh dị rùng rợn Bồ Đào Nha", niche: "👻 Kinh Dị", badge: "🌙 Terror" }
       ],
       "DEFAULT": [
         { tag: "real life stories podcast", vi: "Kể chuyện đời thực & podcast tâm sự", niche: "🎙️ Real Life Stories", badge: "🔥 Breakout" },

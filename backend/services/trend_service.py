@@ -27,6 +27,8 @@ class TrendService:
             "RU": ("ru", "RU"),
             "PL": ("pl", "PL"),
             "IR": ("fa", "IR"),
+            "ES": ("es", "ES"),
+            "PT": ("pt", "PT"),
         }
 
     def detect_channel_language_and_origin(
@@ -63,7 +65,7 @@ class TrendService:
         vi_accents = len(re.findall(r'[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ]', combined, re.I))
         cyrillic_count = len(re.findall(r'[\u0400-\u04ff]', combined))
         arabic_count = len(re.findall(r'[\u0600-\u06ff]', combined))
-        polish_chars = len(re.findall(r'[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]', combined))
+        polish_chars = len(re.findall(r'[ąćęłńśźżĄĆĘŁŃŚŹŻ]', combined))
         latin_count = len(re.findall(r'[a-zA-Z]', combined))
 
         hangul_ratio = hangul_count / total_letters
@@ -76,6 +78,8 @@ class TrendService:
 
         primary_origin = "US"
         lang_name = "Tiếng Anh / Quốc tế"
+
+        vn_distinct_count = len(re.findall(r'[ăằắẳẵặâầấẩẫậêềếểễệôồốổỗộơờớởỡợưừứửữựđĐảạẻẽẹỉĩịỏọủũụỷỹỵ]', combined, re.I))
 
         # Nếu có chữ Hàn trong tên kênh, link kênh, hoặc xuất hiện chữ Hàn
         has_hangul_identity = bool(re.search(r'[\uac00-\ud7a3]', ch_title + " " + ch_url))
@@ -97,12 +101,18 @@ class TrendService:
             else:
                 primary_origin = "AE"
                 lang_name = "Ả Rập (Tiếng Arabic)"
-        elif vi_accents >= 3 or vi_ratio > 0.03:
+        elif vn_distinct_count >= 2 or (vn_distinct_count >= 1 and vi_ratio > 0.02):
             primary_origin = "VN"
             lang_name = "Việt Nam (Tiếng Việt)"
         elif polish_chars >= 2 or polish_ratio > 0.015:
             primary_origin = "PL"
             lang_name = "Ba Lan (Tiếng Ba Lan)"
+        elif bool(re.search(r'[ñÑ¿¡]|\b(?:español|espanol|pelicula|peliculas|historias|infidelidad|venganza|suegra|nuera|de|la|el|en|los|las|por|con)\b', combined, re.I)) and not bool(re.search(r'[ãõÃÕçÇ]', combined)):
+            primary_origin = "ES"
+            lang_name = "Tây Ban Nha (Tiếng Tây Ban Nha)"
+        elif bool(re.search(r'[ãõÃÕçÇ]|\b(?:português|portugues|resumo|filme|filmes|traição|traicao|vingança|vinganca|sogra|nora|história|histórias|do|da|em|um|uma)\b', combined, re.I)):
+            primary_origin = "PT"
+            lang_name = "Bồ Đào Nha (Tiếng Bồ Đào Nha)"
         elif latin_ratio > 0.40:
             primary_origin = "US"
             lang_name = "Tiếng Anh (Latin)"
@@ -203,6 +213,34 @@ class TrendService:
                 "origin_geo": origin_geo,
                 "origin_lang_name": origin_info.get("origin_lang_name", ""),
                 "reason": "Kênh sử dụng chữ Ả Rập / Ba Tư (Farsi), tệp khán giả khu biệt trong cộng đồng nói tiếng Ba Tư / Trung Đông."
+            }
+
+        # Kênh tiếng Bồ Đào Nha (PT / BR)
+        if origin_geo in ["PT", "BR"]:
+            if target in ["PT", "BR"]:
+                return {
+                    "compatibility_score": 0.88,
+                    "is_match": True,
+                    "origin_geo": origin_geo,
+                    "origin_lang_name": origin_info.get("origin_lang_name", ""),
+                    "reason": "Cùng hệ ngôn ngữ Bồ Đào Nha, độ tương thích rất cao giữa Bồ Đào Nha và Brazil."
+                }
+            return {
+                "compatibility_score": 0.20,
+                "is_match": False,
+                "origin_geo": origin_geo,
+                "origin_lang_name": origin_info.get("origin_lang_name", ""),
+                "reason": "Kênh sử dụng tiếng Bồ Đào Nha bản địa, khó tiếp cận thị trường ngoài cộng đồng nói tiếng Bồ Đào Nha."
+            }
+
+        # Kênh tiếng Tây Ban Nha (ES)
+        if origin_geo == "ES":
+            return {
+                "compatibility_score": 0.20,
+                "is_match": False,
+                "origin_geo": origin_geo,
+                "origin_lang_name": origin_info.get("origin_lang_name", ""),
+                "reason": "Kênh sử dụng tiếng Tây Ban Nha bản địa, khó tiếp cận thị trường ngoài cộng đồng nói tiếng Tây Ban Nha."
             }
 
         # Kênh tiếng Anh nhắm các nước khác (Anh, Mỹ, Ấn Độ, Philippines, v.v.)

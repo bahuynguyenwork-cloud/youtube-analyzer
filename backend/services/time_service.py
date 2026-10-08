@@ -84,6 +84,16 @@ COUNTRY_TIMEZONE_PROFILES = {
         "name": "Iran (Ba Tư)",
         "utc_offset": 3.5,  # Tehran (IRST, UTC+3:30 - chậm hơn VN 3.5 tiếng)
         "tz_name": "IRST (Tehran, UTC+3:30)",
+    },
+    "ES": {
+        "name": "Tây Ban Nha (Spain)",
+        "utc_offset": 1,  # Madrid (CET, UTC+1 - chậm hơn VN 6 tiếng)
+        "tz_name": "CET / CEST (Madrid, UTC+1)",
+    },
+    "PT": {
+        "name": "Bồ Đào Nha (Portugal)",
+        "utc_offset": 0,  # Lisbon (WET, UTC+0 - chậm hơn VN 7 tiếng)
+        "tz_name": "WET / WEST (Lisboa, UTC+0)",
     }
 }
 
