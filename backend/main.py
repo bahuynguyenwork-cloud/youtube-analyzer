@@ -2226,29 +2226,7 @@ def get_trending_feed(
                     ch_stats = ch_info.get("statistics", {})
                     subs_count = int(ch_stats.get("subscriberCount") or 0)
                     total_vids = int(ch_stats.get("videoCount") or 0)
-                    
-                    is_active_channel = (subs_count >= 300 and total_vids >= 3) or (view_cnt >= 1000) or (subs_count == 0 and view_cnt >= 500)
-                    is_very_stable = subs_count >= 10000 and total_vids >= 20
-                    
-                    if is_very_stable:
-                        channel_badge_text = "🟢 Kênh Ổn Định"
-                    elif is_active_channel:
-                        channel_badge_text = "🟢 Kênh Hoạt Động"
-                    else:
-                        channel_badge_text = "📺 Kênh Mới"
-                        
-                    if subs_count > 0:
-                        if subs_count >= 1_000_000:
-                            channel_badge_text += f" • {subs_count / 1_000_000:.1f}M Subs"
-                        elif subs_count >= 10_000:
-                            channel_badge_text += f" • {subs_count // 1_000}K Subs"
-                        elif subs_count >= 1_000:
-                            channel_badge_text += f" • {subs_count / 1_000:.1f}K Subs"
-                        else:
-                            channel_badge_text += f" • {subs_count} Subs"
-
-                    if mode == "active_channels" and not is_active_channel:
-                        continue
+                    is_ver = subs_count >= 100000 or bool(ch_info.get("snippet", {}).get("customUrl"))
 
                     thumb = (snippet.get("thumbnails", {}).get("high") or snippet.get("thumbnails", {}).get("medium") or {}).get("url") or f"https://i.ytimg.com/vi/{v_id}/hqdefault.jpg"
                     score = compute_trending_score(view_cnt, pub_iso=pub_at)
@@ -2261,16 +2239,15 @@ def get_trending_feed(
                         "channel": snippet.get("channelTitle", "YouTube Creator"),
                         "channel_id": ch_id,
                         "channel_subs": subs_count,
-                        "is_verified": subs_count >= 100000,
+                        "is_verified": is_ver,
                         "channel_videos": total_vids,
-                        "channel_badge": channel_badge_text,
-                        "is_active_channel": is_active_channel,
+                        "channel_badge": "🟢 Kênh Hoạt Động",
                         "view_count": view_cnt,
                         "views": view_cnt,
                         "trending_score": score,
                         "duration_seconds": dur_seconds,
                         "duration_formatted": format_duration_display(dur_seconds),
-                        "published_at": pub_at[:10],
+                        "published_at": pub_at[:10] if pub_at else "",
                         "published_age": format_published_age(pub_at),
                         "url": f"https://www.youtube.com/watch?v={v_id}",
                         "thumbnail": thumb
@@ -2344,17 +2321,30 @@ def get_trending_feed(
                     candidate_queries.append(words[1])
 
             if cat == "all":
-                secondary_queries = {
-                    "VN": ["podcast việt nam", "phóng sự tài liệu", "vlog việt nam"],
-                    "US": ["podcast documentary usa", "popular talk show"],
-                    "GB": ["podcast documentary uk", "popular talk show"],
-                    "DE": ["podcast reportage deutschland", "dokumentation"],
-                    "FR": ["podcast reportage france", "documentaire"],
-                    "IT": ["podcast reportage italia", "documentario"],
-                    "JP": ["ドキュメンタリー 話題", "ポッドキャスト"],
-                    "KR": ["이슈 팟캐스트", "다큐멘터리"]
-                }
-                candidate_queries.extend(secondary_queries.get(geo_code, ["podcast documentary"]))
+                if mode == "active_channels":
+                    secondary_queries = {
+                        "VN": ["podcast việt nam chính thức", "phóng sự tài liệu vtv", "talkshow uy tín việt nam"],
+                        "US": ["popular talk show official", "podcast documentary usa official", "investigative documentary"],
+                        "GB": ["popular talk show uk", "documentary podcast official", "bbc documentary series"],
+                        "DE": ["podcast reportage deutschland offiziell", "dokumentation serie"],
+                        "FR": ["podcast reportage france officiel", "documentaire serie"],
+                        "IT": ["podcast reportage italia ufficiale", "documentario serie"],
+                        "JP": ["ドキュメンタリー 公式", "人気 ポッドキャスト"],
+                        "KR": ["공식 팟캐스트", "다큐멘터리 시리즈"]
+                    }
+                    candidate_queries.extend(secondary_queries.get(geo_code, ["podcast documentary official"]))
+                else:
+                    secondary_queries = {
+                        "VN": ["trending viral việt nam", "video bứt phá triệu view", "vlog mới nổi"],
+                        "US": ["viral trending videos", "trending breakout creator", "viral challenge podcast"],
+                        "GB": ["trending viral videos uk", "breakout creator viral"],
+                        "DE": ["trends viral deutschland", "neue virale videos"],
+                        "FR": ["tendances viral france", "video buzz nouvelle"],
+                        "IT": ["tendenze virale italia", "video virali nuovi"],
+                        "JP": ["話題の動画 急上昇", "バイラル 動画"],
+                        "KR": ["인기 급상승 바이럴", "화제 영상"]
+                    }
+                    candidate_queries.extend(secondary_queries.get(geo_code, ["trending viral video"]))
 
             # Sử dụng sp filter chính thức của YouTube để lọc đúng 100% mốc thời gian và sắp xếp theo lượt xem
             sp_param = SP_MAP.get(t_range, "CAMSBAgDEAE%3D")
@@ -2640,10 +2630,112 @@ def get_trending_feed(
         except Exception as yt_err:
             logger.error(f"Lỗi khi lấy trending fallback: {yt_err}")
 
-    # 1. Sắp xếp toàn bộ video theo Trending Velocity Score giảm dần (ưu tiên bứt phá & tốc độ lan truyền)
-    videos.sort(key=lambda x: x.get("trending_score", x.get("view_count", 0)), reverse=True)
+    # 1. Bổ sung thông tin người đăng ký (Subscribers) & uy tín kênh thật qua YouTube API nếu có key
+    if videos and api_key:
+        ch_ids_to_fetch = list({v.get("channel_id") for v in videos if v.get("channel_id") and v.get("channel_id").startswith("UC")})
+        missing_cids = [cid for cid in ch_ids_to_fetch if not get_from_cache(_CHANNEL_INFO_CACHE, cid)]
+        if missing_cids:
+            try:
+                c_resp = http_session.get(f"https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id={','.join(missing_cids[:50])}&key={api_key}", timeout=4)
+                if c_resp.status_code == 200:
+                    for it in c_resp.json().get("items", []):
+                        set_to_cache(_CHANNEL_INFO_CACHE, it["id"], it, ttl_seconds=7200)
+            except Exception as ch_err:
+                logger.warning(f"Batch channel enrichment error: {ch_err}")
 
-    # 2. KHỬ TRÙNG LẶP KÊNH (Channel Deduplication): Mỗi kênh chỉ hiển thị duy nhất 1 video tốt nhất
+        for v in videos:
+            cid = v.get("channel_id")
+            if cid:
+                c_info = get_from_cache(_CHANNEL_INFO_CACHE, cid)
+                if c_info:
+                    c_stat = c_info.get("statistics", {})
+                    c_subs = int(c_stat.get("subscriberCount") or 0)
+                    c_vids = int(c_stat.get("videoCount") or 0)
+                    if c_subs > 0:
+                        v["channel_subs"] = c_subs
+                    if c_vids > 0:
+                        v["channel_videos"] = c_vids
+                    if c_subs >= 100000 or c_info.get("snippet", {}).get("customUrl"):
+                        v["is_verified"] = v.get("is_verified") or (c_subs >= 100000)
+
+    # 2. ÁP DỤNG THUẬT TOÁN XẾP HẠNG & LỌC THEO CHẾ ĐỘ (feed_mode)
+    # Mode 1: "active_channels" (🟢 Ưu Tiên Kênh Ổn Định & Còn Sống)
+    # Mode 2: "all_channels" (🌐 Tất Cả Kênh Xu Hướng - Bứt phá viral, khám phá kênh mới)
+    if mode == "active_channels":
+        stable_vids = []
+        other_vids = []
+        for v in videos:
+            subs = int(v.get("channel_subs") or 0)
+            is_ver = bool(v.get("is_verified"))
+            v_cnt = int(v.get("view_count") or 0)
+            base_score = float(v.get("trending_score") or v_cnt)
+
+            # Tiêu chí Kênh Ổn Định & Còn Sống:
+            # Ưu tiên kênh có thương hiệu, xác minh, lượng sub thực tế và hoạt động bền vững
+            is_stable = is_ver or subs >= 10000 or (subs >= 5000 and v_cnt >= 10000) or v_cnt >= 25000
+
+            if is_ver or subs >= 1_000_000:
+                authority_mult = 2.5
+                badge = f"🟢 Kênh Xác Minh • {subs / 1_000_000:.1f}M Subs" if subs >= 1_000_000 else "🟢 Kênh Xác Minh"
+            elif subs >= 100_000:
+                authority_mult = 2.0
+                badge = f"🟢 Kênh Ổn Định • {subs // 1_000}K Subs"
+            elif subs >= 20_000:
+                authority_mult = 1.5
+                badge = f"🟢 Kênh Ổn Định • {subs // 1_000}K Subs"
+            elif subs >= 5_000:
+                authority_mult = 1.2
+                badge = f"🟢 Kênh Hoạt Động • {subs // 1_000}K Subs"
+            else:
+                authority_mult = 0.5  # Phạt kênh nhỏ trong chế độ kênh ổn định
+                badge = "📺 Kênh Mới"
+
+            v["channel_badge"] = badge
+            v["final_mode_score"] = base_score * authority_mult
+            if is_stable:
+                stable_vids.append(v)
+            else:
+                other_vids.append(v)
+
+        # Nếu có đủ kênh ổn định (từ 8 kênh trở lên), lọc bỏ hẳn các kênh không đạt chuẩn
+        if len(stable_vids) >= 8:
+            videos = stable_vids
+        else:
+            videos = stable_vids + other_vids
+        videos.sort(key=lambda x: x.get("final_mode_score", 0), reverse=True)
+    else:
+        # Mode 2: "all_channels" (🌐 Tất Cả Kênh Xu Hướng)
+        for v in videos:
+            subs = int(v.get("channel_subs") or 0)
+            v_cnt = int(v.get("view_count") or 0)
+            base_score = float(v.get("trending_score") or v_cnt)
+
+            # Tỷ lệ bùng nổ view so với sub (Outperformance Breakout Ratio)
+            effective_subs = max(1000, subs) if subs > 0 else 5000
+            breakout_ratio = v_cnt / effective_subs
+
+            if breakout_ratio >= 10.0:
+                breakout_mult = 3.0   # Siêu bùng nổ (Mega Viral)
+                badge = "🚀 Kênh Bứt Phá"
+            elif breakout_ratio >= 3.0:
+                breakout_mult = 2.2   # Viral Breakout
+                badge = "🔥 Viral Breakout"
+            elif subs > 0 and subs <= 30000 and v_cnt >= 20000:
+                breakout_mult = 1.8   # Kênh nhỏ view cao
+                badge = "⚡ Kênh Mới Nổi"
+            elif subs >= 500000:
+                breakout_mult = 0.85  # Giảm nhẹ ưu tiên của các kênh khổng lồ để nhường đất cho kênh xu hướng mới
+                badge = "🌐 Kênh Lớn Xu Hướng"
+            else:
+                breakout_mult = 1.0
+                badge = "🌐 Kênh Xu Hướng"
+
+            v["channel_badge"] = badge
+            v["final_mode_score"] = base_score * breakout_mult
+
+        videos.sort(key=lambda x: x.get("final_mode_score", 0), reverse=True)
+
+    # 3. KHỬ TRÙNG LẶP KÊNH (Channel Deduplication): Mỗi kênh chỉ hiển thị duy nhất 1 video tốt nhất theo chế độ
     if is_unique:
         unique_videos = []
         seen_channels = set()
