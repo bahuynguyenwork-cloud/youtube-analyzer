@@ -1575,24 +1575,87 @@ def parse_views_str(view_str: str) -> int:
     nums = re.findall(r'\d+', v)
     return int(''.join(nums)) if nums else 0
 
+def translate_published_age_to_vi(text: str) -> str:
+    """Chuyển đổi thời gian đăng đa ngôn ngữ (Ý, Pháp, Đức, Tây Ban Nha, Nga, Nhật, Hàn, Anh...) sang tiếng Việt chuẩn."""
+    if not text:
+        return ""
+    s = str(text).strip()
+    if any(kw in s for kw in ["trước", "Vừa xong", "Hôm qua", "Hôm nay"]):
+        return s
+
+    is_streamed = bool(re.search(r'streamed|trasmesso|diffus|transmit|gestreamt|трансляц|配信|스트리밍', s, re.I))
+    prefix = "Đã phát " if is_streamed else ""
+
+    # Special relative terms
+    if re.search(r'just now|moments ago|appena|à l\'instant|gerade eben|только что|방금|たった今', s, re.I):
+        return f"{prefix}Vừa xong"
+    if re.search(r'yesterday|ieri|hier\b|ayer|ontem|gestern|вчера|어제|昨日|kemarin|เมื่อวาน', s, re.I):
+        return f"{prefix}Hôm qua"
+    if re.search(r'today|oggi|aujourd\'hui|hoy|hoje|heute|сегодня|오늘|今日|hari ini|วันนี้', s, re.I):
+        return f"{prefix}Hôm nay"
+
+    # Years
+    m = re.search(r'(\d+)\s*(?:y|yr|yrs|year|years|anno|anni|an|ans|année|années|año|años|ano|anos|jahr|jahren|rok|lata|lat|tahun)\b', s, re.I) or \
+        re.search(r'(\d+)\s*(?:год[а]?|лет|г|년|年|ปี)', s, re.I)
+    if m:
+        return f"{prefix}{m.group(1)} năm trước"
+
+    # Months
+    m = re.search(r'(\d+)\s*(?:mo|mth|mths|month|months|mese|mesi|mois|mes|meses|mês|monat|monaten|miesiąc|miesiące|miesięcy|bulan)\b', s, re.I) or \
+        re.search(r'(\d+)\s*(?:месяц[аев]?|мес|개월|달|か月|ヶ月|箇月|เดือน)', s, re.I)
+    if m:
+        return f"{prefix}{m.group(1)} tháng trước"
+
+    # Weeks
+    m = re.search(r'(\d+)\s*(?:w|wk|wks|week|weeks|sett|sett\.|settimana|settimane|sem|sem\.|semaine|semaines|semana|semanas|woche|wochen|tydzień|tygodn[iea]?|minggu)\b', s, re.I) or \
+        re.search(r'(\d+)\s*(?:недел[ияь]?|нед|주|週間|週|สัปดาห์)', s, re.I)
+    if m:
+        return f"{prefix}{m.group(1)} tuần trước"
+
+    # Days
+    m = re.search(r'(\d+)\s*(?:d|day|days|gg|gg\.|giorno|giorni|jour|jours|j|día|dias|días|dia|tag|tagen|dzień|dni|hari)\b', s, re.I) or \
+        re.search(r'(\d+)\s*(?:день|дня|дней|дн|일|日|วัน)', s, re.I)
+    if m:
+        return f"{prefix}{m.group(1)} ngày trước"
+
+    # Hours
+    m = re.search(r'(\d+)\s*(?:h|hr|hrs|hour|hours|ora|ore|heure|heures|hora|horas|stunde|stunden|std|godzin[ye]?|jam)\b', s, re.I) or \
+        re.search(r'(\d+)\s*(?:час[аов]?|ч|시간|時間|時|ชั่วโมง)', s, re.I)
+    if m:
+        return f"{prefix}{m.group(1)} giờ trước"
+
+    # Minutes
+    m = re.search(r'(\d+)\s*(?:m|min|mins|minute|minutes|minuto|minuti|minuten|minut[y]?|menit)\b', s, re.I) or \
+        re.search(r'(\d+)\s*(?:минут[уы]?|мин|분|分|นาที)', s, re.I)
+    if m:
+        return f"{prefix}{m.group(1)} phút trước"
+
+    # Seconds
+    m = re.search(r'(\d+)\s*(?:s|sec|secs|second|seconds|secondo|secondi|seconde|secondes|segundo|segundos|sekunde|sekunden|detik)\b', s, re.I) or \
+        re.search(r'(\d+)\s*(?:секунд[уы]?|сек|초|秒|วินาที)', s, re.I)
+    if m:
+        return f"{prefix}{m.group(1)} giây trước"
+
+    return s
+
 def is_published_age_matching_range(pub_text: str, t_range: str) -> bool:
     """Kiểm tra nghiêm ngặt chuỗi thời gian hiển thị xem có thực sự nằm trong khung thời gian hay không."""
     if not pub_text or t_range == "all":
         return True
-    p = pub_text.lower().strip()
+    p = translate_published_age_to_vi(pub_text).lower().strip()
     
     # 1. Tuyệt đối không cho phép video từ nhiều năm trước lọt vào các bộ lọc ngắn hạn
-    if any(w in p for w in ['năm', 'year', 'yr', '年前', '년 전', 'jahr', 'an ']):
+    if 'năm' in p or any(w in p for w in ['year', 'yr', '年前', '년 전', 'jahr', 'an ']):
         return False
         
     # 2. Với 24h, 48h, 7d: Tuyệt đối không chấp nhận video từ tháng trước
     if t_range in ['24h', '48h', '7d']:
-        if any(w in p for w in ['tháng', 'thg', 'month', 'mo', 'か月前', '개월 전', 'monat', 'mois']):
+        if 'tháng' in p or any(w in p for w in ['thg', 'month', 'mo', 'か月前', '개월 전', 'monat', 'mois']):
             return False
             
     # 3. Với 24h & 48h: Tuyệt đối không chấp nhận video tính bằng tuần
     if t_range in ['24h', '48h']:
-        if any(w in p for w in ['tuần', 'week', 'wk', '週間前', '주 전', 'woche', 'semaine']):
+        if 'tuần' in p or any(w in p for w in ['week', 'wk', '週間前', '주 전', 'woche', 'semaine']):
             return False
         d_match = re.search(r'(\d+)\s*(?:ngày|day|tage?|jour|일|日)', p)
         if d_match:
@@ -1669,50 +1732,6 @@ def format_published_age(pub_iso: str) -> str:
             return f"🏛️ {years} năm trước • All-Time"
     except Exception:
         return pub_iso[:10]
-
-def translate_published_age_to_vi(text: str) -> str:
-    """Chuyển đổi thời gian đăng (tiếng Anh hoặc viết tắt 6d ago, 2w ago...) sang tiếng Việt chuẩn."""
-    if not text:
-        return ""
-    s = str(text).strip()
-    if any(kw in s for kw in ["trước", "ngày", "giờ", "tuần", "tháng", "năm", "Vừa", "Hôm"]):
-        return s
-
-    is_streamed = bool(re.search(r'streamed', s, re.I))
-    prefix = "Đã phát " if is_streamed else ""
-
-    m = re.search(r'(\d+)\s*(?:d|day|days)\s*ago', s, re.I)
-    if m:
-        return f"{prefix}{m.group(1)} ngày trước"
-
-    m = re.search(r'(\d+)\s*(?:w|week|weeks)\s*ago', s, re.I)
-    if m:
-        return f"{prefix}{m.group(1)} tuần trước"
-
-    m = re.search(r'(\d+)\s*(?:mo|month|months|mths)\s*ago', s, re.I)
-    if m:
-        return f"{prefix}{m.group(1)} tháng trước"
-
-    m = re.search(r'(\d+)\s*(?:y|year|years|yr|yrs)\s*ago', s, re.I)
-    if m:
-        return f"{prefix}{m.group(1)} năm trước"
-
-    m = re.search(r'(\d+)\s*(?:h|hour|hours|hr|hrs)\s*ago', s, re.I)
-    if m:
-        return f"{prefix}{m.group(1)} giờ trước"
-
-    m = re.search(r'(\d+)\s*(?:m|min|mins|minute|minutes)\s*ago', s, re.I)
-    if m:
-        return f"{prefix}{m.group(1)} phút trước"
-
-    if re.search(r'just now|moments ago', s, re.I):
-        return "Vừa xong"
-    if re.search(r'yesterday', s, re.I):
-        return "Hôm qua"
-    if re.search(r'today', s, re.I):
-        return "Hôm nay"
-
-    return s
 
 def compute_trending_score(view_count: int, pub_iso: str = "", pub_age_str: str = "") -> float:
     """
@@ -2343,8 +2362,8 @@ def get_trending_feed(
             # BƯỚC 2.1: Truy vấn trực tiếp YouTube Web UI lấy ytInitialData (nhanh ~300ms, có nhãn ngày đăng thật)
             direct_headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept-Language': f"{hl_code}-{geo_code},{hl_code};q=0.9,en;q=0.8",
-                'Cookie': f"PREF=gl={geo_code}&hl={hl_code};"
+                'Accept-Language': "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7",
+                'Cookie': f"PREF=gl={geo_code}&hl=vi;"
             }
             
             existing_vids = {v["video_id"] for v in videos}
@@ -2357,7 +2376,7 @@ def get_trending_feed(
                 # Quét rộng đủ nguồn ứng viên đa kênh để loại trừ trùng lặp
                 if len(videos) >= 48:
                     break
-                search_url = f"https://www.youtube.com/results?search_query={requests.utils.quote(cand_query)}&sp={sp_param}&gl={geo_code}&hl={hl_code}"
+                search_url = f"https://www.youtube.com/results?search_query={requests.utils.quote(cand_query)}&sp={sp_param}&gl={geo_code}&hl=vi"
                 try:
                     web_resp = http_session.get(search_url, headers=direct_headers, timeout=6)
                     if web_resp.status_code == 200:
@@ -2386,7 +2405,7 @@ def get_trending_feed(
                                     continue
                                 
                                 t = ''.join(r.get('text', '') for r in vr.get('title', {}).get('runs', []))
-                                pub_age = vr.get('publishedTimeText', {}).get('simpleText', '')
+                                pub_age = translate_published_age_to_vi(vr.get('publishedTimeText', {}).get('simpleText', ''))
                                 views_str = vr.get('viewCountText', {}).get('simpleText', '')
                                 dur_str = vr.get('lengthText', {}).get('simpleText', '')
                                 
@@ -2499,7 +2518,7 @@ def get_trending_feed(
                     'socket_timeout': 6,
                     'playlist_items': '1-30',
                     'http_headers': {
-                        'Accept-Language': f"{hl_code}-{geo_code},{hl_code};q=0.9,en;q=0.8"
+                        'Accept-Language': "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7"
                     }
                 }
                 existing_vids = {v["video_id"] for v in videos}

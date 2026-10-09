@@ -1664,43 +1664,58 @@
     function formatPublishedAgeVi(pubAge) {
       if (!pubAge) return '';
       const s = String(pubAge).trim();
-      if (s.includes('trước') || s.includes('Vừa') || s.includes('ngày') || s.includes('giờ') || s.includes('tuần') || s.includes('tháng') || s.includes('năm') || s.includes('Hôm')) {
+      if (s.includes('trước') || s.includes('Vừa xong') || s.includes('Hôm qua') || s.includes('Hôm nay')) {
         return s;
       }
 
-      const isStreamed = /streamed/i.test(s);
+      const isStreamed = /streamed|trasmesso|diffus|transmit|gestreamt|трансляц|配信|스트리밍/iu.test(s);
       const prefix = isStreamed ? 'Đã phát ' : '';
 
+      if (/just now|moments ago|appena|à l'instant|gerade eben|только что|방금|たった今/iu.test(s)) {
+        return prefix + 'Vừa xong';
+      }
+      if (/yesterday|ieri|hier\b|ayer|ontem|gestern|вчера|어제|昨日|kemarin|เมื่อวาน/iu.test(s)) {
+        return prefix + 'Hôm qua';
+      }
+      if (/today|oggi|aujourd'hui|hoy|hoje|heute|сегодня|오늘|今日|hari ini|วันนี้/iu.test(s)) {
+        return prefix + 'Hôm nay';
+      }
+
       let m;
-      if ((m = s.match(/(\d+)\s*(?:d|day|days)\s*ago/i))) {
-        return `${prefix}${m[1]} ngày trước`;
+      // Years
+      if ((m = s.match(/(\d+)\s*(?:y|yr|yrs|year|years|anno|anni|an|ans|année|années|año|años|ano|anos|jahr|jahren|rok|lata|lat|tahun)\b/i)) ||
+          (m = s.match(/(\d+)\s*(?:год[а]?|лет|г|년|年|ปี)/iu))) {
+        return prefix + m[1] + ' năm trước';
       }
-      if ((m = s.match(/(\d+)\s*(?:w|week|weeks)\s*ago/i))) {
-        return `${prefix}${m[1]} tuần trước`;
+      // Months
+      if ((m = s.match(/(\d+)\s*(?:mo|mth|mths|month|months|mese|mesi|mois|mes|meses|mês|monat|monaten|miesiąc|miesiące|miesięcy|bulan)\b/i)) ||
+          (m = s.match(/(\d+)\s*(?:месяц[аев]?|мес|개월|달|か月|ヶ月|箇月|เดือน)/iu))) {
+        return prefix + m[1] + ' tháng trước';
       }
-      if ((m = s.match(/(\d+)\s*(?:mo|month|months|mths)\s*ago/i))) {
-        return `${prefix}${m[1]} tháng trước`;
+      // Weeks
+      if ((m = s.match(/(\d+)\s*(?:w|wk|wks|week|weeks|sett|sett\.|settimana|settimane|sem|sem\.|semaine|semaines|semana|semanas|woche|wochen|tydzień|tygodn[iea]?|minggu)\b/i)) ||
+          (m = s.match(/(\d+)\s*(?:недел[ияь]?|нед|주|週間|週|สัปดาห์)/iu))) {
+        return prefix + m[1] + ' tuần trước';
       }
-      if ((m = s.match(/(\d+)\s*(?:y|year|years|yr|yrs)\s*ago/i))) {
-        return `${prefix}${m[1]} năm trước`;
+      // Days
+      if ((m = s.match(/(\d+)\s*(?:d|day|days|gg|gg\.|giorno|giorni|jour|jours|j|día|dias|días|dia|tag|tagen|dzień|dni|hari)\b/i)) ||
+          (m = s.match(/(\d+)\s*(?:день|дня|дней|дн|일|日|วัน)/iu))) {
+        return prefix + m[1] + ' ngày trước';
       }
-      if ((m = s.match(/(\d+)\s*(?:h|hour|hours|hr|hrs)\s*ago/i))) {
-        return `${prefix}${m[1]} giờ trước`;
+      // Hours
+      if ((m = s.match(/(\d+)\s*(?:h|hr|hrs|hour|hours|ora|ore|heure|heures|hora|horas|stunde|stunden|std|godzin[ye]?|jam)\b/i)) ||
+          (m = s.match(/(\d+)\s*(?:час[аов]?|ч|시간|時間|時|ชั่วโมง)/iu))) {
+        return prefix + m[1] + ' giờ trước';
       }
-      if ((m = s.match(/(\d+)\s*(?:m|min|mins|minute|minutes)\s*ago/i))) {
-        return `${prefix}${m[1]} phút trước`;
+      // Minutes
+      if ((m = s.match(/(\d+)\s*(?:m|min|mins|minute|minutes|minuto|minuti|minuten|minut[y]?|menit)\b/i)) ||
+          (m = s.match(/(\d+)\s*(?:минут[уы]?|мин|분|分|นาที)/iu))) {
+        return prefix + m[1] + ' phút trước';
       }
-      if ((m = s.match(/(\d+)\s*(?:s|sec|secs|second|seconds)\s*ago/i))) {
-        return `${prefix}${m[1]} giây trước`;
-      }
-      if (/just now|moments ago/i.test(s)) {
-        return 'Vừa xong';
-      }
-      if (/yesterday/i.test(s)) {
-        return 'Hôm qua';
-      }
-      if (/today/i.test(s)) {
-        return 'Hôm nay';
+      // Seconds
+      if ((m = s.match(/(\d+)\s*(?:s|sec|secs|second|seconds|secondo|secondi|seconde|secondes|segundo|segundos|sekunde|sekunden|detik)\b/i)) ||
+          (m = s.match(/(\d+)\s*(?:секунд[уы]?|сек|초|秒|วินาที)/iu))) {
+        return prefix + m[1] + ' giây trước';
       }
 
       return s;
