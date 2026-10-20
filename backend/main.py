@@ -735,7 +735,8 @@ def analyze_keyword(req: KeywordAnalysisRequest):
             "VN": ("vi", "VN"), "FR": ("fr", "FR"), "IT": ("it", "IT"), "DE": ("de", "DE"),
             "JP": ("ja", "JP"), "KR": ("ko", "KR"), "BR": ("pt", "BR"), "IN": ("en", "IN"),
             "ID": ("id", "ID"), "TH": ("th", "TH"), "PH": ("en", "PH"), "RU": ("ru", "RU"),
-            "PL": ("pl", "PL"), "IR": ("fa", "IR"), "ES": ("es", "ES"), "PT": ("pt", "PT")
+            "PL": ("pl", "PL"), "IR": ("fa", "IR"), "ES": ("es", "ES"), "PT": ("pt", "PT"),
+            "CN": ("zh-CN", "CN"), "TW": ("zh-TW", "TW")
         }
         hl_lang, gl_country = geo_lang_map.get(geo, ("en", geo))
 
@@ -833,6 +834,30 @@ def analyze_keyword(req: KeywordAnalysisRequest):
 def get_trending_niche_tags(geo: Optional[str] = "US"):
     geo_code = (geo or "US").upper()
     tags_by_geo = {
+        "CN": [
+            {"tag": "学英语口语 零基础", "niche": "🎓 学英语", "badge": "🔥 热门"},
+            {"tag": "英语听力 磨耳朵", "niche": "🎓 学英语", "badge": "🚀 飙升"},
+            {"tag": "出轨复仇 真实爽文", "niche": "💔 情感复仇", "badge": "🔥 爆款"},
+            {"tag": "婆媳矛盾 家庭伦理", "niche": "🏡 家庭伦理", "badge": "⚡ 狗血"},
+            {"tag": "真实犯罪 奇案调查", "niche": "🕵️ 奇案调查", "badge": "🚀 百万播放"},
+            {"tag": "真实灵异 恐怖怪谈", "niche": "👻 恐怖怪谈", "badge": "🌙 胆小勿入"},
+            {"tag": "副业搞钱 投资理财 2026", "niche": "💰 商业理财", "badge": "🔥 高收益"},
+            {"tag": "AI人工智能 工具实操", "niche": "🤖 前沿科技", "badge": "🚀 新趋势"},
+            {"tag": "电影解说 几分钟看完", "niche": "🎬 电影解说", "badge": "🔥 热门"},
+            {"tag": "人生智慧 处世哲学", "niche": "📜 处世哲学", "badge": "🌱 治愈"}
+        ],
+        "TW": [
+            {"tag": "學英語口說 零基礎", "niche": "🎓 學英語", "badge": "🔥 熱門"},
+            {"tag": "英語聽力 每日練耳", "niche": "🎓 學英語", "badge": "🚀 飆升"},
+            {"tag": "出軌復仇 抓姦逆襲", "niche": "💔 情感復仇", "badge": "🔥 發燒"},
+            {"tag": "婆媳問題 傳統家庭糾葛", "niche": "🏡 家庭倫理", "badge": "⚡ 衝突"},
+            {"tag": "真實犯罪 懸案追蹤", "niche": "🕵️ 奇案調查", "badge": "🚀 百萬點閱"},
+            {"tag": "真實靈異 恐怖怪談", "niche": "👻 靈異怪談", "badge": "🌙 膽小慎入"},
+            {"tag": "被動收入 投資理財 2026", "niche": "💰 商業理財", "badge": "🔥 趨勢"},
+            {"tag": "AI人工智慧 實用工具", "niche": "🤖 前沿科技", "badge": "🚀 最新"},
+            {"tag": "電影解說 幾分鐘看懂", "niche": "🎬 電影解說", "badge": "🔥 推薦"},
+            {"tag": "人生感悟 處世智慧", "niche": "📜 處世哲學", "badge": "🌱 療癒"}
+        ],
         "VN": [
             {"tag": "học tiếng anh giao tiếp", "niche": "🎓 Học Tiếng Anh", "badge": "🔥 Hot"},
             {"tag": "luyện nghe tiếng anh thụ động", "niche": "🎓 Học Tiếng Anh", "badge": "🚀 Đang lên"},
@@ -1046,6 +1071,8 @@ NICHE_LOCALIZED_QUERIES = {
         "ES": "estoicismo filosofia lecciones de vida",
         "PT": "estoicismo filosofia sabedoria de vida",
         "IR": "فلسفه رواقی گری درس های زندگی حکمت",
+        "CN": "斯多葛哲学 人生智慧 处世之道",
+        "TW": "斯多葛哲學 人生智慧 處世之道",
         "DEFAULT": "stoicism philosophy"
     },
     "buddhism": {
@@ -1066,6 +1093,8 @@ NICHE_LOCALIZED_QUERIES = {
         "ES": "budismo meditacion ensenanzas sabiduria",
         "PT": "budismo meditacao ensinamentos sabedoria",
         "IR": "بودیسم مدیتیشن آرامش ذهن و خرد",
+        "CN": "佛教 禅修 佛法智慧 听经",
+        "TW": "佛教 禪修 佛法智慧 聽經",
         "DEFAULT": "buddhist wisdom philosophy"
     },
     "christianity_bible": {
@@ -1086,6 +1115,8 @@ NICHE_LOCALIZED_QUERIES = {
         "ES": "lectura de la biblia palabra de dios",
         "PT": "leitura da biblia sagrada palavra de deus",
         "IR": "کتاب مقدس عیسی مسیح انجیل صوتی",
+        "CN": "圣经 朗读 灵修 赞美诗",
+        "TW": "聖經 朗讀 靈修 讚美詩",
         "DEFAULT": "bible scripture reading"
     },
     "elderly_wisdom": {
@@ -1106,6 +1137,8 @@ NICHE_LOCALIZED_QUERIES = {
         "ES": "sabiduria de los ancianos lecciones",
         "PT": "sabedoria dos idosos conselhos de vida",
         "IR": "پند بزرگان تجربه های زندگی کهنسالان",
+        "CN": "老人智慧 人生感悟 晚年生活",
+        "TW": "老人智慧 人生感悟 晚年生活",
         "DEFAULT": "elderly wisdom"
     },
     "reddit_stories": {
@@ -1126,6 +1159,8 @@ NICHE_LOCALIZED_QUERIES = {
         "ES": "historias de reddit confesiones",
         "PT": "historias do reddit relatos",
         "IR": "داستان های ردیت اعترافات عجیب",
+        "CN": "论坛热帖 网友真实故事 奇闻轶事",
+        "TW": "論壇熱帖 網友真實故事 奇聞軼事",
         "DEFAULT": "reddit stories"
     },
     "drama_expose": {
@@ -1146,6 +1181,8 @@ NICHE_LOCALIZED_QUERIES = {
         "ES": "documental escandalo caida de",
         "PT": "documentario escandalo polemica",
         "IR": "افشاگری مستند جنجالی سقوط",
+        "CN": "深度揭秘 奇闻八卦 惊人内幕",
+        "TW": "深度揭秘 奇聞八卦 驚人內幕",
         "DEFAULT": "downfall documentary"
     },
     "true_crime": {
@@ -1166,6 +1203,8 @@ NICHE_LOCALIZED_QUERIES = {
         "ES": "crimenes reales casos sin resolver documental",
         "PT": "crimes reais casos misteriosos documental",
         "IR": "پرونده های جنایی واقعی قتل های مرموز",
+        "CN": "真实犯罪 奇案调查 悬案重案",
+        "TW": "真實犯罪 奇案調查 懸案重案",
         "DEFAULT": "true crime documentary"
     },
     "horror_stories": {
@@ -1186,6 +1225,8 @@ NICHE_LOCALIZED_QUERIES = {
         "ES": "historias de terror reales miedo para no dormir",
         "PT": "historias de terror reais medo para dormir",
         "IR": "داستان های ترسناک واقعی جن و ارواح",
+        "CN": "真实灵异 恐怖故事 惊悚怪谈",
+        "TW": "真實靈異 恐怖故事 驚悚怪談",
         "DEFAULT": "scary horror stories"
     },
     "history_geopolitics": {
@@ -1206,6 +1247,8 @@ NICHE_LOCALIZED_QUERIES = {
         "ES": "historia geopolitica guerras documental",
         "PT": "historia geopolitica guerras documental",
         "IR": "تاریخ جهان ژئوپلیتیک جنگ های بزرگ",
+        "CN": "地缘政治 历史解密 深度纪录片",
+        "TW": "地緣政治 歷史解密 深度紀錄片",
         "DEFAULT": "history geopolitics"
     },
     "space_science": {
@@ -1226,6 +1269,8 @@ NICHE_LOCALIZED_QUERIES = {
         "ES": "misterios del espacio universo ciencia documental",
         "PT": "misterios do espaco universo ciencia documental",
         "IR": "شگفتی های کهکشان رازهای کیهان نجوم",
+        "CN": "宇宙探索 天文科学 未解之谜",
+        "TW": "宇宙探索 天文科學 未解之謎",
         "DEFAULT": "space science documentary"
     },
     "finance_money": {
@@ -1246,6 +1291,8 @@ NICHE_LOCALIZED_QUERIES = {
         "ES": "finanzas personales invertir dinero por internet",
         "PT": "financas pessoais investimentos ganhar dinheiro online",
         "IR": "کسب درآمد دلاری آموزش سرمایه گذاری",
+        "CN": "投资理财 商业思维 搞钱副业",
+        "TW": "投資理財 商業思維 賺錢副業",
         "DEFAULT": "personal finance investing"
     },
     "tech_ai": {
@@ -1266,6 +1313,8 @@ NICHE_LOCALIZED_QUERIES = {
         "ES": "inteligencia artificial herramientas ai 2026",
         "PT": "inteligencia artificial ferramentas ai 2026",
         "IR": "ابزارهای هوش مصنوعی تکنولوژی جدید",
+        "CN": "人工智能 前沿科技 AI工具 测评",
+        "TW": "人工智慧 前沿科技 AI工具 評測",
         "DEFAULT": "artificial intelligence AI"
     },
     "recap_stories": {
@@ -1286,6 +1335,8 @@ NICHE_LOCALIZED_QUERIES = {
         "ES": "resumen de peliculas en minutos",
         "PT": "resumo de filmes em minutos",
         "IR": "خلاصه فیلم سینمایی در چند دقیقه",
+        "CN": "电影解说 几分钟看懂 故事速看",
+        "TW": "電影解說 幾分鐘看懂 故事速看",
         "DEFAULT": "movie recap"
     },
     "gaming": {
@@ -1306,6 +1357,8 @@ NICHE_LOCALIZED_QUERIES = {
         "ES": "gameplay mejores momentos juegos",
         "PT": "gameplay melhores momentos jogos",
         "IR": "گیم پلی بازی های ویدیویی هایلایت",
+        "CN": "游戏实况 精彩高光 游戏解说",
+        "TW": "遊戲實況 精采高光 遊戲解說",
         "DEFAULT": "gaming highlights"
     },
     "entertainment": {
@@ -1326,6 +1379,8 @@ NICHE_LOCALIZED_QUERIES = {
         "ES": "comedia videos divertidos risa viral",
         "PT": "comedia videos engracados pegadinhas viral",
         "IR": "طنز خنده دار کلیپ سرگرمی دوربین مخفی",
+        "CN": "搞笑整蛊 热门综艺 娱乐八卦",
+        "TW": "搞笑整蠱 熱門綜藝 娛樂八卦",
         "DEFAULT": "entertainment funny viral"
     },
     "spicy_18_drama": {
@@ -1346,6 +1401,8 @@ NICHE_LOCALIZED_QUERIES = {
         "ES": "historias de infidelidad confesiones de pareja",
         "PT": "historias de traicao confissoes de casal",
         "IR": "اعترافات عشق های پنهان روابط عاشقانه",
+        "CN": "情感八卦 情感纠葛 狗血剧情",
+        "TW": "情感八卦 情感糾葛 狗血劇情",
         "DEFAULT": "relationship drama stories"
     },
     "father_inlaw_drama": {
@@ -1366,6 +1423,8 @@ NICHE_LOCALIZED_QUERIES = {
         "ES": "suegro y nuera drama familiar",
         "PT": "sogro e nora drama familiar",
         "IR": "پدر شوهر و عروس اختلافات خانوادگی",
+        "CN": "翁媳矛盾 豪门恩怨 家庭伦理",
+        "TW": "翁媳矛盾 豪門恩怨 家庭倫理",
         "DEFAULT": "father in law family drama"
     },
     "mother_inlaw_drama": {
@@ -1386,6 +1445,8 @@ NICHE_LOCALIZED_QUERIES = {
         "ES": "suegra y nuera conflictos familiares",
         "PT": "sogra e nora conflitos familiares",
         "IR": "مادر شوهر و عروس ماجراهای خانوادگی",
+        "CN": "婆媳关系 家庭伦理 真实矛盾",
+        "TW": "婆媳關係 家庭倫理 真實矛盾",
         "DEFAULT": "mother in law family drama"
     },
     "infidelity_revenge": {
@@ -1406,6 +1467,8 @@ NICHE_LOCALIZED_QUERIES = {
         "ES": "infidelidad venganza caught cheating espanol",
         "PT": "traicao vinganca apanhado traindo",
         "IR": "خیانت همسر انتقام داستان واقعی",
+        "CN": "出轨复仇 渣男背叛 爽文逆袭",
+        "TW": "出軌復仇 渣男背叛 爽文逆襲",
         "DEFAULT": "cheating revenge drama"
     },
     "learn_english": {
@@ -1429,6 +1492,8 @@ NICHE_LOCALIZED_QUERIES = {
         "ES": "aprender ingles conversacion pronunciacion",
         "PT": "aprender ingles conversacao pronuncia",
         "IR": "آموزش مکالمه انگلیسی از صفر تلفظ",
+        "CN": "零基础学英语 英语口语 听力磨耳朵",
+        "TW": "零基礎學英語 英語口語 聽力磨耳朵",
         "DEFAULT": "learn english speaking"
     },
     "luxury_lifestyle": {
@@ -1449,6 +1514,8 @@ NICHE_LOCALIZED_QUERIES = {
         "ES": "estilo de vida multimillonarios lujo",
         "PT": "estilo de vida bilionarios luxo",
         "IR": "زندگی ثروتمندان و میلیاردرهای جهان",
+        "CN": "奢华生活 顶级富豪 探店豪宅",
+        "TW": "奢華生活 頂級富豪 探店豪宅",
         "DEFAULT": "luxury lifestyle billionaire"
     },
     "travel_food": {
@@ -1469,6 +1536,8 @@ NICHE_LOCALIZED_QUERIES = {
         "ES": "comida callejera viajes gastronomia",
         "PT": "comida de rua viagens gastronomia",
         "IR": "غذای خیابانی ولاگ سفر آشپزی",
+        "CN": "美食探店 旅游攻略 街头小吃",
+        "TW": "美食探店 旅遊攻略 街頭小吃",
         "DEFAULT": "travel street food"
     },
     "fitness_health": {
@@ -1489,6 +1558,8 @@ NICHE_LOCALIZED_QUERIES = {
         "ES": "ejercicios en casa entrenamiento gimnasio",
         "PT": "exercicios em casa treino academia",
         "IR": "تمرین در خانه بدنسازی کاهش وزن",
+        "CN": "健身减脂 养生健康 居家锻炼",
+        "TW": "健身減脂 養生健康 居家鍛鍊",
         "DEFAULT": "fitness workout gym"
     },
         "real_life_stories": {
@@ -1509,6 +1580,8 @@ NICHE_LOCALIZED_QUERIES = {
         "ES": "historias de la vida real podcast testimonios",
         "PT": "historias reais de vida podcast relatos",
         "IR": "داستان واقعی پادکست سرگذشت زندگی",
+        "CN": "真实经历 人生纪录片 传奇故事",
+        "TW": "真實經歷 人生紀錄片 傳奇故事",
         "DEFAULT": "real life stories true story podcast"
     },
     "music_chill": {
@@ -1529,6 +1602,8 @@ NICHE_LOCALIZED_QUERIES = {
         "ES": "musica relajante lofi chill beats",
         "PT": "musica relaxante lofi chill beats",
         "IR": "موزیک آرامش بخش لوفای بی کلام",
+        "CN": "治愈纯音乐 睡眠白噪音 学习工作BGM",
+        "TW": "治癒純音樂 睡眠白噪音 學習工作BGM",
         "DEFAULT": "lofi chill beats"
     }
 }
@@ -1563,6 +1638,10 @@ def parse_views_str(view_str: str) -> int:
     if not view_str:
         return 0
     v = view_str.strip()
+    yi_match = re.search(r'([\d.,]+)\s*(?:亿|億)', v)
+    if yi_match:
+        num = float(yi_match.group(1).replace(',', '.'))
+        return int(num * 100000000)
     m_match = re.search(r'([\d.,]+)\s*(?:M|Tr|tr|triệu|million|万)', v, re.IGNORECASE)
     if m_match:
         num = float(m_match.group(1).replace(',', '.'))
@@ -1583,15 +1662,15 @@ def translate_published_age_to_vi(text: str) -> str:
     if any(kw in s for kw in ["trước", "Vừa xong", "Hôm qua", "Hôm nay"]):
         return s
 
-    is_streamed = bool(re.search(r'streamed|trasmesso|diffus|transmit|gestreamt|трансляц|配信|스트리밍', s, re.I))
+    is_streamed = bool(re.search(r'streamed|trasmesso|diffus|transmit|gestreamt|трансляц|配信|스트리밍|首播|直播', s, re.I))
     prefix = "Đã phát " if is_streamed else ""
 
     # Special relative terms
-    if re.search(r'just now|moments ago|appena|à l\'instant|gerade eben|только что|방금|たった今', s, re.I):
+    if re.search(r'just now|moments ago|appena|à l\'instant|gerade eben|только что|방금|たった今|刚刚|剛剛', s, re.I):
         return f"{prefix}Vừa xong"
-    if re.search(r'yesterday|ieri|hier\b|ayer|ontem|gestern|вчера|어제|昨日|kemarin|เมื่อวาน', s, re.I):
+    if re.search(r'yesterday|ieri|hier\b|ayer|ontem|gestern|вчера|어제|昨日|kemarin|เมื่อวาน|昨天', s, re.I):
         return f"{prefix}Hôm qua"
-    if re.search(r'today|oggi|aujourd\'hui|hoy|hoje|heute|сегодня|오늘|今日|hari ini|วันนี้', s, re.I):
+    if re.search(r'today|oggi|aujourd\'hui|hoy|hoje|heute|сегодня|오늘|今日|hari ini|วันนี้|今天', s, re.I):
         return f"{prefix}Hôm nay"
 
     # Years
@@ -1602,31 +1681,31 @@ def translate_published_age_to_vi(text: str) -> str:
 
     # Months
     m = re.search(r'(\d+)\s*(?:mo|mth|mths|month|months|mese|mesi|mois|mes|meses|mês|monat|monaten|miesiąc|miesiące|miesięcy|bulan)\b', s, re.I) or \
-        re.search(r'(\d+)\s*(?:месяц[аев]?|мес|개월|달|か月|ヶ月|箇月|เดือน)', s, re.I)
+        re.search(r'(\d+)\s*(?:месяц[аев]?|мес|개월|달|か月|ヶ月|箇月|个月|個月|เดือน)', s, re.I)
     if m:
         return f"{prefix}{m.group(1)} tháng trước"
 
     # Weeks
     m = re.search(r'(\d+)\s*(?:w|wk|wks|week|weeks|sett|sett\.|settimana|settimane|sem|sem\.|semaine|semaines|semana|semanas|woche|wochen|tydzień|tygodn[iea]?|minggu)\b', s, re.I) or \
-        re.search(r'(\d+)\s*(?:недел[ияь]?|нед|주|週間|週|สัปดาห์)', s, re.I)
+        re.search(r'(\d+)\s*(?:недел[ияь]?|нед|주|週間|週|周|星期|สัปดาห์)', s, re.I)
     if m:
         return f"{prefix}{m.group(1)} tuần trước"
 
     # Days
     m = re.search(r'(\d+)\s*(?:d|day|days|gg|gg\.|giorno|giorni|jour|jours|j|día|dias|días|dia|tag|tagen|dzień|dni|hari)\b', s, re.I) or \
-        re.search(r'(\d+)\s*(?:день|дня|дней|дн|일|日|วัน)', s, re.I)
+        re.search(r'(\d+)\s*(?:день|дня|дней|дн|일|日|天|วัน)', s, re.I)
     if m:
         return f"{prefix}{m.group(1)} ngày trước"
 
     # Hours
     m = re.search(r'(\d+)\s*(?:h|hr|hrs|hour|hours|ora|ore|heure|heures|hora|horas|stunde|stunden|std|godzin[ye]?|jam)\b', s, re.I) or \
-        re.search(r'(\d+)\s*(?:час[аов]?|ч|시간|時間|時|ชั่วโมง)', s, re.I)
+        re.search(r'(\d+)\s*(?:час[аов]?|ч|시간|時間|時|小时|小時|ชั่วโมง)', s, re.I)
     if m:
         return f"{prefix}{m.group(1)} giờ trước"
 
     # Minutes
     m = re.search(r'(\d+)\s*(?:m|min|mins|minute|minutes|minuto|minuti|minuten|minut[y]?|menit)\b', s, re.I) or \
-        re.search(r'(\d+)\s*(?:минут[уы]?|мин|분|分|นาที)', s, re.I)
+        re.search(r'(\d+)\s*(?:минут[уы]?|мин|분|分|分钟|分鐘|นาที)', s, re.I)
     if m:
         return f"{prefix}{m.group(1)} phút trước"
 
@@ -2010,6 +2089,25 @@ def is_video_matching_country(item: dict, ch_info: dict, target_geo: str) -> boo
         if ch_country in ['VN', 'RU', 'JP', 'KR', 'TH', 'IN', 'ID', 'PH']:
             return False
 
+    # 19. Thị trường Trung Quốc - Giản Thể (CN)
+    elif geo == 'CN':
+        if has_south_asian or has_hangul or has_kana or has_cyrillic or has_arabic or has_thai or has_vn:
+            return False
+        if audio_lang and not audio_lang.startswith(('zh', 'en', 'zxx')):
+            return False
+        if ch_country in ['VN', 'RU', 'JP', 'KR', 'TH', 'IN', 'ID', 'PH']:
+            return False
+
+    # 20. Thị trường Trung Quốc - Phồn Thể (TW)
+    elif geo == 'TW':
+        if has_south_asian or has_hangul or has_kana or has_cyrillic or has_arabic or has_thai or has_vn:
+            return False
+        if audio_lang and not audio_lang.startswith(('zh', 'en', 'zxx')):
+            return False
+        if ch_country in ['VN', 'RU', 'JP', 'KR', 'TH', 'IN', 'ID', 'PH']:
+            return False
+
+
     return True
 
 @app.get("/api/trending/feed")
@@ -2072,9 +2170,10 @@ def get_trending_feed(
             
             # TRƯỜNG HỢP 1: Tất cả xu hướng (Top Trending chung của quốc gia)
             if cat == "all":
+                api_chart_region = "TW" if geo_code == "CN" else geo_code
                 chart_url = (
                     f"https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics,liveStreamingDetails"
-                    f"&chart=mostPopular&regionCode={geo_code}&maxResults=50&key={api_key}"
+                    f"&chart=mostPopular&regionCode={api_chart_region}&maxResults=50&key={api_key}"
                 )
                 chart_resp = http_session.get(chart_url, timeout=6)
                 if chart_resp.status_code == 200:
@@ -2120,7 +2219,9 @@ def get_trending_feed(
                         "ES": "tendencias videos populares espana podcast documental",
                         "PT": "tendencias videos populares portugal podcast documental",
                         "IR": "ترندهای یوتیوب فارسی پادکست مستند",
-                        "BR": "documentario podcast brasil"
+                        "BR": "documentario podcast brasil",
+                        "CN": "热门视频 深度纪录片 播客 科技",
+                        "TW": "熱門影片 深度紀錄片 播客 科技"
                     }
                     q_term = country_names.get(geo_code, "trending viral video")
 
@@ -2129,7 +2230,8 @@ def get_trending_feed(
                     "VN": "vi", "JP": "ja", "KR": "ko", "DE": "de",
                     "BR": "pt", "IN": "en", "FR": "fr", "IT": "it",
                     "ID": "id", "TH": "th", "PH": "en", "RU": "ru",
-                    "PL": "pl", "ES": "es", "PT": "pt", "IR": "fa"
+                    "PL": "pl", "ES": "es", "PT": "pt", "IR": "fa",
+                    "CN": "zh-Hans", "TW": "zh-Hant"
                 }
                 lang_param = GEO_LANG_MAP.get(geo_code, "en")
 
@@ -2283,7 +2385,9 @@ def get_trending_feed(
                 "KR": "이슈 트렌드",
                 "BR": "em alta brasil",
                 "CA": "trending canada",
-                "AU": "trending australia"
+                "AU": "trending australia",
+                "CN": "热门视频 纪录片",
+                "TW": "發燒影片 紀錄片"
             }
             
             if cat in NICHE_LOCALIZED_QUERIES:
@@ -2298,7 +2402,8 @@ def get_trending_feed(
                 "VN": "vi", "JP": "ja", "KR": "ko", "DE": "de",
                 "BR": "pt", "IN": "en", "FR": "fr", "IT": "it",
                 "ID": "id", "TH": "th", "PH": "en", "RU": "ru",
-                "PL": "pl", "ES": "es", "PT": "pt", "IR": "fa"
+                "PL": "pl", "ES": "es", "PT": "pt", "IR": "fa",
+                "CN": "zh-CN", "TW": "zh-TW"
             }
             hl_code = GEO_LANG_MAP.get(geo_code, "en")
 
@@ -2330,7 +2435,9 @@ def get_trending_feed(
                         "FR": ["podcast reportage france officiel", "documentaire serie"],
                         "IT": ["podcast reportage italia ufficiale", "documentario serie"],
                         "JP": ["ドキュメンタリー 公式", "人気 ポッドキャスト"],
-                        "KR": ["공식 팟캐스트", "다큐멘터리 시리즈"]
+                        "KR": ["공식 팟캐스트", "다큐멘터리 시리즈"],
+                        "CN": ["官方纪录片 深度访谈", "高分纪录片 中文", "知名播客 访谈"],
+                        "TW": ["官方紀錄片 深度訪談", "高分紀錄片 繁體中文", "優質播客 訪談"]
                     }
                     candidate_queries.extend(secondary_queries.get(geo_code, ["podcast documentary official"]))
                 else:
@@ -2338,6 +2445,8 @@ def get_trending_feed(
                         "VN": ["trending viral việt nam", "video bứt phá triệu view", "vlog mới nổi"],
                         "US": ["viral trending videos", "trending breakout creator", "viral challenge podcast"],
                         "GB": ["trending viral videos uk", "breakout creator viral"],
+                        "CN": ["热门爆款视频 真实故事", "破百万播放 爆款", "网络热点 事件始末"],
+                        "TW": ["發燒熱門影片 真實故事", "百萬點閱 爆款推薦", "網路熱門話題 事件始末"],
                         "DE": ["trends viral deutschland", "neue virale videos"],
                         "FR": ["tendances viral france", "video buzz nouvelle"],
                         "IT": ["tendenze virale italia", "video virali nuovi"],

@@ -29,6 +29,8 @@ class TrendService:
             "IR": ("fa", "IR"),
             "ES": ("es", "ES"),
             "PT": ("pt", "PT"),
+            "CN": ("zh-CN", "CN"),
+            "TW": ("zh-TW", "TW"),
         }
 
     def detect_channel_language_and_origin(
@@ -66,6 +68,7 @@ class TrendService:
         cyrillic_count = len(re.findall(r'[\u0400-\u04ff]', combined))
         arabic_count = len(re.findall(r'[\u0600-\u06ff]', combined))
         polish_chars = len(re.findall(r'[ąćęłńśźżĄĆĘŁŃŚŹŻ]', combined))
+        cjk_count = len(re.findall(r'[\u4e00-\u9fff]', combined))
         latin_count = len(re.findall(r'[a-zA-Z]', combined))
 
         hangul_ratio = hangul_count / total_letters
@@ -74,6 +77,7 @@ class TrendService:
         cyrillic_ratio = cyrillic_count / total_letters
         arabic_ratio = arabic_count / total_letters
         polish_ratio = polish_chars / total_letters
+        cjk_ratio = cjk_count / total_letters
         latin_ratio = latin_count / total_letters
 
         primary_origin = "US"
@@ -89,6 +93,16 @@ class TrendService:
         elif kana_count >= 3 or kana_ratio > 0.05:
             primary_origin = "JP"
             lang_name = "Nhật Bản (Tiếng Nhật)"
+        elif cjk_count >= 3 and kana_count < 2 and hangul_count < 2:
+            # Nhận diện tiếng Trung: phân biệt Phồn Thể (TW/HK) và Giản Thể (CN)
+            trad_count = len(re.findall(r'[這個們為國時會對學關門發來讓說話進樣頭麼動兩見還後經過電總機開長實義給聽變轉車題現東內產應問選別報業條帶寫體設員視點軍單台灣臺灣台北繁體香港粵語]', combined))
+            simp_count = len(re.findall(r'[这个们为国时会对学关门发来让说话进样头么动两见还后经过电总机开长实义给听变转车题现东内产应问选别报业条带写体设员视点军单中国大陆简体普通话北京上海]', combined))
+            if trad_count > simp_count:
+                primary_origin = "TW"
+                lang_name = "Trung Quốc - Phồn Thể (TW)"
+            else:
+                primary_origin = "CN"
+                lang_name = "Trung Quốc - Giản Thể (CN)"
         elif cyrillic_count >= 3 or cyrillic_ratio > 0.05:
             primary_origin = "RU"
             lang_name = "Nga (Tiếng Nga)"
@@ -241,6 +255,24 @@ class TrendService:
                 "origin_geo": origin_geo,
                 "origin_lang_name": origin_info.get("origin_lang_name", ""),
                 "reason": "Kênh sử dụng tiếng Tây Ban Nha bản địa, khó tiếp cận thị trường ngoài cộng đồng nói tiếng Tây Ban Nha."
+            }
+
+        # Kênh tiếng Trung (CN / TW)
+        if origin_geo in ["CN", "TW"]:
+            if target in ["CN", "TW", "HK"]:
+                return {
+                    "compatibility_score": 0.90,
+                    "is_match": True,
+                    "origin_geo": origin_geo,
+                    "origin_lang_name": origin_info.get("origin_lang_name", ""),
+                    "reason": "Cùng hệ ngôn ngữ chữ Hán, khán giả Giản thể và Phồn thể có độ tương đồng đọc hiểu rất cao."
+                }
+            return {
+                "compatibility_score": 0.35 if crossover else 0.15,
+                "is_match": False,
+                "origin_geo": origin_geo,
+                "origin_lang_name": origin_info.get("origin_lang_name", ""),
+                "reason": "Kênh sử dụng chữ Hán / tiếng Hoa bản địa, khó tiếp cận thị trường ngoài cộng đồng người Hoa nếu không có phụ đề tiếng Anh."
             }
 
         # Kênh tiếng Anh nhắm các nước khác (Anh, Mỹ, Ấn Độ, Philippines, v.v.)

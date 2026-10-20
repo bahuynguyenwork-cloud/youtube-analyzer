@@ -178,6 +178,8 @@
                 <option value="PT">🇵🇹 Khán giả Bồ Đào Nha (PT)</option>
                 <option value="IR">🇮🇷 Khán giả Iran / Ba Tư (IR)</option>
                 <option value="BR">🇧🇷 Khán giả Brazil (BR)</option>
+                <option value="CN">🇨🇳 Khán giả Trung Quốc - Giản Thể (CN)</option>
+                <option value="TW">🇹🇼 Khán giả Trung Quốc - Phồn Thể (TW)</option>
                 <option value="VN">🇻🇳 Khán giả Việt Nam (VN)</option>
                 <option value="">🌐 Toàn Cầu (Global)</option>
               </select>
@@ -951,6 +953,8 @@
             <option value="ES">Tây Ban Nha (ES)</option>
             <option value="PT">Bồ Đào Nha (PT)</option>
             <option value="IR">Iran / Ba Tư (IR)</option>
+            <option value="CN">Trung Quốc - Giản Thể (CN)</option>
+            <option value="TW">Trung Quốc - Phồn Thể (TW)</option>
             <option value="VN">Việt Nam (VN)</option>
           </select>
           <button type="submit" class="px-6 py-3 bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-rose-600/30 transition">Kiểm Tra</button>
@@ -1054,6 +1058,8 @@
           <select id="feed-country" onchange="loadTrendingFeed()" class="w-full lg:w-auto px-3.5 py-2.5 bg-slate-900/90 border border-white/15 rounded-xl text-white text-xs focus:ring-2 focus:ring-rose-500 font-medium">
             <option value="US">🇺🇸 Hoa Kỳ (US)</option>
             <option value="VN">🇻🇳 Việt Nam (VN)</option>
+            <option value="CN">🇨🇳 Trung Quốc - Giản Thể (CN)</option>
+            <option value="TW">🇹🇼 Trung Quốc - Phồn Thể (TW)</option>
             <option value="GB">🇬🇧 Vương Quốc Anh (UK)</option>
             <option value="FR">🇫🇷 Pháp (FR)</option>
             <option value="IT">🇮🇹 Ý (IT)</option>
@@ -1321,6 +1327,7 @@
       "ID": "Indonesia (ID)", "TH": "Thái Lan (TH)", "PH": "Philippines (PH)", "RU": "Nga (RU)",
       "PL": "Ba Lan (PL)", "IR": "Iran (IR)",
       "ES": "Tây Ban Nha (ES)", "PT": "Bồ Đào Nha (PT)",
+      "CN": "Trung Quốc - Giản Thể (CN)", "TW": "Trung Quốc - Phồn Thể (TW)",
       "BR": "Brazil (BR)", "CA": "Canada (CA)", "AU": "Úc (AU)", "VN": "Việt Nam (VN)", "": "Toàn Cầu"
     };
 
@@ -1331,6 +1338,7 @@
       "ID": 0.75, "TH": 0.95, "PH": 0.85, "RU": 1.2,
       "PL": 1.9, "IR": 0.8,
       "ES": 2.5, "PT": 2.2,
+      "CN": 2.2, "TW": 2.8,
       "GLOBAL": 2.2
     };
 
@@ -1668,16 +1676,16 @@
         return s;
       }
 
-      const isStreamed = /streamed|trasmesso|diffus|transmit|gestreamt|трансляц|配信|스트리밍/iu.test(s);
+      const isStreamed = /streamed|trasmesso|diffus|transmit|gestreamt|трансляц|配信|스트리밍|首播|直播/iu.test(s);
       const prefix = isStreamed ? 'Đã phát ' : '';
 
-      if (/just now|moments ago|appena|à l'instant|gerade eben|только что|방금|たった今/iu.test(s)) {
+      if (/just now|moments ago|appena|à l'instant|gerade eben|только что|방금|たった今|刚刚|剛剛/iu.test(s)) {
         return prefix + 'Vừa xong';
       }
-      if (/yesterday|ieri|hier\b|ayer|ontem|gestern|вчера|어제|昨日|kemarin|เมื่อวาน/iu.test(s)) {
+      if (/yesterday|ieri|hier\b|ayer|ontem|gestern|вчера|어제|昨日|kemarin|เมื่อวาน|昨天/iu.test(s)) {
         return prefix + 'Hôm qua';
       }
-      if (/today|oggi|aujourd'hui|hoy|hoje|heute|сегодня|오늘|今日|hari ini|วันนี้/iu.test(s)) {
+      if (/today|oggi|aujourd'hui|hoy|hoje|heute|сегодня|오늘|今日|hari ini|วันนี้|今天/iu.test(s)) {
         return prefix + 'Hôm nay';
       }
 
@@ -1689,27 +1697,27 @@
       }
       // Months
       if ((m = s.match(/(\d+)\s*(?:mo|mth|mths|month|months|mese|mesi|mois|mes|meses|mês|monat|monaten|miesiąc|miesiące|miesięcy|bulan)\b/i)) ||
-          (m = s.match(/(\d+)\s*(?:месяц[аев]?|мес|개월|달|か月|ヶ月|箇月|เดือน)/iu))) {
+          (m = s.match(/(\d+)\s*(?:месяц[аев]?|мес|개월|달|か月|ヶ月|箇月|个月|個月|เดือน)/iu))) {
         return prefix + m[1] + ' tháng trước';
       }
       // Weeks
       if ((m = s.match(/(\d+)\s*(?:w|wk|wks|week|weeks|sett|sett\.|settimana|settimane|sem|sem\.|semaine|semaines|semana|semanas|woche|wochen|tydzień|tygodn[iea]?|minggu)\b/i)) ||
-          (m = s.match(/(\d+)\s*(?:недел[ияь]?|нед|주|週間|週|สัปดาห์)/iu))) {
+          (m = s.match(/(\d+)\s*(?:недел[ияь]?|нед|주|週間|週|周|星期|สัปดาห์)/iu))) {
         return prefix + m[1] + ' tuần trước';
       }
       // Days
       if ((m = s.match(/(\d+)\s*(?:d|day|days|gg|gg\.|giorno|giorni|jour|jours|j|día|dias|días|dia|tag|tagen|dzień|dni|hari)\b/i)) ||
-          (m = s.match(/(\d+)\s*(?:день|дня|дней|дн|일|日|วัน)/iu))) {
+          (m = s.match(/(\d+)\s*(?:день|дня|дней|дн|일|日|天|วัน)/iu))) {
         return prefix + m[1] + ' ngày trước';
       }
       // Hours
       if ((m = s.match(/(\d+)\s*(?:h|hr|hrs|hour|hours|ora|ore|heure|heures|hora|horas|stunde|stunden|std|godzin[ye]?|jam)\b/i)) ||
-          (m = s.match(/(\d+)\s*(?:час[аов]?|ч|시간|時間|時|ชั่วโมง)/iu))) {
+          (m = s.match(/(\d+)\s*(?:час[аов]?|ч|시간|時間|時|小时|小時|ชั่วโมง)/iu))) {
         return prefix + m[1] + ' giờ trước';
       }
       // Minutes
       if ((m = s.match(/(\d+)\s*(?:m|min|mins|minute|minutes|minuto|minuti|minuten|minut[y]?|menit)\b/i)) ||
-          (m = s.match(/(\d+)\s*(?:минут[уы]?|мин|분|分|นาที)/iu))) {
+          (m = s.match(/(\d+)\s*(?:минут[уы]?|мин|분|分|分钟|分鐘|นาที)/iu))) {
         return prefix + m[1] + ' phút trước';
       }
       // Seconds
@@ -2340,6 +2348,8 @@
       BR: -3,
       FR: 1,
       IT: 1,
+      CN: 8,
+      TW: 8,
       VN: 7
     };
 
@@ -3249,6 +3259,30 @@
     }
 
     const QUICK_NICHE_TAGS_MAP = {
+      "CN": [
+        { tag: "学英语口语 零基础", vi: "Học giao tiếp tiếng Anh từ con số 0", niche: "🎓 Học Tiếng Anh", badge: "🔥 Hot" },
+        { tag: "英语听力 磨耳朵", vi: "Luyện nghe tiếng Anh phản xạ thụ động", niche: "🎓 Học Tiếng Anh", badge: "🚀 Đang lên" },
+        { tag: "出轨复仇 真实爽文", vi: "Bắt gian ngoại tình & trừng phạt hả hê", niche: "💔 Ngoại Tình", badge: "🔥 Bứt phá" },
+        { tag: "婆媳矛盾 家庭伦理", vi: "Mâu thuẫn mẹ chồng nàng dâu gay gắt", niche: "🏡 Gia Đình", badge: "⚡ Drama" },
+        { tag: "真实犯罪 奇案调查", vi: "Hồ sơ vụ án bí ẩn chưa có lời giải", niche: "🕵️ Kỳ Án", badge: "🚀 Triệu view" },
+        { tag: "真实灵异 恐怖怪谈", vi: "Chuyện ma rùng rợn lạnh gáy có thật", niche: "👻 Kinh Dị", badge: "🌙 Rùng rợn" },
+        { tag: "副业搞钱 投资理财 2026", vi: "Nghề tay trái & đầu tư kiếm tiền 2026", niche: "💰 Tài Chính", badge: "🔥 Siêu trend" },
+        { tag: "AI人工智能 工具实操", vi: "Công cụ trí tuệ nhân tạo đột phá", niche: "🤖 Công Nghệ", badge: "🚀 Mới" },
+        { tag: "电影解说 几分钟看完", vi: "Tóm tắt phim & review điện ảnh lôi cuốn", niche: "🎬 Tóm Tắt", badge: "🔥 Triệu view" },
+        { tag: "人生智慧 处世哲学", vi: "Bài học cuộc sống & thức tỉnh tâm hồn", niche: "📜 Triết Lý", badge: "🌱 Chữa lành" }
+      ],
+      "TW": [
+        { tag: "學英語口說 零基礎", vi: "Học giao tiếp tiếng Anh phản xạ từ đầu", niche: "🎓 Học Tiếng Anh", badge: "🔥 Hot" },
+        { tag: "英語聽力 每日練耳", vi: "Luyện nghe tiếng Anh thụ động mỗi ngày", niche: "🎓 Học Tiếng Anh", badge: "🚀 Đang lên" },
+        { tag: "出軌復仇 抓姦逆襲", vi: "Ngoại tình bắt gian & trả thù sảng khoái", niche: "💔 Ngoại Tình", badge: "🔥 Phát sốt" },
+        { tag: "婆媳問題 傳統家庭糾葛", vi: "Mâu thuẫn mẹ chồng nàng dâu truyền thống", niche: "🏡 Gia Đình", badge: "⚡ Drama" },
+        { tag: "真實犯罪 懸案追蹤", vi: "Điều tra kỳ án & hồ sơ tội phạm có thật", niche: "🕵️ Kỳ Án", badge: "🚀 Triệu view" },
+        { tag: "真實靈異 恐怖怪談", vi: "Chuyện tâm linh quái đàm có thật", niche: "👻 Kinh Dị", badge: "🌙 Rùng rợn" },
+        { tag: "被動收入 投資理財 2026", vi: "Tạo thu nhập thụ động & đầu tư 2026", niche: "💰 Tài Chính", badge: "🔥 Xu hướng" },
+        { tag: "AI人工智慧 實用工具", vi: "Ứng dụng trí tuệ nhân tạo công nghệ mới", niche: "🤖 Công Nghệ", badge: "🚀 Mới nhất" },
+        { tag: "電影解說 幾分鐘看懂", vi: "Review tóm tắt phim chiếu rạp hấp dẫn", niche: "🎬 Tóm Tắt", badge: "🔥 Đề xuất" },
+        { tag: "人生感悟 處世智慧", vi: "Triết lý sống & chữa lành tinh thần", niche: "📜 Triết Lý", badge: "🌱 Chữa lành" }
+      ],
       "VN": [
         { tag: "học tiếng anh giao tiếp", vi: "Giao tiếp phản xạ hàng ngày", niche: "🎓 Học Tiếng Anh", badge: "🔥 Hot" },
         { tag: "luyện nghe tiếng anh phản xạ", vi: "Luyện nghe thụ động ngấm sâu", niche: "🎓 Học Tiếng Anh", badge: "🚀 Bứt phá" },
