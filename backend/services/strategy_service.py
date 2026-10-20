@@ -21,6 +21,8 @@ GEO_BASE_RPM = {
     "IR": 0.8,
     "ES": 2.5,
     "PT": 2.2,
+    "CN": 2.2,
+    "TW": 2.8,
     "GLOBAL": 2.2
 }
 
@@ -45,6 +47,11 @@ NICHE_RPM_MULTIPLIERS = {
     "infidelity_revenge": 1.15,
     "drama_expose": 1.10,
     "reddit_stories": 1.10,
+    "astrology_horoscope": 1.15,
+    "horoscope": 1.15,
+    "astrology": 1.15,
+    "tarot": 1.15,
+    "tu_vi": 1.15,
     "buddhism": 1.05,
     "christianity_bible": 1.05,
     "bible": 1.05,

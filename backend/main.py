@@ -869,7 +869,8 @@ def get_trending_niche_tags(geo: Optional[str] = "US"):
             {"tag": "kiếm tiền online 2026", "niche": "💰 Tài Chính", "badge": "🔥 Trend"},
             {"tag": "trí tuệ nhân tạo AI", "niche": "🤖 Công Nghệ", "badge": "🚀 Mới"},
             {"tag": "truyện ma đêm muộn", "niche": "👻 Kinh Dị", "badge": "⚡ Rùng rợn"},
-            {"tag": "triết lý cuộc sống", "niche": "📜 Triết Lý", "badge": "🌱 Chữa lành"}
+            {"tag": "triết lý cuộc sống", "niche": "📜 Triết Lý", "badge": "🌱 Chữa lành"},
+            {"tag": "tử vi 12 con giáp", "niche": "🔮 Tử Vi", "badge": "🔥 Vận mệnh"}
         ],
         "FR": [
             {"tag": "apprendre l'anglais débutant", "niche": "🎓 Anglais", "badge": "🔥 Hot"},
@@ -1074,6 +1075,28 @@ NICHE_LOCALIZED_QUERIES = {
         "CN": "斯多葛哲学 人生智慧 处世之道",
         "TW": "斯多葛哲學 人生智慧 處世之道",
         "DEFAULT": "stoicism philosophy"
+    },
+    "astrology_horoscope": {
+        "VN": "tử vi 12 con giáp cung hoàng đạo tarot",
+        "US": "horoscope astrology zodiac signs tarot",
+        "GB": "horoscope astrology zodiac signs tarot reading",
+        "FR": "horoscope astrologie signes du zodiaque tarot",
+        "IT": "oroscopo astrologia segni zodiacali tarocchi",
+        "DE": "Horoskop Astrologie Sternzeichen Tarot",
+        "JP": "星座占い タロット 運勢 手相",
+        "KR": "별자리 운세 사주 타로 신년운세",
+        "IN": "kundli astrology horoscope rashifal tarot",
+        "ID": "ramalan zodiak horoskop tarot weton",
+        "TH": "ดูดวง ราศี ไพ่ยิปซี ทารอต ลัคนา",
+        "PH": "horoscope tagalog zodiac signs kapalaran tarot",
+        "RU": "гороскоп астрология знаки зодиака таро",
+        "PL": "horoskop astrologia znaki zodiaku tarot",
+        "ES": "horoscopo astrologia signos del zodiaco tarot",
+        "PT": "horóscopo astrologia signos do zodíaco tarot",
+        "IR": "طالع بینی فال تاروت زودیاک ستاره شناسی",
+        "CN": "星座运势 占卜 塔罗牌 八字命理",
+        "TW": "星座運勢 占卜 塔羅牌 八字命理",
+        "DEFAULT": "horoscope astrology zodiac signs tarot"
     },
     "buddhism": {
         "VN": "lời phật dạy triết lý tĩnh tâm",

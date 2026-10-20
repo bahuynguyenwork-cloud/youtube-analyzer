@@ -26,6 +26,7 @@ VALID_NICHES = {
     "christianity_bible": "✝️ Kinh Thánh & Cơ Đốc Giáo (Đọc Kinh Thánh, Lời Chúa, Cầu nguyện, Bài giảng, Thánh ca, Devotion, Audio Bible)",
     "buddhism": "🪷 Phật Pháp & Chữa Lành (Lời Phật dạy, Thiền định, Thuyết pháp, Kinh phật, Tĩnh tâm, Chữa lành)",
     "elderly_wisdom": "👴 Tâm Sự & Lời Khuyên Người Già (Lời khuyên cuộc sống, Dưỡng già, Tuổi trung niên, Bài học cổ nhân)",
+    "astrology_horoscope": "🔮 Tử Vi & Chiêm Tinh (Tử vi trọn đời, 12 con giáp, Cung hoàng đạo, Phong thủy, Xem bói, Tarot, Vận mệnh)",
 }
 
 class AIService:

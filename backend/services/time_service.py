@@ -211,6 +211,24 @@ NICHE_PROFILES = {
             "불경", "불교", "스님", "명상", "힐링", "마음치유", "불교 설법", "설법", "반야심경", "사찰", "예불", "부처님", "법문", "仏教", "説法", "禅"
         ]
     },
+    "astrology_horoscope": {
+        "name_vi": "🔮 Tử Vi, Tướng Số & Chiêm Tinh",
+        "upload_1_start": 6.0,
+        "upload_1_end": 7.5,
+        "upload_1_label": "Khung chính: Sáng sớm xem vận may & tử vi đầu ngày",
+        "upload_2_start": 20.0,
+        "upload_2_end": 22.0,
+        "upload_2_label": "Khung phụ: Tối muộn xem bói bài tarot, vận mệnh, phong thủy",
+        "best_weekdays": ["Chủ Nhật", "Thứ 2", "Thứ 6", "Thứ 7"],
+        "behavior_insight": "Khán giả xem tử vi, cung hoàng đạo, vận hạn có xu hướng xem vào đầu tuần/đầu ngày để đón vận may hoặc tối muộn thư giãn trải bài tarot, xem phong thủy.",
+        "keywords": [
+            "tử vi", "chiêm tinh", "cung hoàng đạo", "12 con giáp", "xem bói", "bói bài", "tarot", "phong thủy", "tướng số", "nhân tướng học", "vận mệnh", "tử vi trọn đời", "tử vi tuần mới", "tử vi tháng", "vận hạn", "lá số tử vi", "chỉ tay", "nốt ruồi", "thần số học", "bói toán", "bói tình duyên", "trải bài tarot", "tài lộc",
+            "horoscope", "astrology", "zodiac", "tarot", "tarot reading", "fortune telling", "numerology", "palmistry", "zodiac signs", "birth chart", "weekly horoscope", "monthly horoscope", "daily horoscope", "feng shui",
+            "운세", "사주", "타로", "별자리", "사주팔자", "신점", "관상", "손금", "토정비결", "신년운세", "타로카드", "풍수지리",
+            "占い", "星座占い", "タロット", "手相", "四柱推命", "風水",
+            "星座", "占卜", "塔罗", "算命", "八字", "风水", "面相", "手相", "生肖", "運勢", "紫微斗数", "命理"
+        ]
+    },
     "christianity_bible": {
         "name_vi": "✝️ Kinh Thánh & Cơ Đốc Giáo",
         "upload_1_start": 5.0,
@@ -482,6 +500,10 @@ NICHE_PROFILES["life_stories"] = NICHE_PROFILES["real_life_stories"]
 NICHE_PROFILES["audio_stories"] = NICHE_PROFILES["real_life_stories"]
 NICHE_PROFILES["podcast"] = NICHE_PROFILES["real_life_stories"]
 NICHE_PROFILES["confession_stories"] = NICHE_PROFILES["real_life_stories"]
+NICHE_PROFILES["horoscope"] = NICHE_PROFILES["astrology_horoscope"]
+NICHE_PROFILES["astrology"] = NICHE_PROFILES["astrology_horoscope"]
+NICHE_PROFILES["tarot"] = NICHE_PROFILES["astrology_horoscope"]
+NICHE_PROFILES["tu_vi"] = NICHE_PROFILES["astrology_horoscope"]
 
 VN_WORD_BOUNDARY = r'(?<![\wàáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ])'
 VN_WORD_BOUNDARY_END = r'(?![\wàáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ])'
@@ -578,7 +600,12 @@ class TimeService:
 
         scores = {}
         for niche_key, niche_info in NICHE_PROFILES.items():
-            if niche_key in ["general", "horror", "education", "drama_story", "finance_biz", "quotes_philosophy", "vlog", "travel", "bible", "christianity", "religion"]:
+            if niche_key in [
+                "general", "horror", "education", "drama_story", "finance_biz", 
+                "quotes_philosophy", "vlog", "travel", "bible", "christianity", 
+                "religion", "life_stories", "audio_stories", "podcast", "confession_stories",
+                "horoscope", "astrology", "tarot", "tu_vi"
+            ]:
                 continue
             score = 0
             title_hits = 0

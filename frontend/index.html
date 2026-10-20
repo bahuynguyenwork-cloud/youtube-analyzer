@@ -359,7 +359,9 @@
                 <option value="mother_inlaw_drama">⚡ Mẹ Vợ Con Rể (Xung Đột & Trớ Trêu)</option>
                 <option value="infidelity_revenge">💔 Ngoại Tình & Bắt Gian Trả Thù (Revenge Drama)</option>
                 <option value="philosophy">📜 Triết Lý & Khắc Kỷ (Stoicism)</option>
-                <option value="buddhism">🪷 Phật Pháp & Chữa Lành</option>
+                <option value="astrology_horoscope">🔮 Tử Vi, Tướng Số & Chiêm Tinh (Horoscope & Tarot)</option>
+                <option value="astrology_horoscope">🔮 Tử Vi & Chiêm Tinh (Horoscope, Zodiac, Tarot)</option>
+            <option value="buddhism">🪷 Phật Pháp & Chữa Lành</option>
                 <option value="christianity_bible">✝️ Kinh Thánh & Cơ Đốc Giáo (Bible & Faith)</option>
                 <option value="elderly_wisdom">👴 Tâm Sự & Lời Khuyên Người Già</option>
                 <option value="reddit_stories">💬 Truyện Reddit & Confessions (AITA)</option>
@@ -1088,7 +1090,8 @@
             <option value="mother_inlaw_drama">⚡ Mẹ Vợ Con Rể (Xung Đột & Trớ Trêu)</option>
             <option value="infidelity_revenge">💔 Ngoại Tình & Bắt Gian Trả Thù (Revenge Drama)</option>
             <option value="philosophy">📜 Triết Lý & Khắc Kỷ (Stoicism)</option>
-            <option value="buddhism">🪷 Phật Pháp & Chữa Lành</option>
+            <option value="astrology_horoscope">🔮 Tử Vi, Tướng Số & Chiêm Tinh (Horoscope & Tarot)</option>
+                <option value="buddhism">🪷 Phật Pháp & Chữa Lành</option>
             <option value="christianity_bible">✝️ Kinh Thánh & Cơ Đốc Giáo (Bible & Faith)</option>
             <option value="elderly_wisdom">👴 Tâm Sự & Lời Khuyên Người Già</option>
             <option value="reddit_stories">💬 Truyện Reddit & Confessions (AITA)</option>
@@ -1348,7 +1351,7 @@
       "real_life_stories": 1.20, "life_stories": 1.20, "audio_stories": 1.20, "podcast": 1.20,
       "horror_stories": 1.10, "spicy_18_drama": 1.15, "father_inlaw_drama": 1.15,
       "mother_inlaw_drama": 1.15, "infidelity_revenge": 1.15, "drama_expose": 1.10,
-      "reddit_stories": 1.10, "buddhism": 1.05, "christianity_bible": 1.05, "bible": 1.05, "christianity": 1.05, "recap_stories": 0.95, "travel_vlog": 1.15, "vlog": 1.15, "travel": 1.15, "gaming": 0.75, "entertainment": 0.85
+      "reddit_stories": 1.10, "astrology_horoscope": 1.15, "horoscope": 1.15, "astrology": 1.15, "tarot": 1.15, "tu_vi": 1.15, "buddhism": 1.05, "christianity_bible": 1.05, "bible": 1.05, "christianity": 1.05, "recap_stories": 0.95, "travel_vlog": 1.15, "vlog": 1.15, "travel": 1.15, "gaming": 0.75, "entertainment": 0.85
     };
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -2162,6 +2165,17 @@
         best_weekdays: ["Chủ Nhật", "Thứ 2", "Thứ 5", "Thứ 6"],
         behavior_insight: "Khán giả nghe danh ngôn, triết lý & khắc kỷ vào sáng sớm thức dậy hoặc tối muộn trước khi ngủ để chữa lành và tìm động lực."
       },
+      astrology_horoscope: {
+        name_vi: "🔮 Tử Vi, Tướng Số & Chiêm Tinh",
+        upload_1_start: 6.0,
+        upload_1_end: 7.5,
+        upload_1_label: "Khung chính: Sáng sớm xem vận may & tử vi đầu ngày",
+        upload_2_start: 20.0,
+        upload_2_end: 22.0,
+        upload_2_label: "Khung phụ: Tối muộn xem bói bài tarot, vận mệnh, phong thủy",
+        best_weekdays: ["Chủ Nhật", "Thứ 2", "Thứ 6", "Thứ 7"],
+        behavior_insight: "Khán giả xem tử vi, cung hoàng đạo, vận hạn có xu hướng xem vào đầu tuần/đầu ngày để đón vận may hoặc tối muộn thư giãn trải bài tarot, xem phong thủy."
+      },
       buddhism: {
         name_vi: "🪷 Phật Pháp & Chữa Lành",
         upload_1_start: 5.0,
@@ -2336,7 +2350,11 @@
     NICHE_CLIENT_PROFILES.finance_biz = NICHE_CLIENT_PROFILES.finance_money;
     NICHE_CLIENT_PROFILES.quotes_philosophy = NICHE_CLIENT_PROFILES.philosophy;
     NICHE_CLIENT_PROFILES.vlog = NICHE_CLIENT_PROFILES.travel_vlog;
-    NICHE_CLIENT_PROFILES.travel = NICHE_CLIENT_PROFILES.travel_vlog;
+    NICHE_CLIENT_PROFILES.travel = NICHE_CLIENT_PROFILES.travel_vlog;
+    NICHE_CLIENT_PROFILES.horoscope = NICHE_CLIENT_PROFILES.astrology_horoscope;
+    NICHE_CLIENT_PROFILES.astrology = NICHE_CLIENT_PROFILES.astrology_horoscope;
+    NICHE_CLIENT_PROFILES.tarot = NICHE_CLIENT_PROFILES.astrology_horoscope;
+    NICHE_CLIENT_PROFILES.tu_vi = NICHE_CLIENT_PROFILES.astrology_horoscope;
 
     const COUNTRY_OFFSETS = {
       US: -5,
@@ -3294,7 +3312,8 @@
         { tag: "kiếm tiền online 2026", vi: "Nguồn thu nhập thụ động", niche: "💰 Tài Chính", badge: "🔥 Trend" },
         { tag: "trí tuệ nhân tạo AI", vi: "Ứng dụng AI đột phá công việc", niche: "🤖 Công Nghệ", badge: "🚀 Mới" },
         { tag: "truyện ma đêm muộn", vi: "Kinh dị rùng rợn lạnh gáy", niche: "👻 Kinh Dị", badge: "⚡ Rùng rợn" },
-        { tag: "triết lý cuộc sống", vi: "Bài học thức tỉnh & chữa lành", niche: "📜 Triết Lý", badge: "🌱 Chữa lành" },
+        { tag: "triết lý cuộc sống", vi: "Bài học thức tỉnh & chữa lành", niche: "📜 Triết Lý", badge: "🌱 Chữa lành" },
+        { tag: "tử vi 12 con giáp", vi: "Tử vi vận mệnh & 12 con giáp mới nhất", niche: "🔮 Tử Vi", badge: "🔥 Vận mệnh" },
         { tag: "nghe kinh thánh lời chúa", vi: "Kinh Thánh & Lời Chúa chữa lành", niche: "✝️ Kinh Thánh", badge: "🔥 Lời Chúa" }
       ],
       "KR": [
