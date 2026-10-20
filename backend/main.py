@@ -1077,14 +1077,14 @@ NICHE_LOCALIZED_QUERIES = {
         "DEFAULT": "stoicism philosophy"
     },
     "astrology_horoscope": {
-        "VN": "tử vi 12 con giáp cung hoàng đạo tarot",
+        "VN": "tử vi cải mệnh hóa giải thái tuế luật nhân quả phong thủy kim cương kinh",
         "US": "horoscope astrology zodiac signs tarot",
         "GB": "horoscope astrology zodiac signs tarot reading",
         "FR": "horoscope astrologie signes du zodiaque tarot",
         "IT": "oroscopo astrologia segni zodiacali tarocchi",
         "DE": "Horoskop Astrologie Sternzeichen Tarot",
-        "JP": "星座占い タロット 運勢 手相",
-        "KR": "별자리 운세 사주 타로 신년운세",
+        "JP": "運勢 仏教 開運 金剛経 厄除け",
+        "KR": "운세 사주 명상 인과법 액땜",
         "IN": "kundli astrology horoscope rashifal tarot",
         "ID": "ramalan zodiak horoskop tarot weton",
         "TH": "ดูดวง ราศี ไพ่ยิปซี ทารอต ลัคนา",
@@ -1094,9 +1094,9 @@ NICHE_LOCALIZED_QUERIES = {
         "ES": "horoscopo astrologia signos del zodiaco tarot",
         "PT": "horóscopo astrologia signos do zodíaco tarot",
         "IR": "طالع بینی فال تاروت زودیاک ستاره شناسی",
-        "CN": "星座运势 占卜 塔罗牌 八字命理",
-        "TW": "星座運勢 占卜 塔羅牌 八字命理",
-        "DEFAULT": "horoscope astrology zodiac signs tarot"
+        "CN": "化太岁 改变命运 积德改命 金刚经 佛法智慧 护身咒 唯识",
+        "TW": "化太歲 改變命運 積德改命 金剛經 佛法智慧 護身咒 唯識",
+        "DEFAULT": "化太歲 改變命運 佛法智慧 金剛經"
     },
     "buddhism": {
         "VN": "lời phật dạy triết lý tĩnh tâm",
