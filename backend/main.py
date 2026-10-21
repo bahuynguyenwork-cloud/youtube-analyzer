@@ -1077,26 +1077,26 @@ NICHE_LOCALIZED_QUERIES = {
         "DEFAULT": "stoicism philosophy"
     },
     "astrology_horoscope": {
-        "VN": "tử vi cải mệnh hóa giải thái tuế luật nhân quả phong thủy kim cương kinh",
-        "US": "horoscope astrology zodiac signs tarot",
-        "GB": "horoscope astrology zodiac signs tarot reading",
-        "FR": "horoscope astrologie signes du zodiaque tarot",
-        "IT": "oroscopo astrologia segni zodiacali tarocchi",
-        "DE": "Horoskop Astrologie Sternzeichen Tarot",
-        "JP": "運勢 仏教 開運 金剛経 厄除け",
-        "KR": "운세 사주 명상 인과법 액땜",
-        "IN": "kundli astrology horoscope rashifal tarot",
-        "ID": "ramalan zodiak horoskop tarot weton",
-        "TH": "ดูดวง ราศี ไพ่ยิปซี ทารอต ลัคนา",
-        "PH": "horoscope tagalog zodiac signs kapalaran tarot",
-        "RU": "гороскоп астрология знаки зодиака таро",
-        "PL": "horoskop astrologia znaki zodiaku tarot",
-        "ES": "horoscopo astrologia signos del zodiaco tarot",
-        "PT": "horóscopo astrologia signos do zodíaco tarot",
-        "IR": "طالع بینی فال تاروت زودیاک ستاره شناسی",
-        "CN": "化太岁 改变命运 积德改命 金刚经 佛法智慧 护身咒 唯识",
-        "TW": "化太歲 改變命運 積德改命 金剛經 佛法智慧 護身咒 唯識",
-        "DEFAULT": "化太歲 改變命運 佛法智慧 金剛經"
+        "VN": "tử vi 12 con giáp | tử vi 2026 | tử vi hàng ngày | xem bói tướng số | phong thủy cải mệnh | phật pháp nhân quả | tử vi tướng số",
+        "US": "horoscope astrology zodiac | tarot reading destiny | zodiac signs forecast | astrology predictions",
+        "GB": "horoscope astrology zodiac | tarot reading destiny | zodiac signs forecast",
+        "FR": "horoscope astrologie signes | voyance tarot astrologie",
+        "IT": "oroscopo astrologia segni | tarocchi destino oroscopo",
+        "DE": "Horoskop Astrologie Sternzeichen | Tarot Vorhersage",
+        "JP": "星座占い 運勢 | 仏教 開運 金剛経 | タロット占い",
+        "KR": "별자리 운세 | 사주 타로 신년운세 | 불교 인과법 개운",
+        "IN": "kundli astrology horoscope | rashifal tarot reading",
+        "ID": "ramalan zodiak horoskop | tarot weton keberuntungan",
+        "TH": "ดูดวง ราศี | ไพ่ยิปซี ทารอต | ลัคนาดวงชะตา",
+        "PH": "horoscope tagalog zodiac | kapalaran tarot reading",
+        "RU": "гороскоп астрология знаки | таро судьба предсказание",
+        "PL": "horoskop astrologia znaki | tarot wróżby przeznaczenie",
+        "ES": "horoscopo astrologia signos | tarot destino predicciones",
+        "PT": "horóscopo astrologia signos | tarot destino previsões",
+        "IR": "طالع بینی فال تاروت | زودیاک فال سرنوشت",
+        "CN": "紫微斗数 运势 | 金刚经 改变命运 | 佛法 智慧 改变命运 | 命理 因果 | 开运 改变命运 | 吸引力法则 佛法",
+        "TW": "紫微斗數 運勢 | 金剛經 改變命運 | 佛法 智慧 改變命運 | 命理 因果 | 開運 改變命運 | 吸引力法則 佛法",
+        "DEFAULT": "紫微斗數 運勢 | 金剛經 改變命運 | 佛法 智慧 改變命運 | horoscope astrology zodiac"
     },
     "buddhism": {
         "VN": "lời phật dạy triết lý tĩnh tâm",
@@ -1788,12 +1788,12 @@ def is_published_age_matching_range(pub_text: str, t_range: str) -> bool:
             if months > 1:
                 return False
 
-    # 6. Với 90d: Chấp nhận tối đa 3 tháng (loại bỏ từ 4 tháng trở lên)
+    # 6. Với 90d: Chấp nhận tối đa 3-4 tháng (cho phép độ trễ làm tròn 90 ngày của YouTube)
     if t_range == '90d':
         m_match = re.search(r'(\d+)\s*(?:tháng|month|mo|monat|mois|개월|か月)', p)
         if m_match:
             months = int(m_match.group(1))
-            if months > 3:
+            if months > 4:
                 return False
                 
     return True
@@ -2114,7 +2114,9 @@ def is_video_matching_country(item: dict, ch_info: dict, target_geo: str) -> boo
 
     # 19. Thị trường Trung Quốc - Giản Thể (CN)
     elif geo == 'CN':
-        if has_south_asian or has_hangul or has_kana or has_cyrillic or has_arabic or has_thai or has_vn:
+        kana_count = len(re.findall(r'[぀-ヿ]', combined_title))
+        hangul_count = len(re.findall(r'[가-힣ᄀ-ᇿ]', combined_title))
+        if has_south_asian or hangul_count >= 2 or kana_count >= 3 or has_cyrillic or has_arabic or has_thai or has_vn:
             return False
         if audio_lang and not audio_lang.startswith(('zh', 'en', 'zxx')):
             return False
@@ -2123,7 +2125,9 @@ def is_video_matching_country(item: dict, ch_info: dict, target_geo: str) -> boo
 
     # 20. Thị trường Trung Quốc - Phồn Thể (TW)
     elif geo == 'TW':
-        if has_south_asian or has_hangul or has_kana or has_cyrillic or has_arabic or has_thai or has_vn:
+        kana_count = len(re.findall(r'[぀-ヿ]', combined_title))
+        hangul_count = len(re.findall(r'[가-힣ᄀ-ᇿ]', combined_title))
+        if has_south_asian or hangul_count >= 2 or kana_count >= 3 or has_cyrillic or has_arabic or has_thai or has_vn:
             return False
         if audio_lang and not audio_lang.startswith(('zh', 'en', 'zxx')):
             return False
@@ -2258,27 +2262,32 @@ def get_trending_feed(
                 }
                 lang_param = GEO_LANG_MAP.get(geo_code, "en")
 
-                s_url = (
-                    f"https://www.googleapis.com/youtube/v3/search?part=snippet&type=video"
-                    f"&videoDuration={v_dur_param}&order=viewCount&regionCode={geo_code}"
-                    f"&relevanceLanguage={lang_param}&q={requests.utils.quote(q_term)}&maxResults=40&key={api_key}"
-                )
-                if published_after_str:
-                    s_url += f"&publishedAfter={published_after_str}"
+                api_search_queries = [q.strip() for q in q_term.split("|")] if "|" in q_term else [q_term]
+                existing_ids = {it.get("id") for it in video_items}
+                for sq in api_search_queries[:3]:
+                    if len(video_items) >= 40:
+                        break
+                    s_url = (
+                        f"https://www.googleapis.com/youtube/v3/search?part=snippet&type=video"
+                        f"&videoDuration={v_dur_param}&order=viewCount&regionCode={geo_code}"
+                        f"&relevanceLanguage={lang_param}&q={requests.utils.quote(sq)}&maxResults=25&key={api_key}"
+                    )
+                    if published_after_str:
+                        s_url += f"&publishedAfter={published_after_str}"
 
-                s_resp = http_session.get(s_url, timeout=6)
-                if s_resp.status_code == 200:
-                    s_items = s_resp.json().get("items", [])
-                    v_ids = [it["id"]["videoId"] for it in s_items if it.get("id", {}).get("videoId")]
+                    s_resp = http_session.get(s_url, timeout=6)
+                    if s_resp.status_code == 200:
+                        s_items = s_resp.json().get("items", [])
+                        v_ids = [it["id"]["videoId"] for it in s_items if it.get("id", {}).get("videoId") and it["id"]["videoId"] not in existing_ids]
 
-                    if v_ids:
-                        d_url = f"https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails,liveStreamingDetails&id={','.join(v_ids[:40])}&key={api_key}"
-                        d_resp = http_session.get(d_url, timeout=6)
-                        if d_resp.status_code == 200:
-                            existing_ids = {it.get("id") for it in video_items}
-                            for it in d_resp.json().get("items", []):
-                                if it.get("id") and it["id"] not in existing_ids:
-                                    video_items.append(it)
+                        if v_ids:
+                            d_url = f"https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails,liveStreamingDetails&id={','.join(v_ids[:30])}&key={api_key}"
+                            d_resp = http_session.get(d_url, timeout=6)
+                            if d_resp.status_code == 200:
+                                for it in d_resp.json().get("items", []):
+                                    if it.get("id") and it["id"] not in existing_ids:
+                                        video_items.append(it)
+                                        existing_ids.add(it["id"])
 
             if video_items:
                 # Lấy thông tin kênh (Tối ưu với Cache thông tin kênh, tránh gọi API lặp lại)
@@ -2430,23 +2439,28 @@ def get_trending_feed(
             }
             hl_code = GEO_LANG_MAP.get(geo_code, "en")
 
-            # Tạo danh sách các từ khóa tìm kiếm: từ khóa chính + biến thể chất lượng
-            candidate_queries = [search_query]
-            words = search_query.split()
-            if cat != "all":
-                if len(words) >= 3:
-                    candidate_queries.append(' '.join(words[:2]))
-                    candidate_queries.append(f"{words[0]} {words[-1]}")
-                elif len(words) == 2:
-                    candidate_queries.append(search_query)
+            # Tạo danh sách các từ khóa tìm kiếm: hỗ trợ danh sách từ khóa chia cách bởi | hoặc biến thể chất lượng
+            if "|" in search_query:
+                candidate_queries = [q.strip() for q in search_query.split("|") if q.strip()]
+            elif "," in search_query:
+                candidate_queries = [q.strip() for q in search_query.split(",") if q.strip()]
             else:
-                if len(words) >= 3:
-                    candidate_queries.append(' '.join(words[:2]))
-                    candidate_queries.append(' '.join(words[-2:]))
-                    candidate_queries.append(words[0])
-                elif len(words) == 2:
-                    candidate_queries.append(words[0])
-                    candidate_queries.append(words[1])
+                candidate_queries = [search_query]
+                words = search_query.split()
+                if cat != "all":
+                    if len(words) >= 3:
+                        candidate_queries.append(' '.join(words[:2]))
+                        candidate_queries.append(f"{words[0]} {words[-1]}")
+                    elif len(words) == 2:
+                        candidate_queries.append(search_query)
+                else:
+                    if len(words) >= 3:
+                        candidate_queries.append(' '.join(words[:2]))
+                        candidate_queries.append(' '.join(words[-2:]))
+                        candidate_queries.append(words[0])
+                    elif len(words) == 2:
+                        candidate_queries.append(words[0])
+                        candidate_queries.append(words[1])
 
             if cat == "all":
                 if mode == "active_channels":
@@ -2804,7 +2818,7 @@ def get_trending_feed(
 
             # Tiêu chí Kênh Ổn Định & Còn Sống:
             # Ưu tiên kênh có thương hiệu, xác minh, lượng sub thực tế và hoạt động bền vững
-            is_stable = is_ver or subs >= 10000 or (subs >= 5000 and v_cnt >= 10000) or v_cnt >= 25000
+            is_stable = is_ver or subs >= 8000 or (subs >= 3000 and v_cnt >= 8000) or v_cnt >= 15000
 
             if is_ver or subs >= 1_000_000:
                 authority_mult = 2.5
