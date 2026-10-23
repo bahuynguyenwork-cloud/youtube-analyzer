@@ -176,7 +176,8 @@ NICHE_PROFILES = {
             "ngoại tình", "bắt gian", "đánh ghen", "trả thù", "tiểu tam", "con giáp thứ 13", "drama bắt gian",
             "cheating spouse", "cheating partner", "cheating revenge", "caught cheating", "revenge drama",
             "불륜", "바람", "참교육", "사이다 썰", "막장", "浮気", "不倫", "修羅場",
-            "infidelidad", "infiel", "esposa infiel", "marido infiel", "traición", "traicion", "amante", "venganza", "engaño", "engañó", "descubrí", "divorcio", "drama familiar", "esposa"
+            "infidelidad", "infiel", "esposa infiel", "marido infiel", "traición", "traicion", "amante", "venganza", "venganza silenciosa", "engaño", "engañó", "engaños", "descubrí", "divorcio", "drama familiar", "esposa", "marido", "justicia tardía",
+            "cheating spouse", "cheating partner", "cheating revenge", "caught cheating", "revenge drama", "infidelity", "betrayal", "affair", "wife cheated", "husband cheated"
         ]
     },
     "philosophy": {

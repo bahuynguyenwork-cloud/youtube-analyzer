@@ -89,33 +89,67 @@ class CompetitorService:
         queries = []
         all_text = f"{current_channel_name} {' '.join(channel_tags or [])} {channel_description or ''}".lower()
 
-        # 1. Nhận diện ngách Truyện đời thực / Drama / Tâm sự tiếng Tây Ban Nha
-        if any(w in all_text for w in ['relatos', 'historias', 'traición', 'infidelidad', 'drama familiar', 'moraleja', 'reflexionar']):
-            if 'infidelidad' in all_text or 'traición' in all_text or 'esposa' in all_text:
-                queries.append('relatos de infidelidad')
-            queries.append('relatos de vida')
-            queries.append('historias para reflexionar')
-            return queries[:3]
+        # 1. Ngách Ngoại Tình & Bắt Gian Trả Thù (Infidelity & Revenge Drama)
+        if niche in ['infidelity_revenge', 'drama_story'] or any(w in all_text for w in ['infidelidad', 'traición', 'traicion', 'venganza', 'esposa infiel', 'engaño']):
+            if any(w in all_text for w in ['esposa', 'infiel', 'traicion', 'traición', 'relatos', 'historias']):
+                return [
+                    'historias de infidelidad venganza',
+                    'relatos de infidelidad',
+                    'traicion y venganza historias',
+                    'historias de traicion drama familiar'
+                ]
+            elif any(w in all_text for w in ['ngoại tình', 'bắt gian', 'đánh ghen', 'trả thù']):
+                return [
+                    'tâm sự ngoại tình bắt gian',
+                    'drama ngoại tình trả thù',
+                    'đánh ghen bắt gian chuyện có thật'
+                ]
+            else:
+                return [
+                    'cheating revenge stories',
+                    'infidelity drama stories',
+                    'reddit cheating revenge'
+                ]
 
-        # 2. Nhận diện ngách Truyện Reddit
-        if any(w in all_text for w in ['reddit', 'aita', 'tIFU', 'confession', 'prorevenge']):
+        # 2. Ngách Kể Chuyện Thật / Podcast Đời Thực (Real Life Stories)
+        if niche in ['real_life_stories', 'life_stories', 'audio_stories']:
+            if any(w in all_text for w in ['relatos', 'historias', 'vida']):
+                return [
+                    'relatos de vida',
+                    'historias para reflexionar',
+                    'historias de la vida real'
+                ]
+            elif any(w in all_text for w in ['kể chuyện', 'tâm sự', 'chuyện đời']):
+                return [
+                    'kể chuyện đời có thật',
+                    'truyện tâm sự đêm muộn',
+                    'tâm sự đời thực'
+                ]
+            else:
+                return [
+                    'real life stories podcast',
+                    'emotional life stories',
+                    'true stories narrated'
+                ]
+
+        # 3. Ngách Truyện Reddit / Confessions
+        if niche == 'reddit_stories' or any(w in all_text for w in ['reddit', 'aita', 'tifu', 'confession']):
             return ['reddit stories', 'aita stories revenge', 'reddit revenge drama']
 
-        # 3. Nhận diện ngách Kể chuyện tâm sự tiếng Việt
-        if any(w in all_text for w in ['tâm sự', 'chuyện đời', 'kể chuyện', 'ngoại tình', 'gia đình cay đắng']):
-            if 'ngoại tình' in all_text or 'bắt gian' in all_text:
-                queries.append('tâm sự ngoại tình bắt gian')
-            queries.append('kể chuyện đời có thật')
-            queries.append('truyện tâm sự đêm muộn')
-            return queries[:3]
+        # 4. Ngách Bố Chồng Nàng Dâu / Mẹ Chồng Con Dâu
+        if niche in ['father_inlaw_drama', 'mother_inlaw_drama']:
+            if any(w in all_text for w in ['bố chồng', 'nàng dâu', 'mẹ chồng', 'mẹ vợ']):
+                return ['bố chồng nàng dâu tâm sự', 'mẹ chồng nàng dâu drama']
+            else:
+                return ['mother in law drama stories', 'toxic mother in law reddit']
 
-        # 4. Nhận diện ngách Kinh dị / Tâm linh
-        if any(w in all_text for w in ['horror', 'terror', 'truyện ma', 'kinh dị', 'paranormal', 'creepypasta']):
-            if any(w in all_text for w in ['terror', 'relatos']):
+        # 5. Ngách Kinh Dị / Tâm Linh
+        if niche in ['horror_stories', 'horror'] or any(w in all_text for w in ['horror', 'terror', 'truyện ma', 'kinh dị']):
+            if any(w in all_text for w in ['terror', 'relatos', 'miedo']):
                 return ['relatos de terror', 'historias de terror reales']
-            return ['truyện ma có thật', 'horror stories']
+            return ['truyện ma có thật', 'horror stories true']
 
-        # 5. Khai thác Channel Tags của chính chủ kênh
+        # 6. Khai thác Channel Tags chính thức
         if channel_tags:
             for tag in channel_tags:
                 clean_tag = str(tag).strip().strip('"').strip("'")
@@ -123,7 +157,7 @@ class CompetitorService:
                 if 2 <= len(words) <= 3 and clean_tag not in queries:
                     queries.append(clean_tag)
 
-        # 6. Dự phòng từ top_keywords
+        # 7. Dự phòng từ top_keywords
         for kw in (top_keywords or [])[:4]:
             val = kw.get('keyword') if isinstance(kw, dict) else str(kw)
             val = (val or '').strip()
@@ -171,7 +205,7 @@ class CompetitorService:
             try:
                 candidate_ids = []
                 for q in queries:
-                    search_url = f"https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q={requests.utils.quote(q)}&maxResults=15&key={api_key.strip()}"
+                    search_url = f"https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q={requests.utils.quote(q)}&maxResults=10&key={api_key.strip()}"
                     s_res = requests.get(search_url, timeout=7).json()
                     for it in s_res.get('items', []):
                         snip = it.get('snippet', {})
@@ -252,26 +286,43 @@ class CompetitorService:
             except Exception as api_err:
                 logger.warning(f"Lỗi khi tìm kênh qua YouTube API: {api_err}")
 
-        # Lọc nghiêm ngặt: CHỈ LẤY KÊNH ĐỐI THỦ THỰC SỰ (Sub >= 2.000 hoặc Tổng view >= 50.000, ít nhất 5 video)
+        # Lọc nghiêm ngặt: KÊNH ĐỐI THỦ THỰC SỰ (Sub >= 1.000 hoặc Tổng view >= 20.000, ít nhất 3 video)
         established_candidates = []
         for c in candidates_map.values():
             subs = c.get('subscriber_count', 0)
             vids = c.get('video_count', 0)
             tot_v = c.get('total_views', 0)
             
-            # Kênh đối thủ thực thụ phải có sub >= 2000 hoặc view >= 50000 và tối thiểu 5 video
-            if (subs >= 2000 or tot_v >= 50000) and vids >= 5:
+            if (subs >= 1000 or tot_v >= 20000) and vids >= 3:
                 established_candidates.append(c)
 
-        # Sắp xếp kênh đối thủ: Ưu tiên kênh có quy mô vừa & lớn cùng lượt view trung bình cao nhất
-        established_candidates.sort(
-            key=lambda x: (
-                1 if (10000 <= x['subscriber_count'] <= 2500000) else 0,
-                x['avg_views']
-            ),
-            reverse=True
-        )
+        # Chấm điểm độ tương đồng ngách để đưa đúng đối thủ thực sự lên đầu
+        def _score_candidate(cand: Dict[str, Any]) -> int:
+            text = (cand['channel_name'] + ' ' + cand['description']).lower()
+            score = 0
+            # Trùng từ khóa ngách chính
+            if any(w in text for w in ['infidelidad', 'infiel', 'infidelidade', 'ngoại tình', 'bắt gian', 'cheating']):
+                score += 50
+            if any(w in text for w in ['traición', 'traicion', 'venganza', 'trả thù', 'revenge', 'betrayal']):
+                score += 40
+            if any(w in text for w in ['drama', 'secretos familiares', 'reddit', 'confesiones', 'tâm sự']):
+                score += 25
+            if any(w in text for w in ['historias', 'relatos', 'cuentos', 'chuyện']):
+                score += 15
+            
+            # Ưu tiên kênh có quy mô vừa & lớn hoạt động ổn định (5K - 800K subs)
+            subs = cand.get('subscriber_count', 0)
+            if 3000 <= subs <= 800000:
+                score += 30
+            elif subs > 800000:
+                score += 15
 
+            # Cộng điểm lượt xem trung bình
+            avg_v = cand.get('avg_views', 0)
+            score += min(20, avg_v // 5000)
+            return score
+
+        established_candidates.sort(key=_score_candidate, reverse=True)
         final_candidates = established_candidates[:limit]
 
         # Lấy video tiêu biểu cho các kênh được chọn
@@ -292,7 +343,7 @@ class CompetitorService:
                 list(pool.map(_fetch_channel_top_video, final_candidates))
 
         # =========================================================================
-        # Chiến lược 2: Fallback yt-dlp nếu vẫn chưa đủ số lượng kênh
+        # Chiến lược 2: Fallback yt-dlp nếu vẫn chưa đủ 6 kênh
         # =========================================================================
         if len(final_candidates) < limit:
             try:
@@ -324,8 +375,8 @@ class CompetitorService:
                             if not is_music_target and self.is_music_or_topic_channel(title=v_title, uploader=uploader):
                                 continue
 
-                            # Chỉ nhận video có lượt view tốt (>= 3000 view)
-                            if v_views < 3000:
+                            # Chỉ nhận video có lượt view tốt (>= 2000 view)
+                            if v_views < 2000:
                                 continue
 
                             final_candidates.append({
