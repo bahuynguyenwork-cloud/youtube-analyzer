@@ -175,7 +175,8 @@ NICHE_PROFILES = {
         "keywords": [
             "ngoại tình", "bắt gian", "đánh ghen", "trả thù", "tiểu tam", "con giáp thứ 13", "drama bắt gian",
             "cheating spouse", "cheating partner", "cheating revenge", "caught cheating", "revenge drama",
-            "불륜", "바람", "참교육", "사이다 썰", "막장", "浮気", "不倫", "修羅場"
+            "불륜", "바람", "참교육", "사이다 썰", "막장", "浮気", "不倫", "修羅場",
+            "infidelidad", "infiel", "esposa infiel", "marido infiel", "traición", "traicion", "amante", "venganza", "engaño", "engañó", "descubrí", "divorcio", "drama familiar", "esposa"
         ]
     },
     "philosophy": {
@@ -479,7 +480,8 @@ NICHE_PROFILES = {
             "داستان واقعی", "داستان", "پادکست", "داستان ارسالی", "سرنوشت", "رمان", "روایت واقعی", "قصه واقعی", "داستان صوتی", "dastan", "sarnevesht", "پادکست داستان", "داستانهای واقعی",
             "prawdziwe historie", "opowieści z życia", "historie z życia wzięte", "podcast historie", "opowiadania audio",
             "истории из жизни", "жизненные истории", "реальные истории", "подкаст истории", "аудиорассказы", "жизненные драмы",
-            "실화 사연", "인생 사연", "오디오 드라마", "사연 라디오", "사연 읽어주는", "감동 사연"
+            "실화 사연", "인생 사연", "오디오 드라마", "사연 라디오", "사연 읽어주는", "감동 사연",
+            "relatos de vida", "historias de vida", "relatos", "historias para reflexionar", "reflexiones de vida", "historias reales", "relatos reales", "historias conmovedoras", "cuentos de vida", "historias de la vida real", "historias para mujeres maduras", "relatos intensos", "audio relatos", "podcast historias"
         ]
     }
 }
