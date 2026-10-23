@@ -45,14 +45,14 @@ class YouTubeService:
         if '/channel/' in raw:
             cid = raw.split('/channel/')[-1].split('/')[0].split('?')[0]
             try:
-                r = requests.get(f'https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails,statistics&id={cid}&key={api_key}', timeout=8).json()
+                r = requests.get(f'https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails,statistics,brandingSettings&id={cid}&key={api_key}', timeout=8).json()
                 if r.get('items'):
                     ch_item = r['items'][0]
             except Exception as e:
                 logger.warning(f"Error fetching channel by id {cid}: {e}")
         elif raw.startswith('UC') and len(raw) == 24:
             try:
-                r = requests.get(f'https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails,statistics&id={raw}&key={api_key}', timeout=8).json()
+                r = requests.get(f'https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails,statistics,brandingSettings&id={raw}&key={api_key}', timeout=8).json()
                 if r.get('items'):
                     ch_item = r['items'][0]
             except Exception as e:
@@ -63,12 +63,12 @@ class YouTubeService:
             handle = '@' + raw.split('@')[-1].split('/')[0].split('?')[0]
             enc_h = urllib.parse.quote(handle)
             try:
-                r = requests.get(f'https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails,statistics&forHandle={enc_h}&key={api_key}', timeout=8).json()
+                r = requests.get(f'https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails,statistics,brandingSettings&forHandle={enc_h}&key={api_key}', timeout=8).json()
                 if r.get('items'):
                     ch_item = r['items'][0]
                 if not ch_item:
                     enc_h2 = urllib.parse.quote(handle.replace('@', ''))
-                    r = requests.get(f'https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails,statistics&forHandle={enc_h2}&key={api_key}', timeout=8).json()
+                    r = requests.get(f'https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails,statistics,brandingSettings&forHandle={enc_h2}&key={api_key}', timeout=8).json()
                     if r.get('items'):
                         ch_item = r['items'][0]
             except Exception as e:
@@ -82,7 +82,7 @@ class YouTubeService:
                     r = requests.get(f'https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q={urllib.parse.quote(clean_q)}&key={api_key}', timeout=8).json()
                     if r.get('items'):
                         cid = r['items'][0]['snippet']['channelId']
-                        r2 = requests.get(f'https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails,statistics&id={cid}&key={api_key}', timeout=8).json()
+                        r2 = requests.get(f'https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails,statistics,brandingSettings&id={cid}&key={api_key}', timeout=8).json()
                         if r2.get('items'):
                             ch_item = r2['items'][0]
                 except Exception as e:
@@ -100,6 +100,11 @@ class YouTubeService:
         thumbs = snip.get('thumbnails', {})
         avatar = thumbs.get('high', {}).get('url') or thumbs.get('medium', {}).get('url') or thumbs.get('default', {}).get('url', '')
 
+        branding = ch_item.get('brandingSettings', {}).get('channel', {})
+        banner = ch_item.get('brandingSettings', {}).get('image', {}).get('bannerExternalUrl', '')
+        raw_keywords = branding.get('keywords', '')
+        extracted_tags = [k.strip('"').strip() for k in re.findall(r'(?:"[^"]*"|[^\s"]+)', raw_keywords) if k.strip('"').strip()] if raw_keywords else []
+
         channel_meta = {
             'channel_title': snip.get('title', 'YouTube Channel'),
             'channel_url': ch_url,
@@ -108,10 +113,12 @@ class YouTubeService:
             'total_channel_views': int(stats_raw.get('viewCount') or 0),
             'video_count': int(stats_raw.get('videoCount') or 0),
             'avatar_url': avatar,
-            'banner_url': '',
+            'banner_url': banner,
             'description': snip.get('description', ''),
             'country': snip.get('country', ''),
-            'is_verified': int(stats_raw.get('subscriberCount') or 0) >= 100000
+            'is_verified': int(stats_raw.get('subscriberCount') or 0) >= 100000,
+            'keywords': extracted_tags,
+            'channel_keywords': extracted_tags
         }
 
         uploads_id = ch_item.get('contentDetails', {}).get('relatedPlaylists', {}).get('uploads')
@@ -245,6 +252,9 @@ class YouTubeService:
                     channel_meta['description'] = about_res.get('description') or ''
                     channel_meta['is_verified'] = bool(about_res.get('channel_is_verified'))
                     channel_meta['video_count'] = about_res.get('playlist_count') or 0
+                    if about_res.get('tags'):
+                        channel_meta['keywords'] = about_res.get('tags') or []
+                        channel_meta['channel_keywords'] = about_res.get('tags') or []
 
                     thumbs = about_res.get('thumbnails', [])
                     if thumbs:

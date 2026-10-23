@@ -287,15 +287,17 @@ def analyze_channel(req: ChannelAnalysisRequest):
         if "hour_distribution" not in time_data and "hours_distribution" in time_data:
             time_data["hour_distribution"] = {item["hour"]: item["video_count"] for item in time_data["hours_distribution"]}
 
+        detected_niche = time_data.get("detected_niche_code", "entertainment")
         competitors = competitor_service.find_similar_channels(
-            channel_meta.get("channel_title", ""),
-            channel_meta.get("channel_url", ""),
-            keyword_data.get("top_keywords", []),
+            current_channel_name=channel_meta.get("channel_title", ""),
+            current_channel_url=channel_meta.get("channel_url", ""),
+            top_keywords=keyword_data.get("top_keywords", []),
+            channel_tags=all_channel_kws,
+            channel_description=channel_meta.get("description", ""),
+            niche=detected_niche,
             limit=6,
             api_key=effective_key
         )
-
-        detected_niche = time_data.get("detected_niche_code", "entertainment")
         strategy_data = strategy_service.generate_recommendations(
             channel_meta=channel_meta,
             stats=stats,
