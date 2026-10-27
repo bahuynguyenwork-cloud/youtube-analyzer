@@ -1935,6 +1935,12 @@ def is_video_matching_country(item: dict, ch_info: dict, target_geo: str) -> boo
         re.I
     ))
 
+    # 0. Chữ Hán & Ngôn ngữ Trung Quốc: TUYỆT ĐỐI KHÔNG xuất hiện ở các quốc gia không sử dụng chữ Hán
+    if has_chinese and geo not in ['CN', 'TW', 'HK', 'JP']:
+        return False
+    if (audio_lang.startswith(('zh', 'yue')) or default_lang.startswith(('zh', 'yue')) or ch_country in ['CN', 'TW', 'HK']) and geo not in ['CN', 'TW', 'HK']:
+        return False
+
     # 1. Video tiếng Thái: TUYỆT ĐỐI KHÔNG xuất hiện ở bất kỳ quốc gia nào ngoài Thái Lan (TH)
     if has_thai or audio_lang.startswith('th') or default_lang.startswith('th') or ch_country == 'TH':
         if geo != 'TH':
@@ -2005,7 +2011,8 @@ def is_video_matching_country(item: dict, ch_info: dict, target_geo: str) -> boo
 
     # 9. Thị trường Pháp (FR)
     elif geo == 'FR':
-        if has_south_asian or has_hangul or has_kana or has_cyrillic or has_arabic or has_vn:
+        if (has_chinese or has_south_asian or has_hangul or has_kana or has_cyrillic or 
+            has_arabic or has_vn or has_exotic_script or has_tagalog):
             return False
         # Chỉ chấp nhận tiếng Pháp (hoặc zxx - không lời), TUYỆT ĐỐI KHÔNG nhận tiếng Anh
         if audio_lang and not audio_lang.startswith(('fr', 'zxx')):
@@ -2013,15 +2020,33 @@ def is_video_matching_country(item: dict, ch_info: dict, target_geo: str) -> boo
         if default_lang and not default_lang.startswith(('fr', 'zxx')):
             return False
         # Chặn kênh từ Mỹ, Anh, Úc, Canada (nếu không nói tiếng Pháp), Ấn Độ, v.v.
-        if ch_country in ['US', 'GB', 'AU', 'IN', 'VN', 'RU', 'PK', 'BD', 'ID', 'KR', 'JP', 'TH']:
+        if ch_country in ['US', 'GB', 'AU', 'IN', 'VN', 'RU', 'PK', 'BD', 'ID', 'KR', 'JP', 'TH', 'CN', 'TW', 'HK']:
             return False
-        # Kiểm tra từ vựng / dấu tiếng Pháp đặc trưng để loại bỏ hoàn toàn video tiếng Anh lọt vào
-        fr_accents = bool(re.search(r'[éèêëàâîïôùûçœæ]', combined_title, re.I))
-        fr_vocab = {'le', 'la', 'les', 'un', 'une', 'des', 'du', 'de', 'et', 'en', 'pour', 'dans', 'sur', 'avec', 'qui', 'que', 'ce', 'cette', 'est', 'sont', 'pas', 'ne', 'au', 'aux', 'par', 'film', 'français', 'france', 'histoire', 'drames', 'drame', 'amour', 'femme', 'homme', 'mari', 'mariage', 'trahison', 'vengeance', 'secret', 'famille', 'fille', 'fils', 'père', 'mère', 'anglais', 'apprendre', 'cours', 'vocabulaire', 'parler'}
-        t_words = set(re.findall(r'\b[a-zA-ZÀ-ÿ]{2,}\b', combined_title.lower()))
+        # Kiểm tra từ vựng / dấu tiếng Pháp đặc trưng trên tiêu đề (không tính tên kênh để tránh các từ nối như " và ")
+        fr_accents = bool(re.search(r'[éèêëàâîïôùûçœæ]', title, re.I))
+        fr_vocab = {
+            'le', 'la', 'les', 'un', 'une', 'des', 'du', 'de', 'et', 'en', 'pour', 'dans', 'sur', 'avec',
+            'qui', 'que', 'ce', 'cette', 'est', 'sont', 'pas', 'ne', 'au', 'aux', 'par', 'film', 'français',
+            'france', 'histoire', 'drames', 'drame', 'amour', 'femme', 'homme', 'mari', 'mariage', 'trahison',
+            'vengeance', 'secret', 'famille', 'fille', 'fils', 'père', 'mère', 'anglais', 'apprendre', 'cours',
+            'vocabulaire', 'parler', 'belle-mère', 'belle-mere', 'gendre', 'beau-fils', 'trompé', 'tromperie',
+            'infidélité', 'mon', 'ma', 'mes', 'ton', 'ta', 'tes', 'son', 'sa', 'ses', 'notre', 'votre', 'leur'
+        }
+        t_words = set(re.findall(r'\b[a-zA-ZÀ-ÿ]{2,}\b', title.lower()))
         has_fr_words = bool(t_words.intersection(fr_vocab))
-        is_fr_channel = (ch_country == 'FR') or audio_lang.startswith('fr') or default_lang.startswith('fr')
-        if not (fr_accents or has_fr_words or is_fr_channel):
+
+        # Nhận diện từ vựng tiếng Anh điển hình để chặn video tiếng Anh lọt vào
+        en_vocab = {
+            'the', 'my', 'she', 'he', 'her', 'his', 'him', 'husband', 'wife', 'mother-in-law', 'father-in-law',
+            'daughter', 'son', 'family', 'in-law', 'in-laws', 'slapped', 'thinks', 'karma', 'revenge',
+            'cheating', 'affair', 'secret', 'caught', 'shocked', 'dog', 'story', 'drama', 'pregnant', 'married', 'wedding'
+        }
+        has_en_words = bool(t_words.intersection(en_vocab))
+        if has_en_words and not (fr_accents or has_fr_words):
+            return False
+
+        is_fr_channel = (ch_country == 'FR') or (audio_lang != '' and audio_lang.startswith('fr'))
+        if not (fr_accents or has_fr_words or (is_fr_channel and not has_en_words)):
             return False
 
     # 10. Thị trường Ý (IT)
@@ -2500,8 +2525,8 @@ def get_trending_feed(
             # BƯỚC 2.1: Truy vấn trực tiếp YouTube Web UI lấy ytInitialData (nhanh ~300ms, có nhãn ngày đăng thật)
             direct_headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept-Language': "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7",
-                'Cookie': f"PREF=gl={geo_code}&hl=vi;"
+                'Accept-Language': f"{hl_code}-{geo_code},{hl_code};q=0.9,en-US;q=0.8,en;q=0.7",
+                'Cookie': f"PREF=gl={geo_code}&hl={hl_code};"
             }
             
             existing_vids = {v["video_id"] for v in videos}
@@ -2514,7 +2539,7 @@ def get_trending_feed(
                 # Quét rộng đủ nguồn ứng viên đa kênh để loại trừ trùng lặp
                 if len(videos) >= 48:
                     break
-                search_url = f"https://www.youtube.com/results?search_query={requests.utils.quote(cand_query)}&sp={sp_param}&gl={geo_code}&hl=vi"
+                search_url = f"https://www.youtube.com/results?search_query={requests.utils.quote(cand_query)}&sp={sp_param}&gl={geo_code}&hl={hl_code}"
                 try:
                     web_resp = http_session.get(search_url, headers=direct_headers, timeout=6)
                     if web_resp.status_code == 200:
@@ -2604,7 +2629,7 @@ def get_trending_feed(
                                     'snippet': {
                                         'title': t,
                                         'channelTitle': ch_name,
-                                        'defaultAudioLanguage': hl_code
+                                        'defaultAudioLanguage': ''
                                     }
                                 }
                                 pseudo_ch = {
@@ -2693,7 +2718,7 @@ def get_trending_feed(
                                 'snippet': {
                                     'title': t,
                                     'channelTitle': ch_name,
-                                    'defaultAudioLanguage': e.get('language') or hl_code
+                                    'defaultAudioLanguage': e.get('language') or ''
                                 }
                             }
                             pseudo_ch = {
