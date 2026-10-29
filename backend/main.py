@@ -133,6 +133,14 @@ class ApiKeyPayload(BaseModel):
     api_key: Optional[str] = None
     gemini_api_key: Optional[str] = None
 
+class CompetitorSearchRequest(BaseModel):
+    query: str
+    channel_url: Optional[str] = None
+    channel_name: Optional[str] = None
+    niche: Optional[str] = None
+    limit: Optional[int] = 6
+    api_key: Optional[str] = None
+
 @app.api_route("/api/health", methods=["GET", "HEAD"])
 def health_check_api():
     return {"status": "ok", "service": "YouTube Trend & Channel Analyzer", "version": "1.2.0"}
@@ -287,6 +295,7 @@ def analyze_channel(req: ChannelAnalysisRequest):
         if "hour_distribution" not in time_data and "hours_distribution" in time_data:
             time_data["hour_distribution"] = {item["hour"]: item["video_count"] for item in time_data["hours_distribution"]}
 
+        vid_sample_titles = [v.get("title", "") for v in (videos or [])[:15]]
         detected_niche = time_data.get("detected_niche_code", "entertainment")
         competitors = competitor_service.find_similar_channels(
             current_channel_name=channel_meta.get("channel_title", ""),
@@ -294,6 +303,7 @@ def analyze_channel(req: ChannelAnalysisRequest):
             top_keywords=keyword_data.get("top_keywords", []),
             channel_tags=all_channel_kws,
             channel_description=channel_meta.get("description", ""),
+            video_titles=vid_sample_titles,
             niche=detected_niche,
             limit=6,
             api_key=effective_key
@@ -332,6 +342,12 @@ def analyze_channel(req: ChannelAnalysisRequest):
             "publish_time_analysis": time_data,
             "competitors": competitors,
             "competitor_sources": competitors,
+            "competitor_niche_info": {
+                "detected_niche_code": detected_niche,
+                "detected_niche_name": time_data.get("detected_niche") or detected_niche,
+                "search_queries": getattr(competitor_service, '_last_queries', []),
+                "suggested_tags": getattr(competitor_service, '_last_queries', [])
+            },
             "strategy": strategy_data,
             "strategy_recommendations": strategy_data,
             "estimated_earnings": strategy_data.get("estimated_earnings")
@@ -342,6 +358,36 @@ def analyze_channel(req: ChannelAnalysisRequest):
     except Exception as e:
         logger.error(f"Error during channel analysis: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Không thể phân tích kênh: {str(e)}")
+
+@app.post("/api/competitors/search")
+def search_competitors_api(req: CompetitorSearchRequest):
+    try:
+        if not req.query or not req.query.strip():
+            raise HTTPException(status_code=400, detail="Vui lòng cung cấp từ khóa ngách cần tìm kiếm.")
+        effective_key = (req.api_key or "").strip() or get_default_api_key()
+        competitors = competitor_service.find_similar_channels(
+            current_channel_name=req.channel_name or "",
+            current_channel_url=req.channel_url or "",
+            top_keywords=[],
+            channel_tags=[],
+            channel_description="",
+            video_titles=[],
+            niche=req.niche,
+            custom_query=req.query.strip(),
+            limit=req.limit or 6,
+            api_key=effective_key
+        )
+        return {
+            "success": True,
+            "query": req.query.strip(),
+            "competitors": competitors,
+            "total": len(competitors)
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error searching competitors: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Lỗi tìm kiếm đối thủ: {str(e)}")
 
 def fetch_google_suggestions(kw: str, hl_lang: str, gl_country: str) -> List[str]:
     variants = [kw, f"{kw} viral", f"{kw} stories", f"{kw} shorts", f"{kw} 2026"]

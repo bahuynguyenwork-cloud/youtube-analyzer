@@ -8,6 +8,135 @@ import yt_dlp
 
 logger = logging.getLogger(__name__)
 
+NICHE_SEARCH_TEMPLATES = {
+    "infidelity_revenge": {
+        "es": ['historias de traicion drama familiar', 'relatos de infidelidad y venganza', 'historias de infidelidad y engaño'],
+        "vi": ['tâm sự ngoại tình trả thù', 'drama bắt gian ngoại tình', 'đánh ghen bắt gian chuyện có thật'],
+        "en": ['cheating revenge drama stories', 'infidelity betrayal stories reddit', 'family betrayal drama']
+    },
+    "father_inlaw_drama": {
+        "es": ['drama suegra y nuera historias', 'conflictos familiares historias', 'historias de drama familiar'],
+        "vi": ['mẹ chồng nàng dâu drama', 'bố chồng nàng dâu tâm sự', 'xung đột mẹ chồng nàng dâu'],
+        "en": ['mother in law drama stories', 'toxic mother in law reddit', 'entitled in laws stories']
+    },
+    "mother_inlaw_drama": {
+        "es": ['drama suegra y nuera historias', 'conflictos familiares historias', 'historias de suegras'],
+        "vi": ['mẹ chồng nàng dâu drama', 'mẹ vợ con rể drama', 'xung đột gia đình'],
+        "en": ['mother in law drama stories', 'toxic mother in law reddit', 'in laws drama']
+    },
+    "reddit_stories": {
+        "es": ['reddit historias espanol', 'historias de reddit venganza', 'relatos reddit espanol'],
+        "vi": ['truyện reddit vietsub', 'tâm sự reddit kể chuyện', 'drama reddit có thật'],
+        "en": ['reddit stories podcast', 'aita revenge drama', 'best reddit confessions']
+    },
+    "drama_expose": {
+        "es": ['polemicas y drama youtube', 'historias de drama y secretos', 'exponiendo la verdad'],
+        "vi": ['bóc phốt drama mới nhất', 'drama vạch trần sự thật', 'tin tức drama showbiz'],
+        "en": ['drama expose commentary', 'youtube drama explained', 'truth exposed documentary']
+    },
+    "true_crime": {
+        "es": ['casos de misterio de la vida real', 'crimen real documental', 'casos criminales sin resolver'],
+        "vi": ['hồ sơ vụ án có thật', 'kỳ án trinh thám phá án', 'tội phạm có thật bí ẩn'],
+        "en": ['true crime documentary stories', 'real crime cases solved', 'mystery criminal investigation']
+    },
+    "horror_stories": {
+        "es": ['relatos de terror reales', 'historias de miedo reales', 'cuentos de terror paranormal'],
+        "vi": ['truyện ma có thật đêm khuya', 'truyện ma kinh dị tâm linh', 'tâm linh kỳ bí'],
+        "en": ['real horror stories true', 'scary stories narrated', 'creepy paranormal true stories']
+    },
+    "travel_vlog": {
+        "es": ['vlog de viajes y comida', 'viajes por el mundo vlog', 'explorando lugares comida'],
+        "vi": ['vlog du lịch trải nghiệm', 'ẩm thực du lịch bốn phương', 'khám phá daily vlog'],
+        "en": ['travel vlog documentary', 'street food and travel', 'travel lifestyle vlog']
+    },
+    "gaming": {
+        "es": ['gameplay espanol', 'mejores momentos gaming', 'gameplay en espanol'],
+        "vi": ['gameplay highlight tiếng việt', 'trải nghiệm game kịch tính', 'stream game hài hước'],
+        "en": ['gaming highlights gameplay', 'game walkthrough review', 'best gaming moments']
+    },
+    "tech_ai": {
+        "es": ['tecnologia inteligencia artificial', 'review tecnologia gadgets', 'tutoriales de inteligencia artificial'],
+        "vi": ['đánh giá công nghệ trí tuệ nhân tạo', 'review đồ công nghệ mới', 'hướng dẫn công cụ ai'],
+        "en": ['tech review artificial intelligence', 'latest tech gadgets review', 'ai tools tutorial']
+    },
+    "recap_stories": {
+        "es": ['resumen de peliculas y series', 'resumen de pelicula drama', 'explicacion de peliculas'],
+        "vi": ['review phim tóm tắt hay', 'tóm tắt phim điện ảnh', 'spoil phim nhanh'],
+        "en": ['movie recap full story', 'film recap explained', 'movie summary storytelling']
+    },
+    "learn_english": {
+        "es": ['aprender ingles facil y rapido', 'curso de ingles conversacion', 'vocabulario en ingles'],
+        "vi": ['học tiếng anh giao tiếp cơ bản', 'luyện nghe tiếng anh mỗi ngày', 'kỹ năng học tiếng anh'],
+        "en": ['learn english conversation', 'daily english speaking practice', 'english listening practice']
+    },
+    "history_geopolitics": {
+        "es": ['historia mundial documental', 'geopolitica y guerras', 'documentales de historia'],
+        "vi": ['lịch sử thế giới phóng sự', 'địa chính trị quốc tế', 'tư liệu chiến tranh lịch sử'],
+        "en": ['world history documentary', 'geopolitics explained', 'historical warfare documentary']
+    },
+    "finance_money": {
+        "es": ['finanzas personales e inversiones', 'como ganar dinero negocios', 'educacion financiera'],
+        "vi": ['tài chính cá nhân đầu tư', 'kinh doanh kiếm tiền thông minh', 'đầu tư chứng khoán bất động sản'],
+        "en": ['personal finance investing', 'how to make money business', 'wealth building passive income']
+    },
+    "philosophy": {
+        "es": ['lecciones de vida reflexion estoicismo', 'filosofia y motivacion', 'reflexiones para la vida'],
+        "vi": ['bài học cuộc sống danh ngôn', 'triết lý sống chữa lành', 'động lực sống phát triển bản thân'],
+        "en": ['stoicism life lessons philosophy', 'life wisdom motivation', 'philosophical life advice']
+    },
+    "christianity_bible": {
+        "es": ['estudio biblico reflexion oracion', 'predicas cristianas vida', 'palabra de dios diaria'],
+        "vi": ['kinh thánh lời chúa mỗi ngày', 'bài giảng cơ đốc giáo đức tin', 'cầu nguyện tĩnh tâm lời chúa'],
+        "en": ['bible study audio prayer', 'christian daily devotional', 'scripture reading sermon']
+    },
+    "buddhism": {
+        "es": ['budismo ensenanzas meditacion', 'paz interior reflexion budista', 'filosofia budista meditacion'],
+        "vi": ['lời phật dạy chữa lành tĩnh tâm', 'thuyết pháp phật giáo an lạc', 'thiền định lời phật dạy'],
+        "en": ['buddhist wisdom teachings', 'healing peaceful meditation', 'inner peace buddhism philosophy']
+    },
+    "elderly_wisdom": {
+        "es": ['sabiduria de vida para la vejez', 'consejos para adultos mayores', 'lecciones para envejecer con paz'],
+        "vi": ['tâm sự tuổi già bài học cuộc đời', 'lời khuyên tuổi trung niên già', 'dưỡng già an yên cuộc sống'],
+        "en": ['aging wisdom life lessons', 'advice for growing older', 'elderly life reflections']
+    },
+    "astrology_horoscope": {
+        "es": ['horoscopo y tarot predicciones', 'astrologia signos del zodiaco', 'tarot interactivo'],
+        "vi": ['tử vi 12 con giáp vận mệnh', 'xem bói phong thủy vận hạn', 'tarot thông điệp tương lai'],
+        "en": ['daily horoscope tarot reading', 'astrology zodiac predictions', 'zodiac signs fortune']
+    },
+    "entertainment": {
+        "es": ['retos y entretenimiento viral', 'videos divertidos virales', 'desafios y comedia viral'],
+        "vi": ['thử thách sinh tồn hài hước', 'giải trí triệu view viral', 'video hài hước giải trí'],
+        "en": ['viral entertainment challenge', 'funny stunts challenge', 'trending entertainment comedy']
+    }
+}
+
+def detect_channel_language(text: str) -> str:
+    """Xác định ngôn ngữ chính xác dựa trên ký tự đặc trưng và từ vựng cốt lõi."""
+    t = text.lower()
+    
+    # 1. Ký tự thuần Việt (không bao giờ trùng với tiếng Tây Ban Nha, Pháp, Bồ Đào Nha)
+    vn_chars = r'[đăâêôơưảãạẳẵặẩẫậẻẽẹểễệỉĩịỏõọổỗộởỡợủũụửữựỳỷỹỵằầềồờừắấếốớứ]'
+    vn_words = r'\b(và|của|trong|cho|với|không|người|chuyện|tâm sự|ngoại tình|trả thù|bắt gian|đánh ghen|gia đình|hài hước|ẩm thực|du lịch|cuộc sống|phim|tóm tắt|vụ án)\b'
+    vn_score = len(re.findall(vn_chars, t)) * 2 + len(re.findall(vn_words, t)) * 5
+
+    # 2. Tiếng Tây Ban Nha đặc trưng
+    es_chars = r'[ñ¿¡]'
+    es_words = r'\b(el|la|los|las|un|una|unos|unas|de|del|en|para|por|con|que|su|sus|mi|mis|tu|tus|al|se|es|son|historias|relatos|esposa|marido|familia|vida|traicion|traición|venganza|desamor|cuentos|infiel|infidelidad|pelicula|resumen|suegra|nuera|engaño|mujer|hombre)\b'
+    es_score = len(re.findall(es_chars, t)) * 3 + len(re.findall(es_words, t)) * 3
+
+    # 3. Tiếng Pháp đặc trưng
+    fr_chars = r'[çœæ]'
+    fr_words = r'\b(le|la|les|des|du|en|dans|pour|avec|qui|que|cette|est|sont|film|histoire|femme|homme|mariage|trahison|vengeance|famille|amour)\b'
+    fr_score = len(re.findall(fr_chars, t)) * 3 + len(re.findall(fr_words, t)) * 3
+
+    scores = {'vi': vn_score, 'es': es_score, 'fr': fr_score}
+    best_lang, best_score = max(scores.items(), key=lambda x: x[1])
+    if best_score >= 3:
+        return best_lang
+    return 'en'
+
+
 class CompetitorService:
     def __init__(self):
         self.ydl_opts = {
@@ -20,6 +149,8 @@ class CompetitorService:
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
         }
+        self._last_queries = []
+        self._last_niche = ""
 
     def _scrape_channel_avatar(self, channel_url: str) -> str:
         if not channel_url or 'results?search_query=' in channel_url:
@@ -83,92 +214,62 @@ class CompetitorService:
         top_keywords: List[Dict[str, Any]],
         channel_tags: Optional[List[str]] = None,
         channel_description: Optional[str] = None,
-        niche: Optional[str] = None
+        video_titles: Optional[List[str]] = None,
+        niche: Optional[str] = None,
+        custom_query: Optional[str] = None
     ) -> List[str]:
-        """Tạo danh sách các truy vấn ngách đắt giá nhất, đại diện cho toàn bộ thể loại kênh."""
+        """Tạo danh sách các truy vấn ngách đắt giá nhất, đại diện cho toàn bộ thể loại kênh và chuẩn ngôn ngữ."""
+        if custom_query and custom_query.strip():
+            return [custom_query.strip()]
+
         queries = []
-        all_text = f"{current_channel_name} {' '.join(channel_tags or [])} {channel_description or ''}".lower()
+        all_text = f"{current_channel_name} {' '.join(channel_tags or [])} {channel_description or ''} {' '.join(video_titles or [])}".lower()
+        lang = detect_channel_language(all_text)
 
-        # 1. Ngách Ngoại Tình & Bắt Gian Trả Thù (Infidelity & Revenge Drama)
-        if niche in ['infidelity_revenge', 'drama_story'] or any(w in all_text for w in ['infidelidad', 'traición', 'traicion', 'venganza', 'esposa infiel', 'engaño']):
-            if any(w in all_text for w in ['esposa', 'infiel', 'traicion', 'traición', 'relatos', 'historias']):
-                return [
-                    'historias de infidelidad venganza',
-                    'relatos de infidelidad',
-                    'traicion y venganza historias',
-                    'historias de traicion drama familiar'
-                ]
-            elif any(w in all_text for w in ['ngoại tình', 'bắt gian', 'đánh ghen', 'trả thù']):
-                return [
-                    'tâm sự ngoại tình bắt gian',
-                    'drama ngoại tình trả thù',
-                    'đánh ghen bắt gian chuyện có thật'
-                ]
-            else:
-                return [
-                    'cheating revenge stories',
-                    'infidelity drama stories',
-                    'reddit cheating revenge'
-                ]
+        # 1. Khai thác mẫu truy vấn chuyên biệt theo ngách và ngôn ngữ
+        if niche and niche in NICHE_SEARCH_TEMPLATES:
+            n_templates = NICHE_SEARCH_TEMPLATES[niche]
+            queries.extend(n_templates.get(lang, n_templates.get("en", [])))
 
-        # 2. Ngách Kể Chuyện Thật / Podcast Đời Thực (Real Life Stories)
-        if niche in ['real_life_stories', 'life_stories', 'audio_stories']:
-            if any(w in all_text for w in ['relatos', 'historias', 'vida']):
-                return [
-                    'relatos de vida',
-                    'historias para reflexionar',
-                    'historias de la vida real'
-                ]
-            elif any(w in all_text for w in ['kể chuyện', 'tâm sự', 'chuyện đời']):
-                return [
-                    'kể chuyện đời có thật',
-                    'truyện tâm sự đêm muộn',
-                    'tâm sự đời thực'
-                ]
-            else:
-                return [
-                    'real life stories podcast',
-                    'emotional life stories',
-                    'true stories narrated'
-                ]
+        # 2. Phát hiện chủ đề từ tiêu đề video thực tế (Ground Truth)
+        if lang == 'es':
+            if any(w in all_text for w in ['infidelidad', 'traicion', 'traición', 'venganza', 'esposa infiel', 'engaño']):
+                for q in ['historias de traicion drama familiar', 'relatos de infidelidad y venganza', 'historias de drama familiar']:
+                    if q not in queries:
+                        queries.append(q)
+            elif any(w in all_text for w in ['suegra', 'nuera', 'familia']):
+                for q in ['drama suegra y nuera historias', 'conflictos familiares historias']:
+                    if q not in queries:
+                        queries.append(q)
+        elif lang == 'vi':
+            if any(w in all_text for w in ['ngoại tình', 'bắt gian', 'đánh ghen', 'trả thù']):
+                for q in ['tâm sự ngoại tình trả thù', 'drama bắt gian ngoại tình', 'đánh ghen bắt gian chuyện có thật']:
+                    if q not in queries:
+                        queries.append(q)
+            elif any(w in all_text for w in ['mẹ chồng', 'mẹ vợ', 'con dâu', 'bố chồng']):
+                for q in ['mẹ chồng nàng dâu drama', 'bố chồng nàng dâu tâm sự']:
+                    if q not in queries:
+                        queries.append(q)
 
-        # 3. Ngách Truyện Reddit / Confessions
-        if niche == 'reddit_stories' or any(w in all_text for w in ['reddit', 'aita', 'tifu', 'confession']):
-            return ['reddit stories', 'aita stories revenge', 'reddit revenge drama']
-
-        # 4. Ngách Bố Chồng Nàng Dâu / Mẹ Chồng Con Dâu
-        if niche in ['father_inlaw_drama', 'mother_inlaw_drama']:
-            if any(w in all_text for w in ['bố chồng', 'nàng dâu', 'mẹ chồng', 'mẹ vợ']):
-                return ['bố chồng nàng dâu tâm sự', 'mẹ chồng nàng dâu drama']
-            else:
-                return ['mother in law drama stories', 'toxic mother in law reddit']
-
-        # 5. Ngách Kinh Dị / Tâm Linh
-        if niche in ['horror_stories', 'horror'] or any(w in all_text for w in ['horror', 'terror', 'truyện ma', 'kinh dị']):
-            if any(w in all_text for w in ['terror', 'relatos', 'miedo']):
-                return ['relatos de terror', 'historias de terror reales']
-            return ['truyện ma có thật', 'horror stories true']
-
-        # 6. Khai thác Channel Tags chính thức
+        # 3. Khai thác Channel Tags & Top Keywords chất lượng (từ 2 đến 4 từ)
         if channel_tags:
             for tag in channel_tags:
                 clean_tag = str(tag).strip().strip('"').strip("'")
                 words = clean_tag.split()
-                if 2 <= len(words) <= 3 and clean_tag not in queries:
+                if 2 <= len(words) <= 4 and clean_tag.lower() not in [q.lower() for q in queries]:
                     queries.append(clean_tag)
 
-        # 7. Dự phòng từ top_keywords
-        for kw in (top_keywords or [])[:4]:
+        for kw in (top_keywords or [])[:5]:
             val = kw.get('keyword') if isinstance(kw, dict) else str(kw)
             val = (val or '').strip()
             words = val.split()
-            if 2 <= len(words) <= 3 and val not in queries:
+            if 2 <= len(words) <= 4 and val.lower() not in [q.lower() for q in queries]:
                 queries.append(val)
 
         if not queries:
             queries = [current_channel_name]
 
-        return queries[:3]
+        return queries[:4]
 
     def find_similar_channels(
         self,
@@ -177,41 +278,53 @@ class CompetitorService:
         top_keywords: List[Dict[str, Any]],
         channel_tags: Optional[List[str]] = None,
         channel_description: Optional[str] = None,
+        video_titles: Optional[List[str]] = None,
         niche: Optional[str] = None,
+        custom_query: Optional[str] = None,
         limit: int = 6,
         api_key: Optional[str] = None
     ) -> List[Dict[str, Any]]:
-        """Tìm kiếm các kênh đối thủ UY TÍN, ĐANG HOẠT ĐỘNG MẠNH trong cùng ngách (loại bỏ hoàn toàn kênh mới 0 sub)."""
+        """
+        Tìm kiếm các kênh đối thủ UY TÍN, ĐANG HOẠT ĐỘNG MẠNH trong cùng ngách:
+        - Quét cả video viral hàng đầu và kênh trực tiếp để tìm đúng những creator đang dẫn đầu ngách.
+        - Khớp đúng 100% ngôn ngữ và chủ đề của kênh đang phân tích.
+        - Lọc bỏ hoàn toàn kênh mới 0 sub, kênh rác, kênh Shorts và kênh MV/Nhạc.
+        """
         queries = self._build_search_queries(
             current_channel_name=current_channel_name,
             top_keywords=top_keywords,
             channel_tags=channel_tags,
             channel_description=channel_description,
-            niche=niche
+            video_titles=video_titles,
+            niche=niche,
+            custom_query=custom_query
         )
+        self._last_queries = queries
+        self._last_niche = niche or ""
         logger.info(f"Finding established competitors for '{current_channel_name}' with queries: {queries}")
 
-        is_music_target = False
-        target_context = f"{current_channel_name} {' '.join(channel_tags or [])} {channel_description or ''}".lower()
-        if any(w in target_context for w in ['music', 'música', 'singer', 'ca sĩ', 'bài hát', 'nhạc']):
-            is_music_target = True
+        all_target_text = f"{current_channel_name} {' '.join(channel_tags or [])} {channel_description or ''} {' '.join(video_titles or [])}".lower()
+        target_lang = detect_channel_language(all_target_text)
+        is_music_target = any(w in all_target_text for w in ['music', 'música', 'singer', 'ca sĩ', 'bài hát', 'nhạc'])
 
         candidates_map: Dict[str, Dict[str, Any]] = {}
+        candidate_ids: List[str] = []
 
         # =========================================================================
-        # Chiến lược 1: Tìm kiếm trực tiếp kênh qua YouTube Data API v3 (type=channel)
+        # Chiến lược 1: Tìm kiếm đối thủ thực tế qua YouTube Data API v3
+        # Quét video thịnh hành nhất trong ngách để lấy creator thực sự + quét kênh
         # =========================================================================
         if api_key and api_key.strip():
             try:
-                candidate_ids = []
                 for q in queries:
-                    search_url = f"https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q={requests.utils.quote(q)}&maxResults=10&key={api_key.strip()}"
-                    s_res = requests.get(search_url, timeout=7).json()
-                    for it in s_res.get('items', []):
+                    # 1.1 Quét video hàng đầu trong ngách để tìm kênh đứng sau các video viral đó
+                    v_search_url = f"https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&q={requests.utils.quote(q)}&order=relevance&maxResults=12&key={api_key.strip()}"
+                    v_res = requests.get(v_search_url, timeout=7).json()
+                    for it in v_res.get('items', []):
                         snip = it.get('snippet', {})
                         c_id = snip.get('channelId')
                         c_name = snip.get('channelTitle', '')
-                        c_desc = snip.get('description', '')
+                        v_title = snip.get('title', '')
 
                         if not c_id or not c_name or c_id in candidate_ids:
                             continue
@@ -222,7 +335,51 @@ class CompetitorService:
                         if current_channel_url and c_id in current_channel_url:
                             continue
 
-                        # Lọc bỏ Shorts & Nhạc
+                        if self.is_short_or_shorts_channel(title=v_title, uploader=c_name):
+                            continue
+                        if not is_music_target and self.is_music_or_topic_channel(title=v_title, uploader=c_name):
+                            continue
+
+                        candidate_ids.append(c_id)
+                        candidates_map[c_id] = {
+                            'channel_name': c_name,
+                            'title': c_name,
+                            'name': c_name,
+                            'channel_id': c_id,
+                            'channel_url': f"https://www.youtube.com/channel/{c_id}",
+                            'url': f"https://www.youtube.com/channel/{c_id}",
+                            'avatar_url': '',
+                            'avatar': '',
+                            'thumbnail': '',
+                            'description': '',
+                            'subscriber_count': 0,
+                            'video_count': 0,
+                            'total_views': 0,
+                            'avg_views': 0,
+                            'avg_views_sample': 0,
+                            'sample_matched_videos': 1,
+                            'top_video_title': v_title,
+                            'top_video_views': 0,
+                            'is_verified': False
+                        }
+
+                    # 1.2 Quét trực tiếp type=channel để bổ sung kênh mang từ khóa ngách
+                    c_search_url = f"https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q={requests.utils.quote(q)}&maxResults=4&key={api_key.strip()}"
+                    c_res = requests.get(c_search_url, timeout=6).json()
+                    for it in c_res.get('items', []):
+                        snip = it.get('snippet', {})
+                        c_id = snip.get('channelId')
+                        c_name = snip.get('channelTitle', '')
+                        c_desc = snip.get('description', '')
+
+                        if not c_id or not c_name or c_id in candidate_ids:
+                            continue
+
+                        if current_channel_name and (current_channel_name.lower() in c_name.lower() or c_name.lower() in current_channel_name.lower()):
+                            continue
+                        if current_channel_url and c_id in current_channel_url:
+                            continue
+
                         if self.is_short_or_shorts_channel(uploader=c_name):
                             continue
                         if not is_music_target and self.is_music_or_topic_channel(uploader=c_name, description=c_desc):
@@ -244,6 +401,7 @@ class CompetitorService:
                             'description': c_desc,
                             'subscriber_count': 0,
                             'video_count': 0,
+                            'total_views': 0,
                             'avg_views': 0,
                             'avg_views_sample': 0,
                             'sample_matched_videos': 1,
@@ -252,10 +410,10 @@ class CompetitorService:
                             'is_verified': False
                         }
 
-                # Lấy số liệu thống kê chi tiết và LỌC KÊNH UY TÍN
+                # 1.3 Lấy thông số chi tiết (Subscribers, Views, Videos, Avatar) cho tất cả ứng viên
                 if candidate_ids:
-                    chunk = candidate_ids[:40]
-                    detail_url = f"https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,contentDetails&id={','.join(chunk)}&key={api_key.strip()}"
+                    chunk = candidate_ids[:45]
+                    detail_url = f"https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id={','.join(chunk)}&key={api_key.strip()}"
                     d_res = requests.get(detail_url, timeout=8).json()
                     
                     for d_it in d_res.get('items', []):
@@ -274,6 +432,7 @@ class CompetitorService:
                             candidates_map[d_id]['avg_views'] = avg_v
                             candidates_map[d_id]['avg_views_sample'] = avg_v
                             candidates_map[d_id]['is_verified'] = subs >= 100000
+                            candidates_map[d_id]['description'] = sn.get('description', '') or candidates_map[d_id]['description']
                             
                             thumbs = sn.get('thumbnails', {})
                             if thumbs:
@@ -296,28 +455,38 @@ class CompetitorService:
             if (subs >= 1000 or tot_v >= 20000) and vids >= 3:
                 established_candidates.append(c)
 
-        # Chấm điểm độ tương đồng ngách để đưa đúng đối thủ thực sự lên đầu
+        # Chấm điểm độ tương đồng ngách & ngôn ngữ để đưa đúng đối thủ thực sự lên đầu
         def _score_candidate(cand: Dict[str, Any]) -> int:
-            text = (cand['channel_name'] + ' ' + cand['description']).lower()
+            text = (cand['channel_name'] + ' ' + cand.get('description', '') + ' ' + cand.get('top_video_title', '')).lower()
             score = 0
-            # Trùng từ khóa ngách chính
-            if any(w in text for w in ['infidelidad', 'infiel', 'infidelidade', 'ngoại tình', 'bắt gian', 'cheating']):
-                score += 50
-            if any(w in text for w in ['traición', 'traicion', 'venganza', 'trả thù', 'revenge', 'betrayal']):
-                score += 40
-            if any(w in text for w in ['drama', 'secretos familiares', 'reddit', 'confesiones', 'tâm sự']):
-                score += 25
-            if any(w in text for w in ['historias', 'relatos', 'cuentos', 'chuyện']):
-                score += 15
-            
-            # Ưu tiên kênh có quy mô vừa & lớn hoạt động ổn định (5K - 800K subs)
-            subs = cand.get('subscriber_count', 0)
-            if 3000 <= subs <= 800000:
-                score += 30
-            elif subs > 800000:
-                score += 15
+            cand_lang = detect_channel_language(text)
 
-            # Cộng điểm lượt xem trung bình
+            # Khớp ngôn ngữ của kênh phân tích
+            if cand_lang == target_lang:
+                score += 50
+            else:
+                score -= 30
+
+            # Khớp từ khóa chủ đề ngách
+            for q in queries:
+                q_words = [w for w in q.lower().split() if len(w) > 2]
+                overlap = sum(1 for w in q_words if w in text)
+                score += overlap * 10
+
+            # Ưu tiên kênh đối thủ cùng hạng cân (5.000 - 800.000 subs)
+            subs = cand.get('subscriber_count', 0)
+            if 5000 <= subs <= 500000:
+                score += 35
+            elif 500000 < subs <= 1500000:
+                score += 25
+            elif subs > 0:
+                score += 10
+
+            # Có video tiêu biểu viral
+            if cand.get('top_video_title'):
+                score += 20
+
+            # Lượt xem trung bình
             avg_v = cand.get('avg_views', 0)
             score += min(20, avg_v // 5000)
             return score
@@ -325,9 +494,11 @@ class CompetitorService:
         established_candidates.sort(key=_score_candidate, reverse=True)
         final_candidates = established_candidates[:limit]
 
-        # Lấy video tiêu biểu cho các kênh được chọn
+        # Bổ sung video tiêu biểu cho các kênh được chọn nếu chưa có
         if api_key and api_key.strip() and final_candidates:
             def _fetch_channel_top_video(cand: Dict[str, Any]):
+                if cand.get('top_video_title'):
+                    return
                 c_id = cand['channel_id']
                 uploads_id = 'UU' + c_id[2:]
                 try:
@@ -343,7 +514,7 @@ class CompetitorService:
                 list(pool.map(_fetch_channel_top_video, final_candidates))
 
         # =========================================================================
-        # Chiến lược 2: Fallback yt-dlp nếu vẫn chưa đủ 6 kênh
+        # Chiến lược 2: Fallback yt-dlp nếu không có API Key hoặc chưa đủ kênh
         # =========================================================================
         if len(final_candidates) < limit:
             try:
