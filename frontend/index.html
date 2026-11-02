@@ -2070,6 +2070,7 @@
       // Store last analyzed channel context for competitor search
       window._lastAnalyzedChannelUrl = channel_info.channel_url || '';
       window._lastAnalyzedChannelName = channel_info.title || channel_info.channel_title || '';
+      window._lastAnalyzedTargetGeo = (document.getElementById('channel-geo')?.value) || channel_info.country || 'US';
 
       // Competitors & Strategies with Niche Info
       renderCompetitors(competitor_sources || [], data.competitor_niche_info || null);
@@ -2847,10 +2848,12 @@
 
       try {
         const apiKey = document.getElementById('user-api-key')?.value || '';
+        const targetGeo = window._lastAnalyzedTargetGeo || (document.getElementById('channel-geo')?.value) || 'US';
         const payload = {
           query: query,
           channel_url: window._lastAnalyzedChannelUrl || '',
           channel_name: window._lastAnalyzedChannelName || '',
+          target_geo: targetGeo,
           limit: 6,
           api_key: apiKey
         };

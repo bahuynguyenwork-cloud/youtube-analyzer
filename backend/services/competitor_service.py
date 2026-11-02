@@ -8,132 +8,223 @@ import yt_dlp
 
 logger = logging.getLogger(__name__)
 
+GEO_TO_LANG_MAP = {
+    "KR": "ko",
+    "JP": "ja",
+    "VN": "vi",
+    "US": "en", "GB": "en", "CA": "en", "AU": "en",
+    "FR": "fr",
+    "DE": "de",
+    "ES": "es", "MX": "es", "AR": "es", "CO": "es", "CL": "es", "PE": "es",
+    "BR": "pt", "PT": "pt",
+    "RU": "ru",
+    "TH": "th",
+    "CN": "zh", "TW": "zh", "HK": "zh",
+    "IT": "it",
+    "IN": "hi",
+    "ID": "id"
+}
+
 NICHE_SEARCH_TEMPLATES = {
     "infidelity_revenge": {
+        "ko": ['사이다 썰', '바람 불륜 사이다 복수 썰', '사이다사연 참교육', '톡썰 사연 모음'],
+        "ja": ['修羅場 スカッとする話', '浮気 復讐 スカッと', '修羅場 不倫 ざまぁ'],
         "es": ['historias de traicion drama familiar', 'relatos de infidelidad y venganza', 'historias de infidelidad y engaño'],
         "vi": ['tâm sự ngoại tình trả thù', 'drama bắt gian ngoại tình', 'đánh ghen bắt gian chuyện có thật'],
         "en": ['cheating revenge drama stories', 'infidelity betrayal stories reddit', 'family betrayal drama']
     },
     "father_inlaw_drama": {
+        "ko": ['시어머니 며느리 갈등 사이다 썰', '시댁 갈등 사이다 사연', '막장 시댁 참교육 썰'],
+        "ja": ['義母 嫁 姑 確執 スカッと', '義実家 ざまぁ スカッとする話'],
         "es": ['drama suegra y nuera historias', 'conflictos familiares historias', 'historias de drama familiar'],
         "vi": ['mẹ chồng nàng dâu drama', 'bố chồng nàng dâu tâm sự', 'xung đột mẹ chồng nàng dâu'],
         "en": ['mother in law drama stories', 'toxic mother in law reddit', 'entitled in laws stories']
     },
     "mother_inlaw_drama": {
+        "ko": ['시어머니 며느리 갈등 사이다 썰', '시어머니 참교육 썰', '사이다 톡썰 모음'],
+        "ja": ['姑 嫁いびり スカッと', '義母 撃退 ざまぁ スカッとする話'],
         "es": ['drama suegra y nuera historias', 'conflictos familiares historias', 'historias de suegras'],
         "vi": ['mẹ chồng nàng dâu drama', 'mẹ vợ con rể drama', 'xung đột gia đình'],
         "en": ['mother in law drama stories', 'toxic mother in law reddit', 'in laws drama']
     },
     "reddit_stories": {
+        "ko": ['레딧 썰', '네이트판 레전드 썰', '사연 라디오', '커뮤니티 레전드 썰'],
+        "ja": ['2ch スカッと 伝説', '2ちゃんねる スレ 朗読'],
         "es": ['reddit historias espanol', 'historias de reddit venganza', 'relatos reddit espanol'],
         "vi": ['truyện reddit vietsub', 'tâm sự reddit kể chuyện', 'drama reddit có thật'],
         "en": ['reddit stories podcast', 'aita revenge drama', 'best reddit confessions']
     },
     "drama_expose": {
+        "ko": ['사건사고 이슈 폭로', '연예 이슈 정리', '논란 이슈 총정리'],
+        "ja": ['炎上 事件 暴露 まとめ', '芸能界 闇 暴露'],
         "es": ['polemicas y drama youtube', 'historias de drama y secretos', 'exponiendo la verdad'],
         "vi": ['bóc phốt drama mới nhất', 'drama vạch trần sự thật', 'tin tức drama showbiz'],
         "en": ['drama expose commentary', 'youtube drama explained', 'truth exposed documentary']
     },
     "true_crime": {
+        "ko": ['그것이 알고싶다 미제사건', '실화 범죄 미스터리', '한국 미제사건 실화'],
+        "ja": ['未解決事件 迷宮入り', '実際の事件 凶悪事件 ドキュメンタリー'],
         "es": ['casos de misterio de la vida real', 'crimen real documental', 'casos criminales sin resolver'],
         "vi": ['hồ sơ vụ án có thật', 'kỳ án trinh thám phá án', 'tội phạm có thật bí ẩn'],
         "en": ['true crime documentary stories', 'real crime cases solved', 'mystery criminal investigation']
     },
     "horror_stories": {
+        "ko": ['무서운 이야기 실화', '괴담 라디오', '공포 실화 썰'],
+        "ja": ['本当にあった怖い話 朗読', '怪談 恐怖 実話'],
         "es": ['relatos de terror reales', 'historias de miedo reales', 'cuentos de terror paranormal'],
         "vi": ['truyện ma có thật đêm khuya', 'truyện ma kinh dị tâm linh', 'tâm linh kỳ bí'],
         "en": ['real horror stories true', 'scary stories narrated', 'creepy paranormal true stories']
     },
     "travel_vlog": {
+        "ko": ['여행 브이로그', '세계여행 브이로그', '먹방 여행 브이로그'],
+        "ja": ['旅行 vlog ひとり旅', '海外旅行 ドキュメンタリー'],
         "es": ['vlog de viajes y comida', 'viajes por el mundo vlog', 'explorando lugares comida'],
         "vi": ['vlog du lịch trải nghiệm', 'ẩm thực du lịch bốn phương', 'khám phá daily vlog'],
         "en": ['travel vlog documentary', 'street food and travel', 'travel lifestyle vlog']
     },
     "gaming": {
+        "ko": ['게임 하이라이트', '게임 실황 플레이', '종합게임 플레이'],
+        "ja": ['ゲーム実況 プレイ', 'ゲーム ハイライト 名場面'],
         "es": ['gameplay espanol', 'mejores momentos gaming', 'gameplay en espanol'],
         "vi": ['gameplay highlight tiếng việt', 'trải nghiệm game kịch tính', 'stream game hài hước'],
         "en": ['gaming highlights gameplay', 'game walkthrough review', 'best gaming moments']
     },
     "tech_ai": {
+        "ko": ['it 테크 리뷰', 'ai 인공지능 활용법', '전자기기 언박싱'],
+        "ja": ['ガジェット レビュー 最新', 'ai 活用法 ツール 最新情報'],
         "es": ['tecnologia inteligencia artificial', 'review tecnologia gadgets', 'tutoriales de inteligencia artificial'],
         "vi": ['đánh giá công nghệ trí tuệ nhân tạo', 'review đồ công nghệ mới', 'hướng dẫn công cụ ai'],
         "en": ['tech review artificial intelligence', 'latest tech gadgets review', 'ai tools tutorial']
     },
     "recap_stories": {
+        "ko": ['영화 결말포함', '영화 리뷰 요약', '드라마 몰아보기 요약'],
+        "ja": ['映画 解説 結末まで', '映画 あらすじ 要約'],
         "es": ['resumen de peliculas y series', 'resumen de pelicula drama', 'explicacion de peliculas'],
         "vi": ['review phim tóm tắt hay', 'tóm tắt phim điện ảnh', 'spoil phim nhanh'],
         "en": ['movie recap full story', 'film recap explained', 'movie summary storytelling']
     },
     "learn_english": {
+        "ko": ['영어회화 꿀팁', '원어민 영어 표현', '기초 영어 패턴'],
+        "ja": ['英会話 リスニング 練習', 'ネイティブ 英語 フレーズ'],
         "es": ['aprender ingles facil y rapido', 'curso de ingles conversacion', 'vocabulario en ingles'],
         "vi": ['học tiếng anh giao tiếp cơ bản', 'luyện nghe tiếng anh mỗi ngày', 'kỹ năng học tiếng anh'],
         "en": ['learn english conversation', 'daily english speaking practice', 'english listening practice']
     },
     "history_geopolitics": {
+        "ko": ['세계사 역사 다큐', '전쟁사 다큐멘터리', '국제정세 지정학'],
+        "ja": ['世界史 ドキュメンタリー', '戦争の歴史 地政学'],
         "es": ['historia mundial documental', 'geopolitica y guerras', 'documentales de historia'],
         "vi": ['lịch sử thế giới phóng sự', 'địa chính trị quốc tế', 'tư liệu chiến tranh lịch sử'],
         "en": ['world history documentary', 'geopolitics explained', 'historical warfare documentary']
     },
     "finance_money": {
+        "ko": ['재테크 재정 경제', '주식 부동산 투자', '부자되는 습관'],
+        "ja": ['資産運用 投資 初心者', 'お金の増やし方 副業'],
         "es": ['finanzas personales e inversiones', 'como ganar dinero negocios', 'educacion financiera'],
         "vi": ['tài chính cá nhân đầu tư', 'kinh doanh kiếm tiền thông minh', 'đầu tư chứng khoán bất động sản'],
         "en": ['personal finance investing', 'how to make money business', 'wealth building passive income']
     },
     "philosophy": {
+        "ko": ['인생 명언 교훈', '인생 철학 동기부여', '마음공부 지혜'],
+        "ja": ['人生の教訓 名言 哲学', '心を整える 智慧'],
         "es": ['lecciones de vida reflexion estoicismo', 'filosofia y motivacion', 'reflexiones para la vida'],
         "vi": ['bài học cuộc sống danh ngôn', 'triết lý sống chữa lành', 'động lực sống phát triển bản thân'],
         "en": ['stoicism life lessons philosophy', 'life wisdom motivation', 'philosophical life advice']
     },
     "christianity_bible": {
+        "ko": ['말씀 기도 묵상', '성경 오디오 말씀', '기독교 설교 은혜'],
+        "ja": ['聖書の言葉 祈り 礼拝', 'キリスト教 説教 賛美歌'],
         "es": ['estudio biblico reflexion oracion', 'predicas cristianas vida', 'palabra de dios diaria'],
         "vi": ['kinh thánh lời chúa mỗi ngày', 'bài giảng cơ đốc giáo đức tin', 'cầu nguyện tĩnh tâm lời chúa'],
         "en": ['bible study audio prayer', 'christian daily devotional', 'scripture reading sermon']
     },
     "buddhism": {
+        "ko": ['불교 명상 법문', '마음 다스리는 법문', '부처님 말씀 힐링'],
+        "ja": ['仏教 法話 瞑想 心の平安', 'ブッダの教え 説法'],
         "es": ['budismo ensenanzas meditacion', 'paz interior reflexion budista', 'filosofia budista meditacion'],
         "vi": ['lời phật dạy chữa lành tĩnh tâm', 'thuyết pháp phật giáo an lạc', 'thiền định lời phật dạy'],
         "en": ['buddhist wisdom teachings', 'healing peaceful meditation', 'inner peace buddhism philosophy']
     },
     "elderly_wisdom": {
+        "ko": ['노후 인생 명언', '노년 인생 교훈', '은퇴 후 삶의 지혜'],
+        "ja": ['老後の生き方 人生の知恵', 'シニア 人生の教訓'],
         "es": ['sabiduria de vida para la vejez', 'consejos para adultos mayores', 'lecciones para envejecer con paz'],
         "vi": ['tâm sự tuổi già bài học cuộc đời', 'lời khuyên tuổi trung niên già', 'dưỡng già an yên cuộc sống'],
         "en": ['aging wisdom life lessons', 'advice for growing older', 'elderly life reflections']
     },
     "astrology_horoscope": {
+        "ko": ['오늘의 운세 띠별운세', '타로 카드 리딩', '신년 사주 운세'],
+        "ja": ['占い タロット リーディング', '星座占い 運勢'],
         "es": ['horoscopo y tarot predicciones', 'astrologia signos del zodiaco', 'tarot interactivo'],
         "vi": ['tử vi 12 con giáp vận mệnh', 'xem bói phong thủy vận hạn', 'tarot thông điệp tương lai'],
         "en": ['daily horoscope tarot reading', 'astrology zodiac predictions', 'zodiac signs fortune']
     },
     "entertainment": {
+        "ko": ['예능 레전드 모음', '웃긴 영상 챌린지', '재미있는 영상 모음'],
+        "ja": ['おもしろ動画 爆笑', 'バラエティ 名場面'],
         "es": ['retos y entretenimiento viral', 'videos divertidos virales', 'desafios y comedia viral'],
         "vi": ['thử thách sinh tồn hài hước', 'giải trí triệu view viral', 'video hài hước giải trí'],
         "en": ['viral entertainment challenge', 'funny stunts challenge', 'trending entertainment comedy']
     }
 }
 
-def detect_channel_language(text: str) -> str:
-    """Xác định ngôn ngữ chính xác dựa trên ký tự đặc trưng và từ vựng cốt lõi."""
+def detect_channel_language(text: str, target_geo: Optional[str] = None, channel_country: Optional[str] = None) -> str:
+    """Xác định ngôn ngữ chính xác dựa trên ký tự đặc trưng, từ vựng cốt lõi và quốc gia kênh/thị trường."""
     t = text.lower()
     
-    # 1. Ký tự thuần Việt (không bao giờ trùng với tiếng Tây Ban Nha, Pháp, Bồ Đào Nha)
+    # 1. Tiếng Hàn Quốc (Hangul: [가-힣ᄀ-ᇿ])
+    if len(re.findall(r'[가-힣ᄀ-ᇿ]', text)) >= 2:
+        return 'ko'
+        
+    # 2. Tiếng Nhật (Kana: [ぁ-んァ-ヶ])
+    if len(re.findall(r'[ぁ-んァ-ヶ]', text)) >= 2:
+        return 'ja'
+        
+    # 3. Tiếng Trung (Hanzi [\u4e00-\u9fff])
+    if len(re.findall(r'[\u4e00-\u9fff]', text)) >= 3:
+        return 'zh'
+
+    # 4. Tiếng Thái
+    if len(re.findall(r'[\u0e00-\u0e7f]', text)) >= 3:
+        return 'th'
+
+    # 5. Tiếng Nga / Cyrillic
+    if len(re.findall(r'[а-яА-ЯёЁ]', text)) >= 3:
+        return 'ru'
+
+    # 6. Ký tự thuần Việt
     vn_chars = r'[đăâêôơưảãạẳẵặẩẫậẻẽẹểễệỉĩịỏõọổỗộởỡợủũụửữựỳỷỹỵằầềồờừắấếốớứ]'
     vn_words = r'\b(và|của|trong|cho|với|không|người|chuyện|tâm sự|ngoại tình|trả thù|bắt gian|đánh ghen|gia đình|hài hước|ẩm thực|du lịch|cuộc sống|phim|tóm tắt|vụ án)\b'
     vn_score = len(re.findall(vn_chars, t)) * 2 + len(re.findall(vn_words, t)) * 5
 
-    # 2. Tiếng Tây Ban Nha đặc trưng
+    # 7. Tiếng Tây Ban Nha đặc trưng
     es_chars = r'[ñ¿¡]'
     es_words = r'\b(el|la|los|las|un|una|unos|unas|de|del|en|para|por|con|que|su|sus|mi|mis|tu|tus|al|se|es|son|historias|relatos|esposa|marido|familia|vida|traicion|traición|venganza|desamor|cuentos|infiel|infidelidad|pelicula|resumen|suegra|nuera|engaño|mujer|hombre)\b'
     es_score = len(re.findall(es_chars, t)) * 3 + len(re.findall(es_words, t)) * 3
 
-    # 3. Tiếng Pháp đặc trưng
+    # 8. Tiếng Pháp đặc trưng
     fr_chars = r'[çœæ]'
-    fr_words = r'\b(le|la|les|des|du|en|dans|pour|avec|qui|que|cette|est|sont|film|histoire|femme|homme|mariage|trahison|vengeance|famille|amour)\b'
+    fr_words = r'\b(le|la|les|des|du|en|dans|pour|avec|qui|que|cette|est|sont|film|histoire|femme|homme|mariage|trahison|vengeance|famille|amour|belle-mère)\b'
     fr_score = len(re.findall(fr_chars, t)) * 3 + len(re.findall(fr_words, t)) * 3
 
-    scores = {'vi': vn_score, 'es': es_score, 'fr': fr_score}
+    # 9. Tiếng Bồ Đào Nha đặc trưng
+    pt_words = r'\b(você|voce|não|nao|história|historia|traição|traicao|vingança|vinganca|infidelidade|esposa|marido|casamento|família|familia)\b'
+    pt_score = len(re.findall(pt_words, t)) * 3
+
+    # 10. Tiếng Đức đặc trưng
+    de_words = r'\b(und|der|die|das|nicht|mit|ein|eine|einer|geschichten|rache|affäre|betrogen|ehefrau|ehemann|familie|drama)\b'
+    de_score = len(re.findall(de_words, t)) * 3
+
+    scores = {'vi': vn_score, 'es': es_score, 'fr': fr_score, 'pt': pt_score, 'de': de_score}
     best_lang, best_score = max(scores.items(), key=lambda x: x[1])
     if best_score >= 3:
         return best_lang
+
+    # 11. Dựa vào target_geo hoặc channel_country khi text ít ký tự
+    eff_geo = (target_geo or channel_country or "").upper()
+    if eff_geo in GEO_TO_LANG_MAP:
+        return GEO_TO_LANG_MAP[eff_geo]
+
     return 'en'
 
 
@@ -215,6 +306,8 @@ class CompetitorService:
         channel_tags: Optional[List[str]] = None,
         channel_description: Optional[str] = None,
         video_titles: Optional[List[str]] = None,
+        target_geo: Optional[str] = None,
+        channel_country: Optional[str] = None,
         niche: Optional[str] = None,
         custom_query: Optional[str] = None
     ) -> List[str]:
@@ -224,46 +317,37 @@ class CompetitorService:
 
         queries = []
         all_text = f"{current_channel_name} {' '.join(channel_tags or [])} {channel_description or ''} {' '.join(video_titles or [])}".lower()
-        lang = detect_channel_language(all_text)
+        lang = detect_channel_language(all_text, target_geo=target_geo, channel_country=channel_country)
 
         # 1. Khai thác mẫu truy vấn chuyên biệt theo ngách và ngôn ngữ
         if niche and niche in NICHE_SEARCH_TEMPLATES:
             n_templates = NICHE_SEARCH_TEMPLATES[niche]
             queries.extend(n_templates.get(lang, n_templates.get("en", [])))
 
-        # 2. Phát hiện chủ đề từ tiêu đề video thực tế (Ground Truth)
-        if lang == 'es':
-            if any(w in all_text for w in ['infidelidad', 'traicion', 'traición', 'venganza', 'esposa infiel', 'engaño']):
-                for q in ['historias de traicion drama familiar', 'relatos de infidelidad y venganza', 'historias de drama familiar']:
-                    if q not in queries:
-                        queries.append(q)
-            elif any(w in all_text for w in ['suegra', 'nuera', 'familia']):
-                for q in ['drama suegra y nuera historias', 'conflictos familiares historias']:
-                    if q not in queries:
-                        queries.append(q)
-        elif lang == 'vi':
-            if any(w in all_text for w in ['ngoại tình', 'bắt gian', 'đánh ghen', 'trả thù']):
-                for q in ['tâm sự ngoại tình trả thù', 'drama bắt gian ngoại tình', 'đánh ghen bắt gian chuyện có thật']:
-                    if q not in queries:
-                        queries.append(q)
-            elif any(w in all_text for w in ['mẹ chồng', 'mẹ vợ', 'con dâu', 'bố chồng']):
-                for q in ['mẹ chồng nàng dâu drama', 'bố chồng nàng dâu tâm sự']:
-                    if q not in queries:
-                        queries.append(q)
+        # 2. Khai thác Channel Tags & Top Keywords chất lượng có cùng hệ ngôn ngữ
+        def is_tag_matching_lang(tg: str) -> bool:
+            if lang == 'ko':
+                return bool(re.search(r'[가-힣]', tg))
+            elif lang == 'ja':
+                return bool(re.search(r'[ぁ-んァ-ヶ]', tg))
+            elif lang == 'zh':
+                return bool(re.search(r'[\u4e00-\u9fff]', tg))
+            elif lang == 'vi':
+                return bool(re.search(r'[àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ]', tg.lower()))
+            return True
 
-        # 3. Khai thác Channel Tags & Top Keywords chất lượng (từ 2 đến 4 từ)
         if channel_tags:
             for tag in channel_tags:
                 clean_tag = str(tag).strip().strip('"').strip("'")
                 words = clean_tag.split()
-                if 2 <= len(words) <= 4 and clean_tag.lower() not in [q.lower() for q in queries]:
+                if 1 <= len(words) <= 4 and is_tag_matching_lang(clean_tag) and clean_tag.lower() not in [q.lower() for q in queries]:
                     queries.append(clean_tag)
 
         for kw in (top_keywords or [])[:5]:
             val = kw.get('keyword') if isinstance(kw, dict) else str(kw)
             val = (val or '').strip()
             words = val.split()
-            if 2 <= len(words) <= 4 and val.lower() not in [q.lower() for q in queries]:
+            if 1 <= len(words) <= 4 and is_tag_matching_lang(val) and val.lower() not in [q.lower() for q in queries]:
                 queries.append(val)
 
         if not queries:
@@ -279,6 +363,8 @@ class CompetitorService:
         channel_tags: Optional[List[str]] = None,
         channel_description: Optional[str] = None,
         video_titles: Optional[List[str]] = None,
+        target_geo: Optional[str] = None,
+        channel_country: Optional[str] = None,
         niche: Optional[str] = None,
         custom_query: Optional[str] = None,
         limit: int = 6,
@@ -287,7 +373,7 @@ class CompetitorService:
         """
         Tìm kiếm các kênh đối thủ UY TÍN, ĐANG HOẠT ĐỘNG MẠNH trong cùng ngách:
         - Quét cả video viral hàng đầu và kênh trực tiếp để tìm đúng những creator đang dẫn đầu ngách.
-        - Khớp đúng 100% ngôn ngữ và chủ đề của kênh đang phân tích.
+        - Khớp đúng 100% ngôn ngữ và chủ đề của kênh đang phân tích theo quốc gia mục tiêu.
         - Lọc bỏ hoàn toàn kênh mới 0 sub, kênh rác, kênh Shorts và kênh MV/Nhạc.
         """
         queries = self._build_search_queries(
@@ -296,19 +382,25 @@ class CompetitorService:
             channel_tags=channel_tags,
             channel_description=channel_description,
             video_titles=video_titles,
+            target_geo=target_geo,
+            channel_country=channel_country,
             niche=niche,
             custom_query=custom_query
         )
         self._last_queries = queries
         self._last_niche = niche or ""
-        logger.info(f"Finding established competitors for '{current_channel_name}' with queries: {queries}")
+        logger.info(f"Finding established competitors for '{current_channel_name}' [Geo: {target_geo}] with queries: {queries}")
 
         all_target_text = f"{current_channel_name} {' '.join(channel_tags or [])} {channel_description or ''} {' '.join(video_titles or [])}".lower()
-        target_lang = detect_channel_language(all_target_text)
+        target_lang = detect_channel_language(all_target_text, target_geo=target_geo, channel_country=channel_country)
         is_music_target = any(w in all_target_text for w in ['music', 'música', 'singer', 'ca sĩ', 'bài hát', 'nhạc'])
 
         candidates_map: Dict[str, Dict[str, Any]] = {}
         candidate_ids: List[str] = []
+
+        # Chuẩn bị tham số khu vực cho YouTube Search API
+        region_param = f"&regionCode={target_geo.upper()}" if target_geo and target_geo.upper() not in ["GLOBAL", "ALL"] else ""
+        lang_param = f"&relevanceLanguage={target_lang}" if target_lang else ""
 
         # =========================================================================
         # Chiến lược 1: Tìm kiếm đối thủ thực tế qua YouTube Data API v3
@@ -318,7 +410,7 @@ class CompetitorService:
             try:
                 for q in queries:
                     # 1.1 Quét video hàng đầu trong ngách để tìm kênh đứng sau các video viral đó
-                    v_search_url = f"https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&q={requests.utils.quote(q)}&order=relevance&maxResults=12&key={api_key.strip()}"
+                    v_search_url = f"https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&q={requests.utils.quote(q)}{region_param}{lang_param}&order=relevance&maxResults=12&key={api_key.strip()}"
                     v_res = requests.get(v_search_url, timeout=7).json()
                     for it in v_res.get('items', []):
                         snip = it.get('snippet', {})
@@ -364,7 +456,7 @@ class CompetitorService:
                         }
 
                     # 1.2 Quét trực tiếp type=channel để bổ sung kênh mang từ khóa ngách
-                    c_search_url = f"https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q={requests.utils.quote(q)}&maxResults=4&key={api_key.strip()}"
+                    c_search_url = f"https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q={requests.utils.quote(q)}{region_param}{lang_param}&maxResults=4&key={api_key.strip()}"
                     c_res = requests.get(c_search_url, timeout=6).json()
                     for it in c_res.get('items', []):
                         snip = it.get('snippet', {})
@@ -433,6 +525,7 @@ class CompetitorService:
                             candidates_map[d_id]['avg_views_sample'] = avg_v
                             candidates_map[d_id]['is_verified'] = subs >= 100000
                             candidates_map[d_id]['description'] = sn.get('description', '') or candidates_map[d_id]['description']
+                            candidates_map[d_id]['country'] = sn.get('country', '')
                             
                             thumbs = sn.get('thumbnails', {})
                             if thumbs:
@@ -458,18 +551,39 @@ class CompetitorService:
         # Chấm điểm độ tương đồng ngách & ngôn ngữ để đưa đúng đối thủ thực sự lên đầu
         def _score_candidate(cand: Dict[str, Any]) -> int:
             text = (cand['channel_name'] + ' ' + cand.get('description', '') + ' ' + cand.get('top_video_title', '')).lower()
+            cand_country = cand.get('country', '')
             score = 0
-            cand_lang = detect_channel_language(text)
+            cand_lang = detect_channel_language(text, target_geo=cand_country, channel_country=cand_country)
 
             # Khớp ngôn ngữ của kênh phân tích
-            if cand_lang == target_lang:
-                score += 50
+            if target_lang == 'ko':
+                if not re.search(r'[가-힣]', text):
+                    return -999  # Loại bỏ hoàn toàn kênh ngoại lai khi đang phân tích kênh Hàn Quốc
+                score += 80
+            elif target_lang == 'ja':
+                if not re.search(r'[ぁ-んァ-ヶ]', text):
+                    return -999
+                score += 80
+            elif target_lang == 'zh':
+                if not re.search(r'[\u4e00-\u9fff]', text):
+                    return -999
+                score += 80
+            elif target_lang == 'vi':
+                if re.search(r'[가-힣ぁ-んァ-ヶ\u0e00-\u0e7f]', text):
+                    return -999
+                score += 60 if cand_lang == 'vi' else -50
             else:
-                score -= 30
+                if cand_lang == target_lang:
+                    score += 60
+                else:
+                    score -= 40
+
+            if target_geo and cand_country and cand_country.upper() == target_geo.upper():
+                score += 30
 
             # Khớp từ khóa chủ đề ngách
             for q in queries:
-                q_words = [w for w in q.lower().split() if len(w) > 2]
+                q_words = [w for w in q.lower().split() if len(w) > 1]
                 overlap = sum(1 for w in q_words if w in text)
                 score += overlap * 10
 
@@ -491,6 +605,8 @@ class CompetitorService:
             score += min(20, avg_v // 5000)
             return score
 
+        # Lọc bỏ các kênh điểm âm do sai ngôn ngữ
+        established_candidates = [c for c in established_candidates if _score_candidate(c) > 0]
         established_candidates.sort(key=_score_candidate, reverse=True)
         final_candidates = established_candidates[:limit]
 
@@ -544,6 +660,15 @@ class CompetitorService:
                             if self.is_short_or_shorts_channel(title=v_title, uploader=uploader, duration_sec=v_dur):
                                 continue
                             if not is_music_target and self.is_music_or_topic_channel(title=v_title, uploader=uploader):
+                                continue
+
+                            # Kiểm tra ngôn ngữ tối thiểu cho fallback
+                            cand_text = f"{uploader} {v_title}"
+                            if target_lang == 'ko' and not re.search(r'[가-힣]', cand_text):
+                                continue
+                            if target_lang == 'ja' and not re.search(r'[ぁ-んァ-ヶ]', cand_text):
+                                continue
+                            if target_lang == 'zh' and not re.search(r'[\u4e00-\u9fff]', cand_text):
                                 continue
 
                             # Chỉ nhận video có lượt view tốt (>= 2000 view)

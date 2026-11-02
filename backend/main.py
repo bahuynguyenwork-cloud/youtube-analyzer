@@ -137,6 +137,7 @@ class CompetitorSearchRequest(BaseModel):
     query: str
     channel_url: Optional[str] = None
     channel_name: Optional[str] = None
+    target_geo: Optional[str] = "US"
     niche: Optional[str] = None
     limit: Optional[int] = 6
     api_key: Optional[str] = None
@@ -304,6 +305,8 @@ def analyze_channel(req: ChannelAnalysisRequest):
             channel_tags=all_channel_kws,
             channel_description=channel_meta.get("description", ""),
             video_titles=vid_sample_titles,
+            target_geo=geo,
+            channel_country=channel_meta.get("country", ""),
             niche=detected_niche,
             limit=6,
             api_key=effective_key
@@ -372,6 +375,8 @@ def search_competitors_api(req: CompetitorSearchRequest):
             channel_tags=[],
             channel_description="",
             video_titles=[],
+            target_geo=req.target_geo or "US",
+            channel_country="",
             niche=req.niche,
             custom_query=req.query.strip(),
             limit=req.limit or 6,
