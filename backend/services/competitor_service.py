@@ -299,6 +299,61 @@ class CompetitorService:
             return True
         return False
 
+    def is_tv_or_broadcast_network(self, title: str = "", uploader: str = "", description: str = "") -> bool:
+        """Kiểm tra nghiêm ngặt xem kênh có phải là Đài truyền hình, Đài phát thanh, Hãng tin tức hoặc Tập đoàn truyền thông không.
+        Mục tiêu: Đảm bảo tab đối thủ chỉ hiển thị các nhà sáng tạo nội dung độc lập (indie creators / drama story channels),
+        loại bỏ hoàn toàn các đài quốc gia và kênh truyền hình chính thống như SBS, KBS, MBC, tvN, JTBC, VTV, BBC...
+        """
+        ch = (uploader or "").strip().lower()
+        desc = (description or "").lower()
+
+        # 1. Các đài truyền hình & hệ thống kênh truyền hình Hàn Quốc
+        kr_tv_patterns = [
+            r'\bsbs\b', r'sbs plus', r'스플스', r'\bkbs\b', r'\bmbc\b', r'\btvn\b', r'\bjtbc\b', 
+            r'\bmbn\b', r'\bytn\b', r'\bebs\b', r'채널a', r'channel a', r'tv조선', r'tv chosun',
+            r'연합뉴스', r'kbs n', r'kbs drama', r'kbs joy', r'mbc drama', r'mbc every1',
+            r'sbs fun\s*e', r'tvn drama', r'tvn story', r'tvn show', r'jtbc drama', r'jtbc voyage',
+            r'엠비씨', r'케이비에스', r'에스비에스', r'제이티비씨', r'티비엔'
+        ]
+        if any(re.search(pat, ch) for pat in kr_tv_patterns):
+            return True
+
+        # 2. Các đài truyền hình, cơ quan báo chí & thông tấn Việt Nam
+        vn_tv_patterns = [
+            r'\bvtv\d*\b', r'\bhtv\d*\b', r'\bthvl\d*\b', r'\bvtc\d*\b', r'\bvov\b',
+            r'truyền hình', r'báo thanh niên', r'báo tuổi trẻ', r'báo người lao động',
+            r'vnexpress', r'báo dân trí', r'tiền phong', r'vtc now', r'vtv giải trí', r'thvl phim',
+            r'truyenhinh'
+        ]
+        if any(re.search(pat, ch) for pat in vn_tv_patterns):
+            return True
+
+        # 3. Các đài truyền hình, hãng tin tức & tập đoàn giải trí toàn cầu (Mỹ, Anh...)
+        global_tv_patterns = [
+            r'\bbbc\b', r'\bcnn\b', r'\bmsnbc\b', r'\bcnbc\b', r'\babc news\b', r'\bfox news\b',
+            r'\bcbs news\b', r'\bnbc news\b', r'\bap news\b', r'\breuters\b', r'\bbloomberg\b',
+            r'\bnew york times\b', r'\bwashington post\b', r'\bwall street journal\b',
+            r'\bnetflix\b', r'\bhbo\b', r'\bwarner bros\b', r'\bparamount\b', r'\bdisney\+\b',
+            r'\bdiscovery channel\b', r'\bnational geographic\b'
+        ]
+        if any(re.search(pat, ch) for pat in global_tv_patterns):
+            return True
+
+        # 4. Các đài truyền hình Nhật Bản
+        jp_tv_patterns = [
+            r'\bnhk\b', r'\btbs\b', r'フジテレビ', r'fuji tv', r'テレビ朝日', r'tv asahi',
+            r'テレビ東京', r'tv tokyo', r'日本テレビ', r'\bntv\b'
+        ]
+        if any(re.search(pat, ch) for pat in jp_tv_patterns):
+            return True
+
+        # 5. Phối hợp kiểm tra tên kênh có chữ news / tv / broadcast kết hợp hãng lớn
+        ch_tokens = set(re.findall(r'\b[a-z0-9]+\b', ch))
+        if {"cbs", "nbc", "abc"}.intersection(ch_tokens) and any(kw in ch for kw in ["news", "tv", "official", "network", "broadcast"]):
+            return True
+
+        return False
+
     def _build_search_queries(
         self,
         current_channel_name: str,
@@ -431,6 +486,8 @@ class CompetitorService:
                             continue
                         if not is_music_target and self.is_music_or_topic_channel(title=v_title, uploader=c_name):
                             continue
+                        if self.is_tv_or_broadcast_network(uploader=c_name, title=v_title):
+                            continue
 
                         candidate_ids.append(c_id)
                         candidates_map[c_id] = {
@@ -475,6 +532,8 @@ class CompetitorService:
                         if self.is_short_or_shorts_channel(uploader=c_name):
                             continue
                         if not is_music_target and self.is_music_or_topic_channel(uploader=c_name, description=c_desc):
+                            continue
+                        if self.is_tv_or_broadcast_network(uploader=c_name, description=c_desc):
                             continue
 
                         thumb = (snip.get('thumbnails', {}).get('high') or snip.get('thumbnails', {}).get('medium') or snip.get('thumbnails', {}).get('default', {})).get('url', '')
@@ -538,13 +597,18 @@ class CompetitorService:
             except Exception as api_err:
                 logger.warning(f"Lỗi khi tìm kênh qua YouTube API: {api_err}")
 
-        # Lọc nghiêm ngặt: KÊNH ĐỐI THỦ THỰC SỰ (Sub >= 1.000 hoặc Tổng view >= 20.000, ít nhất 3 video)
+        # Lọc nghiêm ngặt: KÊNH ĐỐI THỦ THỰC SỰ (Sub >= 1.000 hoặc Tổng view >= 20.000, ít nhất 3 video, không phải đài truyền hình)
         established_candidates = []
         for c in candidates_map.values():
             subs = c.get('subscriber_count', 0)
             vids = c.get('video_count', 0)
             tot_v = c.get('total_views', 0)
-            
+            c_name = c.get('channel_name', '')
+            c_desc = c.get('description', '')
+
+            if self.is_tv_or_broadcast_network(uploader=c_name, description=c_desc):
+                continue
+
             if (subs >= 1000 or tot_v >= 20000) and vids >= 3:
                 established_candidates.append(c)
 
@@ -660,6 +724,8 @@ class CompetitorService:
                             if self.is_short_or_shorts_channel(title=v_title, uploader=uploader, duration_sec=v_dur):
                                 continue
                             if not is_music_target and self.is_music_or_topic_channel(title=v_title, uploader=uploader):
+                                continue
+                            if self.is_tv_or_broadcast_network(uploader=uploader, title=v_title):
                                 continue
 
                             # Kiểm tra ngôn ngữ tối thiểu cho fallback
