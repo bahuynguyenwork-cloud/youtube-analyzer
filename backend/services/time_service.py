@@ -143,7 +143,7 @@ NICHE_PROFILES = {
         "keywords": [
             "bố chồng nàng dâu", "bố chồng", "nàng dâu", "gia đình cay đắng", "tâm sự gia đình", "mâu thuẫn gia đình",
             "father in law", "daughter in law", "in-law drama", "toxic family", "family drama stories",
-            "시아버지", "며느리", "시댁 갈등", "가족 갈등 썰", "義父", "嫁"
+            "시아버지", "며느리", "시댁", "시댁 갈등", "가족 갈등 썰", "시동생", "시누이", "고부갈등", "고부 갈등", "시어머니", "義父", "嫁"
         ]
     },
     "mother_inlaw_drama": {
@@ -159,7 +159,7 @@ NICHE_PROFILES = {
         "keywords": [
             "mẹ vợ con rể", "mẹ vợ", "con rể", "mẹ chồng nàng dâu", "mẹ chồng", "xung đột gia đình",
             "mother in law", "son in law", "toxic mother in law", "in law conflict", "family conflict stories",
-            "장모", "사위", "장모 사위", "시월드", "義母", "婿"
+            "장모", "사위", "장모 사위", "시어머니", "시월드", "시댁", "시댁 갈등", "고부갈등", "고부 갈등", "義母", "婿"
         ]
     },
     "infidelity_revenge": {
@@ -175,7 +175,7 @@ NICHE_PROFILES = {
         "keywords": [
             "ngoại tình", "bắt gian", "đánh ghen", "trả thù", "tiểu tam", "con giáp thứ 13", "drama bắt gian",
             "cheating spouse", "cheating partner", "cheating revenge", "caught cheating", "revenge drama",
-            "불륜", "바람", "참교육", "사이다 썰", "막장", "浮気", "不倫", "修羅場",
+            "불륜", "바람", "참교육", "사이다 썰", "막장", "내연녀", "내연남", "상간녀", "상간남", "외도", "맞바람", "배신", "복수", "사생아", "이혼", "사이다사연", "참교육 썰", "사이다사이다", "浮気", "不倫", "修羅場",
             "infidelidad", "infiel", "esposa infiel", "marido infiel", "traición", "traicion", "amante", "venganza", "venganza silenciosa", "engaño", "engañó", "engaños", "descubrí", "divorcio", "drama familiar", "esposa", "marido", "justicia tardía",
             "cheating spouse", "cheating partner", "cheating revenge", "caught cheating", "revenge drama", "infidelity", "betrayal", "affair", "wife cheated", "husband cheated"
         ]
@@ -244,7 +244,7 @@ NICHE_PROFILES = {
         "keywords": [
             "kinh thánh", "lời chúa", "cơ đốc", "cầu nguyện", "bài giảng", "đức chúa trời", "chúa jesus", "chúa giê-su", "nghe kinh thánh", "thánh ca", "tin lành", "công giáo", "kinh thánh nói", "đọc kinh thánh", "tân ước", "cựu ước", "suy ngẫm lời chúa", "phúc âm", "thánh kinh",
             "bible", "holy bible", "scripture", "gospel", "jesus", "god's word", "bible reading", "christian", "christianity", "worship", "prayer", "devotional", "new testament", "old testament", "psalms", "proverbs", "bible audio", "audio bible", "bible study",
-            "성경", "성경듣기", "쉬운성경", "성경말씀", "신약성경", "구약성경", "성경통독", "오디오성경", "하나님", "예수님", "예수", "기도", "찬양", "말씀", "기독교", "교회", "묵상", "qt", "설교", "새벽기도", "시편", "잠언", "복음", "찬송가", "성경낭독",
+            "성경", "성경듣기", "쉬운성경", "성경말씀", "신약성경", "구약성경", "성경통독", "오디오성경", "하나님", "예수님", "예수", "기도문", "찬양", "말씀묵상", "기독교", "교회", "성경 묵상", "qt 묵상", "설교", "새벽기도회", "시편", "잠언", "복음", "찬송가", "성경낭독",
             "聖書", "キリスト教", "祈り", "福音", "イエス"
         ]
     },
@@ -587,9 +587,10 @@ class TimeService:
                 return False
             if kw_clean == tag:
                 return True
-            # Ký tự Hàn / Nhật / Trung: kiểm tra quan hệ bao hàm chuỗi trực tiếp (vd: kw "하나님" nằm trong tag "하나님의")
+            # Ký tự Hàn / Nhật / Trung: kiểm tra từ khóa ngách đặc thù có nằm trọn trong tag (ví dụ: kw "하나님" nằm trong tag "하나님의은혜")
+            # Tuyệt đối không kiểm tra ngược lại (tag ngắn ngẫu nhiên "새벽" nằm trong kw "새벽기도회" là SAI)
             if is_cjk(kw_clean) or is_cjk(tag):
-                if kw_clean in tag or tag in kw_clean:
+                if len(kw_clean) >= 2 and kw_clean in tag:
                     return True
                 return False
             kw_words = kw_clean.split()

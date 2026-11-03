@@ -98,7 +98,7 @@ class AIService:
         }
 
         # Ưu tiên các model nhẹ, quota riêng biệt
-        models = ["gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-2.0-flash"]
+        models = ["gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.8-flash"]
         rate_limited_count = 0
         for model in models:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}"
