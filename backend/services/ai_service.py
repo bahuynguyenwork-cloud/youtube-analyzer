@@ -16,6 +16,7 @@ VALID_NICHES = {
     "learn_english": "🎓 Học Tiếng Anh & Kỹ Năng (Ngoại ngữ, Giao tiếp, Kỹ năng mềm, Bài giảng)",
     "infidelity_revenge": "💔 Ngoại Tình & Báo Thù (Mâu thuẫn hôn nhân, Drama tình ái, Trả đũa)",
     "father_inlaw_drama": "⚡ Bố Chồng Nàng Dâu (Mâu thuẫn gia đình, Gia đình cay đắng, Xung đột thế hệ)",
+    "mother_inlaw_drama": "🧑‍🤝‍🧑 Mẹ Chồng Nàng Dâu / Mẹ Vợ Con Rể (Drama mẹ chồng, Xung đột nàng dâu mẹ chồng, Gia đình xung đột)",
     "reddit_stories": "📱 Truyện Reddit & Tâm Sự (Reddit confessions, Storytime, Tâm sự đời thực)",
     "drama_expose": "🎭 Drama & Bóc Phốt (Exposé, Scandal người nổi tiếng, Vạch trần)",
     "true_crime": "🕵️ Vụ Án Có Thật & Bí Ẩn (Hồ sơ tội phạm, Trinh thám, Phá án, Bí ẩn chưa lời giải)",

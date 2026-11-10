@@ -329,13 +329,17 @@ class CompetitorService:
         kr_tv_patterns = [
             r'sbs\s*(plus|뉴스|news|스포츠|sports|funE|fun\s*e|드라마|drama|연예|joy|\d)',
             r'스플스',  # SBS Plus tiếng Hàn
-            r'\bsbs\b',  # Tên kênh chỉ là "SBS"
+            # Bắt SBS/KBS/MBC/tvN/JTBC dù kề ký tự Hàn hoặc Latin (lookbehind/lookahead Unicode-aware)
+            r'(?:^|[\s\(\[_\-])sbs(?:$|[\s\)\]_\-뉴스드라마스포츠])',
+            r'\bsbs\b',
             r'kbs\s*(\d|뉴스|news|drama|joy|world|스포츠|sports|n\b)',
             r'\bkbs\b',
             r'mbc\s*(\d|뉴스|news|drama|every1|스포츠|sports)',
             r'\bmbc\b',
-            r'\btvn\b', r'tvn\s*(drama|story|show|스타일)',
-            r'\bjtbc\b', r'jtbc\s*(drama|voyage|스튜디오)',
+            r'tvn\s*(드라마|drama|story|show|스타일|스타)',
+            r'\btvn\b', r'tvn드라마', r'tvn스타',
+            r'jtbc\s*(드라마|drama|voyage|스튜디오)',
+            r'\bjtbc\b', r'jtbc스튜디오',
             r'\bmbn\b', r'\bytn\b', r'\bebs\b',
             r'채널\s*a', r'channel\s*a',
             r'tv\s*조선', r'tv\s*chosun',
@@ -485,7 +489,7 @@ class CompetitorService:
         is_music_target = any(w in all_target_text for w in ['music', 'música', 'singer', 'ca sĩ', 'bài hát', 'nhạc'])
 
         candidates_map: Dict[str, Dict[str, Any]] = {}
-        candidate_ids: List[str] = []  # Dùng để kiểm tra trùng lặp nhanh
+        candidate_ids: set = set()  # Dùng set để O(1) lookup thay O(n)
 
         # Chuẩn bị tham số khu vực cho YouTube Search API
         region_param = f"&regionCode={target_geo.upper()}" if target_geo and target_geo.upper() not in ["GLOBAL", "ALL"] else ""
@@ -523,7 +527,7 @@ class CompetitorService:
                         if self.is_tv_or_broadcast_network(uploader=c_name, title=v_title):
                             continue
 
-                        candidate_ids.append(c_id)
+                        candidate_ids.add(c_id)
                         candidates_map[c_id] = {
                             'channel_name': c_name,
                             'title': c_name,
@@ -572,7 +576,7 @@ class CompetitorService:
 
                         thumb = (snip.get('thumbnails', {}).get('high') or snip.get('thumbnails', {}).get('medium') or snip.get('thumbnails', {}).get('default', {})).get('url', '')
 
-                        candidate_ids.append(c_id)
+                        candidate_ids.add(c_id)
                         candidates_map[c_id] = {
                             'channel_name': c_name,
                             'title': c_name,
@@ -597,7 +601,7 @@ class CompetitorService:
 
                 # 1.3 Lấy thông số chi tiết (Subscribers, Views, Videos, Avatar) cho tất cả ứng viên
                 if candidate_ids:
-                    chunk = candidate_ids[:45]
+                    chunk = list(candidate_ids)[:45]
                     detail_url = f"https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id={','.join(chunk)}&key={api_key.strip()}"
                     d_res = requests.get(detail_url, timeout=8).json()
                     
