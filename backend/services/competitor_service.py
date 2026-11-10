@@ -169,7 +169,13 @@ NICHE_SEARCH_TEMPLATES = {
 }
 
 def detect_channel_language(text: str, target_geo: Optional[str] = None, channel_country: Optional[str] = None) -> str:
-    """Xác định ngôn ngữ chính xác dựa trên ký tự đặc trưng, từ vựng cốt lõi và quốc gia kênh/thị trường."""
+    """Xác định ngôn ngữ chính xác dựa trên ký tự đặc trưng, từ vựng cốt lõi và quốc gia kênh/thị trường.
+    
+    Thứ tự ưu tiên:
+    1. Nhận dạng bằng ký tự đặc trưng CJK / Thái / Cyrillic / Việt (độ chính xác cao nhất)
+    2. Chấm điểm từ vựng có trọng số (vô hiệu hoá các từ Đức/Pháp quá ngắn dễ nhầm)
+    3. Fallback theo quốc gia kênh / thị trường mục tiêu
+    """
     t = text.lower()
     
     # 1. Tiếng Hàn Quốc (Hangul: [가-힣ᄀ-ᇿ])
@@ -192,35 +198,44 @@ def detect_channel_language(text: str, target_geo: Optional[str] = None, channel
     if len(re.findall(r'[а-яА-ЯёЁ]', text)) >= 3:
         return 'ru'
 
-    # 6. Ký tự thuần Việt
+    # 6. Ký tự dấu thuần Việt (độ chính xác cao, dấu không xuất hiện trong ngôn ngữ Latin khác)
     vn_chars = r'[đăâêôơưảãạẳẵặẩẫậẻẽẹểễệỉĩịỏõọổỗộởỡợủũụửữựỳỷỹỵằầềồờừắấếốớứ]'
     vn_words = r'\b(và|của|trong|cho|với|không|người|chuyện|tâm sự|ngoại tình|trả thù|bắt gian|đánh ghen|gia đình|hài hước|ẩm thực|du lịch|cuộc sống|phim|tóm tắt|vụ án)\b'
     vn_score = len(re.findall(vn_chars, t)) * 2 + len(re.findall(vn_words, t)) * 5
+    # Nếu đủ ký tự Việt đặc trưng, trả về ngay để tránh nhầm vs Tây Ban Nha
+    if vn_score >= 6:
+        return 'vi'
 
-    # 7. Tiếng Tây Ban Nha đặc trưng
+    # 7. Tiếng Tây Ban Nha đặc trưng (ưu tiên dấu ñ ¿ ¡ và từ dài độc đáo)
     es_chars = r'[ñ¿¡]'
-    es_words = r'\b(el|la|los|las|un|una|unos|unas|de|del|en|para|por|con|que|su|sus|mi|mis|tu|tus|al|se|es|son|historias|relatos|esposa|marido|familia|vida|traicion|traición|venganza|desamor|cuentos|infiel|infidelidad|pelicula|resumen|suegra|nuera|engaño|mujer|hombre)\b'
-    es_score = len(re.findall(es_chars, t)) * 3 + len(re.findall(es_words, t)) * 3
+    # Chỉ dùng các từ dài >= 4 ký tự hoặc từ độc quyền để tránh nhầm vs de/fr/en
+    es_words = r'\b(historias|relatos|esposa|marido|familia|vida|traicion|traición|venganza|desamor|cuentos|infiel|infidelidad|pelicula|resumen|suegra|nuera|engaño|mujer|hombre|espanol|español)\b'
+    es_score = len(re.findall(es_chars, t)) * 4 + len(re.findall(es_words, t)) * 4
 
-    # 8. Tiếng Pháp đặc trưng
+    # 8. Tiếng Pháp đặc trưng (ưu tiên ký tự œ æ ç và từ độc quyền)
     fr_chars = r'[çœæ]'
-    fr_words = r'\b(le|la|les|des|du|en|dans|pour|avec|qui|que|cette|est|sont|film|histoire|femme|homme|mariage|trahison|vengeance|famille|amour|belle-mère)\b'
-    fr_score = len(re.findall(fr_chars, t)) * 3 + len(re.findall(fr_words, t)) * 3
+    # Chỉ dùng từ dài >= 4 ký tự hoặc từ độc quyền
+    fr_words = r'\b(dans|pour|avec|cette|film|histoire|femme|homme|mariage|trahison|vengeance|famille|amour|bonjour|française|français)\b'
+    fr_score = len(re.findall(fr_chars, t)) * 4 + len(re.findall(fr_words, t)) * 4
 
-    # 9. Tiếng Bồ Đào Nha đặc trưng
-    pt_words = r'\b(você|voce|não|nao|história|historia|traição|traicao|vingança|vinganca|infidelidade|esposa|marido|casamento|família|familia)\b'
-    pt_score = len(re.findall(pt_words, t)) * 3
+    # 9. Tiếng Bồ Đào Nha đặc trưng (ưu tiên từ dài độc quyền)
+    pt_words = r'\b(você|voce|não|nao|história|historia|traição|traicao|vingança|vinganca|infidelidade|esposa|marido|casamento|família|familia|português)\b'
+    pt_score = len(re.findall(pt_words, t)) * 4
 
     # 10. Tiếng Đức đặc trưng
-    de_words = r'\b(und|der|die|das|nicht|mit|ein|eine|einer|geschichten|rache|affäre|betrogen|ehefrau|ehemann|familie|drama)\b'
-    de_score = len(re.findall(de_words, t)) * 3
+    # LƯU Ý: Các từ Đức ngắn như "und", "der", "die", "das", "ein", "mit" dễ xuất hiện
+    # trong tên kênh tiếng Anh. Chỉ chấm điểm cao cho từ DÀI và ĐỘC QUYỀN của tiếng Đức.
+    de_chars = r'[äöüÄÖÜß]'
+    de_words = r'\b(nicht|geschichten|rache|affäre|betrogen|ehefrau|ehemann|familie|deutsch|deutschen|scheidung|untreue|rache)\b'
+    de_score = len(re.findall(de_chars, t)) * 4 + len(re.findall(de_words, t)) * 4
 
     scores = {'vi': vn_score, 'es': es_score, 'fr': fr_score, 'pt': pt_score, 'de': de_score}
     best_lang, best_score = max(scores.items(), key=lambda x: x[1])
-    if best_score >= 3:
+    # Yêu cầu ngưỡng điểm cao hơn (>= 4) để tránh false positive
+    if best_score >= 4:
         return best_lang
 
-    # 11. Dựa vào target_geo hoặc channel_country khi text ít ký tự
+    # 11. Dựa vào target_geo hoặc channel_country khi text ít ký tự đặc trưng
     eff_geo = (target_geo or channel_country or "").upper()
     if eff_geo in GEO_TO_LANG_MAP:
         return GEO_TO_LANG_MAP[eff_geo]
@@ -305,18 +320,30 @@ class CompetitorService:
         loại bỏ hoàn toàn các đài quốc gia và kênh truyền hình chính thống như SBS, KBS, MBC, tvN, JTBC, VTV, BBC...
         """
         ch = (uploader or "").strip().lower()
+        # Cũng kiểm tra title vì một số kênh có tên tiếng Anh nhưng title chứa tên đài
+        t = (title or "").lower()
         desc = (description or "").lower()
 
         # 1. Các đài truyền hình & hệ thống kênh truyền hình Hàn Quốc
+        # Lưu ý: dùng regex linh hoạt bắt cả "SBSnews", "sbs뉴스", "KBS2" v.v.
         kr_tv_patterns = [
-            r'\bsbs\b', r'sbs plus', r'스플스', r'\bkbs\b', r'\bmbc\b', r'\btvn\b', r'\bjtbc\b', 
-            r'\bmbn\b', r'\bytn\b', r'\bebs\b', r'채널a', r'channel a', r'tv조선', r'tv chosun',
-            r'연합뉴스', r'kbs n', r'kbs drama', r'kbs joy', r'mbc drama', r'mbc every1',
-            r'sbs fun\s*e', r'tvn drama', r'tvn story', r'tvn show', r'jtbc drama', r'jtbc voyage',
-            r'엠비씨', r'케이비에스', r'에스비에스', r'제이티비씨', r'티비엔'
+            r'sbs\s*(plus|뉴스|news|스포츠|sports|funE|fun\s*e|드라마|drama|연예|joy|\d)',
+            r'스플스',  # SBS Plus tiếng Hàn
+            r'\bsbs\b',  # Tên kênh chỉ là "SBS"
+            r'kbs\s*(\d|뉴스|news|drama|joy|world|스포츠|sports|n\b)',
+            r'\bkbs\b',
+            r'mbc\s*(\d|뉴스|news|drama|every1|스포츠|sports)',
+            r'\bmbc\b',
+            r'\btvn\b', r'tvn\s*(drama|story|show|스타일)',
+            r'\bjtbc\b', r'jtbc\s*(drama|voyage|스튜디오)',
+            r'\bmbn\b', r'\bytn\b', r'\bebs\b',
+            r'채널\s*a', r'channel\s*a',
+            r'tv\s*조선', r'tv\s*chosun',
+            r'연합뉴스', r'엠비씨', r'케이비에스', r'에스비에스', r'제이티비씨', r'티비엔',
         ]
-        if any(re.search(pat, ch) for pat in kr_tv_patterns):
-            return True
+        for pat in kr_tv_patterns:
+            if re.search(pat, ch) or re.search(pat, t):
+                return True
 
         # 2. Các đài truyền hình, cơ quan báo chí & thông tấn Việt Nam
         vn_tv_patterns = [
@@ -325,32 +352,39 @@ class CompetitorService:
             r'vnexpress', r'báo dân trí', r'tiền phong', r'vtc now', r'vtv giải trí', r'thvl phim',
             r'truyenhinh'
         ]
-        if any(re.search(pat, ch) for pat in vn_tv_patterns):
-            return True
+        for pat in vn_tv_patterns:
+            if re.search(pat, ch) or re.search(pat, t):
+                return True
 
         # 3. Các đài truyền hình, hãng tin tức & tập đoàn giải trí toàn cầu (Mỹ, Anh...)
         global_tv_patterns = [
-            r'\bbbc\b', r'\bcnn\b', r'\bmsnbc\b', r'\bcnbc\b', r'\babc news\b', r'\bfox news\b',
-            r'\bcbs news\b', r'\bnbc news\b', r'\bap news\b', r'\breuters\b', r'\bbloomberg\b',
+            r'\bbbc\b', r'\bcnn\b', r'\bmsnbc\b', r'\bcnbc\b',
+            r'\babc\s*news\b', r'\bfox\s*news\b', r'\bcbs\s*news\b', r'\bnbc\s*news\b',
+            r'\bap\s*news\b', r'\breuters\b', r'\bbloomberg\b',
             r'\bnew york times\b', r'\bwashington post\b', r'\bwall street journal\b',
             r'\bnetflix\b', r'\bhbo\b', r'\bwarner bros\b', r'\bparamount\b', r'\bdisney\+\b',
-            r'\bdiscovery channel\b', r'\bnational geographic\b'
+            r'\bdiscovery channel\b', r'\bnational geographic\b', r'\bespn\b'
         ]
-        if any(re.search(pat, ch) for pat in global_tv_patterns):
-            return True
+        for pat in global_tv_patterns:
+            if re.search(pat, ch) or re.search(pat, t):
+                return True
 
         # 4. Các đài truyền hình Nhật Bản
         jp_tv_patterns = [
-            r'\bnhk\b', r'\btbs\b', r'フジテレビ', r'fuji tv', r'テレビ朝日', r'tv asahi',
-            r'テレビ東京', r'tv tokyo', r'日本テレビ', r'\bntv\b'
+            r'\bnhk\b', r'\btbs\s*(tv|テレビ|\b)',
+            r'フジテレビ', r'fuji\s*tv', r'テレビ朝日', r'tv\s*asahi',
+            r'テレビ東京', r'tv\s*tokyo', r'日本テレビ', r'\bntv\b'
         ]
-        if any(re.search(pat, ch) for pat in jp_tv_patterns):
-            return True
+        for pat in jp_tv_patterns:
+            if re.search(pat, ch) or re.search(pat, t):
+                return True
 
-        # 5. Phối hợp kiểm tra tên kênh có chữ news / tv / broadcast kết hợp hãng lớn
-        ch_tokens = set(re.findall(r'\b[a-z0-9]+\b', ch))
-        if {"cbs", "nbc", "abc"}.intersection(ch_tokens) and any(kw in ch for kw in ["news", "tv", "official", "network", "broadcast"]):
-            return True
+        # 5. Phát hiện bổ sung qua description: kênh đài lớn thường khai báo "official channel of" hoặc "방송"
+        if desc:
+            if re.search(r'official (channel|page|account) of\s+(sbs|kbs|mbc|tvn|jtbc|mbn|ytn|nhk|bbc|cnn)', desc):
+                return True
+            if re.search(r'(방송국|공식\s*채널|공영\s*방송)', desc):
+                return True
 
         return False
 
@@ -451,7 +485,7 @@ class CompetitorService:
         is_music_target = any(w in all_target_text for w in ['music', 'música', 'singer', 'ca sĩ', 'bài hát', 'nhạc'])
 
         candidates_map: Dict[str, Dict[str, Any]] = {}
-        candidate_ids: List[str] = []
+        candidate_ids: List[str] = []  # Dùng để kiểm tra trùng lặp nhanh
 
         # Chuẩn bị tham số khu vực cho YouTube Search API
         region_param = f"&regionCode={target_geo.upper()}" if target_geo and target_geo.upper() not in ["GLOBAL", "ALL"] else ""
@@ -736,6 +770,12 @@ class CompetitorService:
                                 continue
                             if target_lang == 'zh' and not re.search(r'[\u4e00-\u9fff]', cand_text):
                                 continue
+                            # Fallback tiếng Việt: loại bỏ kênh không có ký tự tiếng Việt hoặc tiếng Anh thuần
+                            if target_lang == 'vi':
+                                vn_char_found = bool(re.search(r'[đăâêôơưảãạẳẵặẩẫậẻẽẹểễệỉĩịỏõọổỗộởỡợủũụửữựỳỷỹỵằầềồờừắấếốớứ]', cand_text))
+                                # Nếu không có ký tự Việt đặc trưng và cũng không có GEO target_geo==VN → bỏ
+                                if not vn_char_found and (target_geo or '').upper() == 'VN':
+                                    continue
 
                             # Chỉ nhận video có lượt view tốt (>= 2000 view)
                             if v_views < 2000:
