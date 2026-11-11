@@ -1717,6 +1717,40 @@ NICHE_LOCALIZED_QUERIES = {
     }
 }
 
+# Bổ sung từ khóa ngách tiếng Ả Rập cho SA (Ả Rập Xê Út), AE (UAE), EG (Ai Cập)
+_AR_NICHE_LOCALIZED = {
+    "philosophy": "حكمة وعبر من الحياة | دروس الحياة والفلسفة العربية",
+    "astrology_horoscope": "أبراج اليوم 2026 | توقعات الأبراج والفلك | قراءة الفنجان والطالع",
+    "buddhism": "تأمل وسكينة روحية | علاج نفسي وهدوء البال",
+    "christianity_bible": "قراءة الإنجيل والكتاب المقدس | ترانيم وتأملات مسيحية",
+    "elderly_wisdom": "حكم ونصائح كبار السن | وصايا وعبر من واقع الحياة",
+    "infidelity_revenge": "قصص خيانة زوجية حقيقية | انتقام من الخيانة الزوجية | خيانة وطلاق قصص واقعية",
+    "father_inlaw_drama": "مشاكل الحماة والكنة قصص واقعية | قصص عائلية صعبة | دراما أسرية عربية",
+    "mother_inlaw_drama": "قصص الحماة وزوجة الابن | مشاكل زوجية وعائلية مؤثرة",
+    "spicy_18_drama": "اعترافات جريئة قصص واقعية | أسرار زوجية وعاطفية للكبار",
+    "learn_english": "تعلم اللغة الانجليزية من الصفر | محادثات انجليزية يومية",
+    "reddit_stories": "قصص واقعية من الحياة | حكايات واقعية مؤلمة ومؤثرة",
+    "drama_expose": "فضائح مشاهير العرب | كشف أسرار وقصص حقيقية",
+    "true_crime": "جرائم حقيقية وثائقي عربي | قضايا جنائية غامضة تم حلها",
+    "horror_stories": "قصص رعب حقيقية ليلية | قصص جن وأرواح مرعبة",
+    "history_geopolitics": "تاريخ الوطن العربي وثائقي | أحداث تاريخية وسياسية عربية",
+    "space_science": "أسرار الفضاء والكون وثائقي | اكتشافات علمية مذهلة",
+    "finance_money": "كيف تربح المال من الانترنت 2026 | استثمار وأفكار مشاريع ناجحة",
+    "tech_ai": "تقنية الذكاء الاصطناعي 2026 | أدوات الذكاء الاصطناعي المجانية",
+    "recap_stories": "ملخص أفلام أجنبية وعربية | تلخيص مسلسلات رمضانية",
+    "gaming": "العاب فيديو وتحديات قيمرز عربية | بث مباشر العاب",
+    "entertainment": "تحديات وترفيه عربي فيرال | مقالب وفيديوهات مضحكة",
+    "luxury_lifestyle": "حياة الرفاهية والسيارات الفارهة دبي والسعودية",
+    "travel_food": "جولات سياحية وأكلات شعبية عربية | السفر في السعودية ودبي",
+    "fitness_health": "تمارين منزلية وكمال أجسام | تغذية صحية وتخسيس",
+    "real_life_stories": "حكاية وعبرة قصص واقعية | قصص من الواقع مؤثرة | بودكاست قصص الحياة",
+    "music_chill": "موسيقى هادئة للدراسة والنوم | موسيقى عربية هادئة لوفي",
+}
+for _nk, _aq in _AR_NICHE_LOCALIZED.items():
+    if _nk in NICHE_LOCALIZED_QUERIES:
+        for _ar_geo in ("SA", "AE", "EG"):
+            NICHE_LOCALIZED_QUERIES[_nk][_ar_geo] = _aq
+
 SP_MAP = {
     "24h": "CAMSBAgCEAE%3D",  # Today / last 24h, sorted by viewCount
     "48h": "CAMSBAgCEAE%3D",  # 24-48h, sorted by viewCount
@@ -1743,20 +1777,21 @@ def parse_duration_str_to_seconds(dur_str: str) -> int:
     return 0
 
 def parse_views_str(view_str: str) -> int:
-    """Chuyển đổi chuỗi lượt xem đa ngôn ngữ ('402.643 lượt xem', '1.2M views', '150K') thành int."""
+    """Chuyển đổi chuỗi lượt xem đa ngôn ngữ ('402.643 lượt xem', '1.2M views', '150K', '1.2 مليون') thành int."""
     if not view_str:
         return 0
-    v = view_str.strip()
+    # Chuẩn hóa chữ số Ả Rập-Ấn Độ (٠١٢٣٤٥٦٧٨٩) về ASCII 0-9
+    v = view_str.strip().translate(str.maketrans('٠١٢٣٤٥٦٧٨٩٫٬', '0123456789.,'))
     yi_match = re.search(r'([\d.,]+)\s*(?:亿|億)', v)
     if yi_match:
         num = float(yi_match.group(1).replace(',', '.'))
         return int(num * 100000000)
-    m_match = re.search(r'([\d.,]+)\s*(?:M|Tr|tr|triệu|million|万)', v, re.IGNORECASE)
+    m_match = re.search(r'([\d.,]+)\s*(?:M|Tr|tr|triệu|million|万|مليون)', v, re.IGNORECASE)
     if m_match:
         num = float(m_match.group(1).replace(',', '.'))
         mult = 10000 if '万' in v else 1000000
         return int(num * mult)
-    k_match = re.search(r'([\d.,]+)\s*(?:K|k|N|nghìn|ngàn)', v, re.IGNORECASE)
+    k_match = re.search(r'([\d.,]+)\s*(?:K|k|N|nghìn|ngàn|ألف)', v, re.IGNORECASE)
     if k_match:
         num = float(k_match.group(1).replace(',', '.'))
         return int(num * 1000)
@@ -1767,60 +1802,86 @@ def translate_published_age_to_vi(text: str) -> str:
     """Chuyển đổi thời gian đăng đa ngôn ngữ (Ý, Pháp, Đức, Tây Ban Nha, Nga, Nhật, Hàn, Anh...) sang tiếng Việt chuẩn."""
     if not text:
         return ""
-    s = str(text).strip()
+    s = str(text).strip().translate(str.maketrans('٠١٢٣٤٥٦٧٨٩', '0123456789'))
     if any(kw in s for kw in ["trước", "Vừa xong", "Hôm qua", "Hôm nay"]):
         return s
 
-    is_streamed = bool(re.search(r'streamed|trasmesso|diffus|transmit|gestreamt|трансляц|配信|스트리밍|首播|直播', s, re.I))
+    is_streamed = bool(re.search(r'streamed|trasmesso|diffus|transmit|gestreamt|трансляц|配信|스트리밍|首播|直播|تم البث', s, re.I))
     prefix = "Đã phát " if is_streamed else ""
 
     # Special relative terms
-    if re.search(r'just now|moments ago|appena|à l\'instant|gerade eben|только что|방금|たった今|刚刚|剛剛', s, re.I):
+    if re.search(r'just now|moments ago|appena|à l\'instant|gerade eben|только что|방금|たった今|刚刚|剛剛|الآن|منذ لحظات', s, re.I):
         return f"{prefix}Vừa xong"
-    if re.search(r'yesterday|ieri|hier\b|ayer|ontem|gestern|вчера|어제|昨日|kemarin|เมื่อวาน|昨天', s, re.I):
+    if re.search(r'yesterday|ieri|hier\b|ayer|ontem|gestern|вчера|어제|昨日|kemarin|เมื่อวาน|昨天|أمس', s, re.I):
         return f"{prefix}Hôm qua"
-    if re.search(r'today|oggi|aujourd\'hui|hoy|hoje|heute|сегодня|오늘|今日|hari ini|วันนี้|今天', s, re.I):
+    if re.search(r'today|oggi|aujourd\'hui|hoy|hoje|heute|сегодня|오늘|今日|hari ini|วันนี้|今天|اليوم', s, re.I):
         return f"{prefix}Hôm nay"
+
+    # Arabic singular/dual forms without digits (e.g. "منذ سنة", "منذ عام", "منذ شهر", "منذ أسبوع", "منذ يوم", "منذ ساعة", "منذ دقيقة")
+    if re.search(r'(?:^|\s)(?:سنتين|عامين)(?:\s|$)', s):
+        return f"{prefix}2 năm trước"
+    if re.search(r'(?:^|\s)(?:سنة|عام)(?:\s|$)', s) and not re.search(r'\d', s):
+        return f"{prefix}1 năm trước"
+    if re.search(r'(?:^|\s)شهرين(?:\s|$)', s):
+        return f"{prefix}2 tháng trước"
+    if re.search(r'(?:^|\s)شهر(?:\s|$)', s) and not re.search(r'\d', s):
+        return f"{prefix}1 tháng trước"
+    if re.search(r'(?:^|\s)أسبوعين(?:\s|$)', s):
+        return f"{prefix}2 tuần trước"
+    if re.search(r'(?:^|\s)أسبوع(?:\s|$)', s) and not re.search(r'\d', s):
+        return f"{prefix}1 tuần trước"
+    if re.search(r'(?:^|\s)يومين(?:\s|$)', s):
+        return f"{prefix}2 ngày trước"
+    if re.search(r'(?:^|\s)يوم(?:\s|$)', s) and not re.search(r'\d', s):
+        return f"{prefix}1 ngày trước"
+    if re.search(r'(?:^|\s)ساعتين(?:\s|$)', s):
+        return f"{prefix}2 giờ trước"
+    if re.search(r'(?:^|\s)ساعة(?:\s|$)', s) and not re.search(r'\d', s):
+        return f"{prefix}1 giờ trước"
+    if re.search(r'(?:^|\s)دقيقتين(?:\s|$)', s):
+        return f"{prefix}2 phút trước"
+    if re.search(r'(?:^|\s)دقيقة(?:\s|$)', s) and not re.search(r'\d', s):
+        return f"{prefix}1 phút trước"
 
     # Years
     m = re.search(r'(\d+)\s*(?:y|yr|yrs|year|years|anno|anni|an|ans|année|années|año|años|ano|anos|jahr|jahren|rok|lata|lat|tahun)\b', s, re.I) or \
-        re.search(r'(\d+)\s*(?:год[а]?|лет|г|년|年|ปี)', s, re.I)
+        re.search(r'(\d+)\s*(?:год[а]?|лет|г|년|年|ปี|سنوات|سنة|أعوام|عام)', s, re.I)
     if m:
         return f"{prefix}{m.group(1)} năm trước"
 
     # Months
     m = re.search(r'(\d+)\s*(?:mo|mth|mths|month|months|mese|mesi|mois|mes|meses|mês|monat|monaten|miesiąc|miesiące|miesięcy|bulan)\b', s, re.I) or \
-        re.search(r'(\d+)\s*(?:месяц[аев]?|мес|개월|달|か月|ヶ月|箇月|个月|個月|เดือน)', s, re.I)
+        re.search(r'(\d+)\s*(?:месяц[аев]?|мес|개월|달|か月|ヶ月|箇月|个月|個月|เดือน|أشهر|شهور|شهر)', s, re.I)
     if m:
         return f"{prefix}{m.group(1)} tháng trước"
 
     # Weeks
     m = re.search(r'(\d+)\s*(?:w|wk|wks|week|weeks|sett|sett\.|settimana|settimane|sem|sem\.|semaine|semaines|semana|semanas|woche|wochen|tydzień|tygodn[iea]?|minggu)\b', s, re.I) or \
-        re.search(r'(\d+)\s*(?:недел[ияь]?|нед|주|週間|週|周|星期|สัปดาห์)', s, re.I)
+        re.search(r'(\d+)\s*(?:недел[ияь]?|нед|주|週間|週|周|星期|สัปดาห์|أسابيع|أسبوع)', s, re.I)
     if m:
         return f"{prefix}{m.group(1)} tuần trước"
 
     # Days
     m = re.search(r'(\d+)\s*(?:d|day|days|gg|gg\.|giorno|giorni|jour|jours|j|día|dias|días|dia|tag|tagen|dzień|dni|hari)\b', s, re.I) or \
-        re.search(r'(\d+)\s*(?:день|дня|дней|дн|일|日|天|วัน)', s, re.I)
+        re.search(r'(\d+)\s*(?:день|дня|дней|дн|일|日|天|วัน|أيام|يوم)', s, re.I)
     if m:
         return f"{prefix}{m.group(1)} ngày trước"
 
     # Hours
     m = re.search(r'(\d+)\s*(?:h|hr|hrs|hour|hours|ora|ore|heure|heures|hora|horas|stunde|stunden|std|godzin[ye]?|jam)\b', s, re.I) or \
-        re.search(r'(\d+)\s*(?:час[аов]?|ч|시간|時間|時|小时|小時|ชั่วโมง)', s, re.I)
+        re.search(r'(\d+)\s*(?:час[аов]?|ч|시간|時間|時|小时|小時|ชั่วโมง|ساعات|ساعة)', s, re.I)
     if m:
         return f"{prefix}{m.group(1)} giờ trước"
 
     # Minutes
     m = re.search(r'(\d+)\s*(?:m|min|mins|minute|minutes|minuto|minuti|minuten|minut[y]?|menit)\b', s, re.I) or \
-        re.search(r'(\d+)\s*(?:минут[уы]?|мин|분|分|分钟|分鐘|นาที)', s, re.I)
+        re.search(r'(\d+)\s*(?:минут[уы]?|мин|분|分|分钟|分鐘|นาที|دقائق|دقيقة)', s, re.I)
     if m:
         return f"{prefix}{m.group(1)} phút trước"
 
     # Seconds
     m = re.search(r'(\d+)\s*(?:s|sec|secs|second|seconds|secondo|secondi|seconde|secondes|segundo|segundos|sekunde|sekunden|detik)\b', s, re.I) or \
-        re.search(r'(\d+)\s*(?:секунд[уы]?|сек|초|秒|วินาที)', s, re.I)
+        re.search(r'(\d+)\s*(?:секунд[уы]?|сек|초|秒|วินาที|ثوانٍ|ثواني|ثانية)', s, re.I)
     if m:
         return f"{prefix}{m.group(1)} giây trước"
 
@@ -2245,6 +2306,20 @@ def is_video_matching_country(item: dict, ch_info: dict, target_geo: str) -> boo
         if ch_country in ['VN', 'RU', 'JP', 'KR', 'TH', 'IN', 'ID', 'PH']:
             return False
 
+    # 21. Thị trường Ả Rập (SA - Ả Rập Xê Út, AE - UAE, EG - Ai Cập, IQ, KW, QA...)
+    elif geo in ['SA', 'AE', 'EG', 'IQ', 'KW', 'QA', 'MA', 'JO', 'LB']:
+        if has_south_asian or has_hangul or has_kana or has_cyrillic or has_thai or has_vn or has_chinese:
+            return False
+        # Chặn ký tự Farsi thuần túy (گ چ پ ژ) nếu đang lọc thị trường Ả Rập
+        if re.search(r'[گچپژ]', combined_title):
+            return False
+        if audio_lang and not audio_lang.startswith(('ar', 'zxx')):
+            return False
+        if ch_country in ['US', 'GB', 'AU', 'VN', 'RU', 'JP', 'KR', 'TH', 'IN', 'ID', 'PH', 'IR', 'CN', 'TW', 'FR', 'DE']:
+            return False
+        if not has_arabic and not audio_lang.startswith('ar'):
+            return False
+
 
     return True
 
@@ -2357,6 +2432,9 @@ def get_trending_feed(
                         "ES": "tendencias videos populares espana podcast documental",
                         "PT": "tendencias videos populares portugal podcast documental",
                         "IR": "ترندهای یوتیوب فارسی پادکست مستند",
+                        "SA": "الأكثر رواجا السعودية قصص واقعية بودكاست",
+                        "AE": "الأكثر رواجا الامارات قصص بودكاست",
+                        "EG": "الأكثر رواجا مصر قصص واقعية حكايات",
                         "BR": "documentario podcast brasil",
                         "CN": "热门视频 深度纪录片 播客 科技",
                         "TW": "熱門影片 深度紀錄片 播客 科技"
@@ -2369,6 +2447,7 @@ def get_trending_feed(
                     "BR": "pt", "IN": "en", "FR": "fr", "IT": "it",
                     "ID": "id", "TH": "th", "PH": "en", "RU": "ru",
                     "PL": "pl", "ES": "es", "PT": "pt", "IR": "fa",
+                    "SA": "ar", "AE": "ar", "EG": "ar",
                     "CN": "zh-Hans", "TW": "zh-Hant"
                 }
                 lang_param = GEO_LANG_MAP.get(geo_code, "en")
@@ -2523,6 +2602,9 @@ def get_trending_feed(
                 "ES": "en tendencias espana",
                 "PT": "em alta portugal",
                 "IR": "ترندهای یوتیوب فارسی",
+                "SA": "الأكثر رواجا السعودية",
+                "AE": "الأكثر رواجا الامارات",
+                "EG": "الأكثر رواجا مصر",
                 "VN": "thịnh hành việt nam",
                 "JP": "話題 トレンド",
                 "KR": "이슈 트렌드",
@@ -2546,6 +2628,7 @@ def get_trending_feed(
                 "BR": "pt", "IN": "en", "FR": "fr", "IT": "it",
                 "ID": "id", "TH": "th", "PH": "en", "RU": "ru",
                 "PL": "pl", "ES": "es", "PT": "pt", "IR": "fa",
+                "SA": "ar", "AE": "ar", "EG": "ar",
                 "CN": "zh-CN", "TW": "zh-TW"
             }
             hl_code = GEO_LANG_MAP.get(geo_code, "en")
@@ -2585,7 +2668,10 @@ def get_trending_feed(
                         "JP": ["ドキュメンタリー 公式", "人気 ポッドキャスト"],
                         "KR": ["공식 팟캐스트", "다큐멘터리 시리즈"],
                         "CN": ["官方纪录片 深度访谈", "高分纪录片 中文", "知名播客 访谈"],
-                        "TW": ["官方紀錄片 深度訪談", "高分紀錄片 繁體中文", "優質播客 訪談"]
+                        "TW": ["官方紀錄片 深度訪談", "高分紀錄片 繁體中文", "優質播客 訪談"],
+                        "SA": ["بودكاست عربي شهير", "وثائقي عربي قصص", "حكايات وقصص واقعية"],
+                        "AE": ["بودكاست اماراتي عربي", "وثائقي عربي شهير"],
+                        "EG": ["بودكاست مصري شهير", "قصص واقعية مصرية"]
                     }
                     candidate_queries.extend(secondary_queries.get(geo_code, ["podcast documentary official"]))
                 else:
@@ -2599,7 +2685,10 @@ def get_trending_feed(
                         "FR": ["tendances viral france", "video buzz nouvelle"],
                         "IT": ["tendenze virale italia", "video virali nuovi"],
                         "JP": ["話題の動画 急上昇", "バイラル 動画"],
-                        "KR": ["인기 급상승 바이럴", "화제 영상"]
+                        "KR": ["인기 급상승 바이럴", "화제 영상"],
+                        "SA": ["ترند السعودية اليوم", "فيديوهات فيرال السعودية", "قصص مؤثرة السعودية"],
+                        "AE": ["ترند الامارات اليوم", "فيديوهات فيرال دبي"],
+                        "EG": ["ترند مصر اليوم", "فيديوهات فيرال مصر"]
                     }
                     candidate_queries.extend(secondary_queries.get(geo_code, ["trending viral video"]))
 

@@ -27,6 +27,12 @@ class TrendService:
             "RU": ("ru", "RU"),
             "PL": ("pl", "PL"),
             "IR": ("fa", "IR"),
+            "SA": ("ar", "SA"),
+            "AE": ("ar", "AE"),
+            "EG": ("ar", "EG"),
+            "IQ": ("ar", "IQ"),
+            "KW": ("ar", "KW"),
+            "QA": ("ar", "QA"),
             "ES": ("es", "ES"),
             "PT": ("pt", "PT"),
             "CN": ("zh-CN", "CN"),
@@ -148,8 +154,9 @@ class TrendService:
         origin_geo = origin_info.get("origin_geo", "US")
         target = target_geo.upper().strip() if target_geo else "US"
 
-        # Trùng khớp thị trường gốc 100%
-        if origin_geo == target or not target:
+        # Trùng khớp thị trường gốc 100% (bao gồm nhóm các nước nói tiếng Ả Rập: SA, AE, EG, IQ, KW, QA...)
+        arabic_geos = {"SA", "AE", "EG", "IQ", "KW", "QA", "MA", "JO", "LB", "OM", "BH"}
+        if origin_geo == target or not target or (origin_geo in arabic_geos and target in arabic_geos):
             return {
                 "compatibility_score": 1.0,
                 "is_match": True,
