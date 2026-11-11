@@ -94,7 +94,38 @@ COUNTRY_TIMEZONE_PROFILES = {
         "name": "Bồ Đào Nha (Portugal)",
         "utc_offset": 0,  # Lisbon (WET, UTC+0 - chậm hơn VN 7 tiếng)
         "tz_name": "WET / WEST (Lisboa, UTC+0)",
-    }
+    },
+    # Trung Đông & Bắc Phi — tiếng Ả Rập
+    "SA": {
+        "name": "Ả Rập Xê Út (Saudi Arabia)",
+        "utc_offset": 3,  # Riyadh (AST, UTC+3 - chậm hơn VN 4 tiếng)
+        "tz_name": "AST (Riyadh, UTC+3)",
+    },
+    "AE": {
+        "name": "UAE (Các Tiểu Vương Quốc Ả Rập)",
+        "utc_offset": 4,  # Dubai (GST, UTC+4 - chậm hơn VN 3 tiếng)
+        "tz_name": "GST (Dubai, UTC+4)",
+    },
+    "EG": {
+        "name": "Ai Cập (Egypt)",
+        "utc_offset": 2,  # Cairo (EET, UTC+2 - chậm hơn VN 5 tiếng)
+        "tz_name": "EET (Cairo, UTC+2)",
+    },
+    "IQ": {
+        "name": "Iraq",
+        "utc_offset": 3,  # Baghdad (AST, UTC+3)
+        "tz_name": "AST (Baghdad, UTC+3)",
+    },
+    "KW": {
+        "name": "Kuwait",
+        "utc_offset": 3,
+        "tz_name": "AST (Kuwait City, UTC+3)",
+    },
+    "QA": {
+        "name": "Qatar",
+        "utc_offset": 3,
+        "tz_name": "AST (Doha, UTC+3)",
+    },
 }
 
 # Hồ sơ 2 khung giờ đăng tối ưu theo 19 chủ đề / ngách chuẩn của hệ thống

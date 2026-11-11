@@ -789,7 +789,11 @@ def analyze_keyword(req: KeywordAnalysisRequest):
             "JP": ("ja", "JP"), "KR": ("ko", "KR"), "BR": ("pt", "BR"), "IN": ("en", "IN"),
             "ID": ("id", "ID"), "TH": ("th", "TH"), "PH": ("en", "PH"), "RU": ("ru", "RU"),
             "PL": ("pl", "PL"), "IR": ("fa", "IR"), "ES": ("es", "ES"), "PT": ("pt", "PT"),
-            "CN": ("zh-CN", "CN"), "TW": ("zh-TW", "TW")
+            "CN": ("zh-CN", "CN"), "TW": ("zh-TW", "TW"),
+            # Tiếng Ả Rập — Trung Đông & Bắc Phi
+            "SA": ("ar", "SA"), "AE": ("ar", "AE"), "EG": ("ar", "EG"),
+            "IQ": ("ar", "IQ"), "MA": ("ar", "MA"), "KW": ("ar", "KW"),
+            "QA": ("ar", "QA"), "JO": ("ar", "JO"), "LB": ("ar", "LB"),
         }
         hl_lang, gl_country = geo_lang_map.get(geo, ("en", geo))
 
@@ -1099,6 +1103,35 @@ def get_trending_niche_tags(geo: Optional[str] = "US"):
             {"tag": "true crime interrogation", "niche": "🕵️ True Crime", "badge": "🚀 Deep Dive"},
             {"tag": "scary horror stories", "niche": "👻 Horror", "badge": "🌙 Spooky"},
             {"tag": "stoicism life lessons", "niche": "📜 Stoicism", "badge": "🌱 Wisdom"}
+        ],
+        # ===== Tiếng Ả Rập — Trung Đông & Bắc Phi (SA, AE, EG...) =====
+        "SA": [
+            {"tag": "قصص خيانة زوجية حقيقية", "niche": "💔 خيانة وانتقام", "badge": "🔥 فيرال"},
+            {"tag": "دراما عائلية مؤثرة", "niche": "🏡 عائلة ودراما", "badge": "⚡ درامية"},
+            {"tag": "حكاية وعبرة قصص واقعية", "niche": "📖 قصص حقيقية", "badge": "🔥 مؤثر"},
+            {"tag": "مشاكل الحماة والكنة", "niche": "🏡 مشاكل أسرية", "badge": "⚡ درامي"},
+            {"tag": "قصص رعب حقيقية ليلية", "niche": "👻 رعب وأسرار", "badge": "🌙 مرعب"},
+            {"tag": "جرائم حقيقية وثائقي عربي", "niche": "🕵️ جرائم حقيقية", "badge": "🚀 مليون مشاهدة"},
+            {"tag": "ربح المال من الانترنت 2026", "niche": "💰 مال وأعمال", "badge": "🔥 ترند"},
+            {"tag": "أدوات الذكاء الاصطناعي مجاناً", "niche": "🤖 تقنية وذكاء", "badge": "🚀 جديد"},
+            {"tag": "أبراج اليوم والتوقعات", "niche": "🔮 أبراج وحظ", "badge": "🔮 يومي"},
+            {"tag": "حكمة وعبر كبار السن", "niche": "📜 حكمة وفلسفة", "badge": "🌱 ملهم"},
+            {"tag": "ملخص مسلسل عربي رمضاني", "niche": "🎬 مسلسلات وتلخيص", "badge": "🔥 ترند"}
+        ],
+        "AE": [
+            {"tag": "قصص خيانة زوجية حقيقية", "niche": "💔 خيانة وانتقام", "badge": "🔥 فيرال"},
+            {"tag": "دراما عائلية مؤثرة", "niche": "🏡 عائلة ودراما", "badge": "⚡ درامية"},
+            {"tag": "قصص رعب حقيقية", "niche": "👻 رعب وأسرار", "badge": "🌙 مرعب"},
+            {"tag": "ربح المال من الانترنت 2026", "niche": "💰 مال وأعمال", "badge": "🔥 ترند"},
+            {"tag": "أدوات الذكاء الاصطناعي", "niche": "🤖 تقنية", "badge": "🚀 جديد"},
+            {"tag": "جرائم حقيقية وثائقي", "niche": "🕵️ جرائم حقيقية", "badge": "🚀 مليون مشاهدة"}
+        ],
+        "EG": [
+            {"tag": "قصص خيانة زوجية مصرية", "niche": "💔 خيانة وانتقام", "badge": "🔥 فيرال"},
+            {"tag": "دراما عائلية مصرية", "niche": "🏡 عائلة ودراما", "badge": "⚡ درامية"},
+            {"tag": "قصص رعب وأشباح مصر", "niche": "👻 رعب", "badge": "🌙 مرعب"},
+            {"tag": "أفكار مشاريع صغيرة ناجحة", "niche": "💰 أعمال", "badge": "🔥 ترند"},
+            {"tag": "ملخص مسلسل مصري", "niche": "🎬 مسلسلات", "badge": "🔥 Trending"}
         ]
     }
     return {

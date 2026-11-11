@@ -22,7 +22,11 @@ GEO_TO_LANG_MAP = {
     "CN": "zh", "TW": "zh", "HK": "zh",
     "IT": "it",
     "IN": "hi",
-    "ID": "id"
+    "ID": "id",
+    # Tiếng Ả Rập — Trung Đông & Bắc Phi
+    "SA": "ar", "AE": "ar", "EG": "ar", "IQ": "ar", "MA": "ar",
+    "DZ": "ar", "TN": "ar", "LB": "ar", "JO": "ar", "KW": "ar",
+    "QA": "ar", "BH": "ar", "OM": "ar", "YE": "ar", "LY": "ar", "SD": "ar",
 }
 
 NICHE_SEARCH_TEMPLATES = {
@@ -164,9 +168,37 @@ NICHE_SEARCH_TEMPLATES = {
         "ja": ['おもしろ動画 爆笑', 'バラエティ 名場面'],
         "es": ['retos y entretenimiento viral', 'videos divertidos virales', 'desafios y comedia viral'],
         "vi": ['thử thách sinh tồn hài hước', 'giải trí triệu view viral', 'video hài hước giải trí'],
-        "en": ['viral entertainment challenge', 'funny stunts challenge', 'trending entertainment comedy']
+        "en": ['viral entertainment challenge', 'funny stunts challenge', 'trending entertainment comedy'],
+        "ar": ['تحديات وترفيه فيرال', 'فيديوهات مضحكة عربية', 'تحديات ترفيهية']
     }
 }
+
+# =====================================================================
+# Niche Search Templates bổ sung cho tiếng Ả Rập (AR)
+# Áp dụng cho các quốc gia: SA (Ả Rập Xê Út), AE (UAE), EG (Ai Cập)...
+# =====================================================================
+for _niche, _ar_queries in {
+    "infidelity_revenge": ["قصص خيانة زوجية حقيقية", "انتقام من الخيانة الزوجية", "خيانة وطلاق قصص واقعية"],
+    "father_inlaw_drama": ["مشاكل الحماة والكنة قصص", "قصص عائلية صعبة حماة عروس", "دراما أسرية الحماة والزوج"],
+    "mother_inlaw_drama": ["قصص حماة وكنة صعبة", "مشاكل زوجية مع العائلة قصص واقعية", "دراما عائلية حماة وزوجة ابنها"],
+    "reddit_stories": ["قصص واقعية من حياتي", "حكايات حقيقية مؤلمة", "تجارب شخصية مؤثرة"],
+    "horror_stories": ["قصص رعب حقيقية", "قصص مرعبة واقعية ليلية", "قصص جن وأرواح حقيقية"],
+    "true_crime": ["جرائم حقيقية وثائقي", "قضايا جنائية حقيقية مثيرة", "أسرار وجرائم غامضة"],
+    "philosophy": ["حكمة وعبر من الحياة", "دروس الحياة والحكمة العربية", "تأملات وفلسفة الحياة"],
+    "christianity_bible": ["قراءة الإنجيل والكتاب المقدس", "تعاليم مسيحية وصلاة", "كلمة الرب والترنيم"],
+    "finance_money": ["كيف تربح المال من الانترنت 2026", "أفكار مشاريع ناجحة صغيرة", "استثمار وادخار للمبتدئين"],
+    "tech_ai": ["تقنية الذكاء الاصطناعي 2026", "أدوات الذكاء الاصطناعي مجاناً", "تطبيقات تقنية مفيدة"],
+    "travel_vlog": ["جولة سياحية في السعودية", "أجمل الأماكن السياحية العربية", "رحلات وسفر في الوطن العربي"],
+    "entertainment": ["تحديات وترفيه عربي فيرال", "فيديوهات مضحكة عربية", "مقاطع ترفيهية عربية"],
+    "drama_expose": ["فضائح مشاهير العرب", "كشف أسرار حقيقية مشاهير", "فضائح وأسرار الحياة الخاصة"],
+    "recap_stories": ["ملخص مسلسل عربي", "تلخيص أحداث مسلسل", "أحداث مسلسلات رمضانية"],
+    "history_geopolitics": ["تاريخ الوطن العربي وثائقي", "تاريخ إسلامي ووثائقي", "أحداث تاريخية عربية مهمة"],
+    "astrology_horoscope": ["أبراج اليوم 2026", "توقعات الأبراج الأسبوعية", "فنجان وطالع وقراءة الكف"],
+    "elderly_wisdom": ["حكم ونصائح كبار السن", "وصايا وعبر الحياة", "خبرات وحكم من الكبار"],
+    "buddhism": ["تأمل وسكينة روحية", "علاج نفسي روحاني هادئ", "راحة البال والتأمل الروحي"],
+}.items():
+    if _niche in NICHE_SEARCH_TEMPLATES:
+        NICHE_SEARCH_TEMPLATES[_niche]["ar"] = _ar_queries
 
 def detect_channel_language(text: str, target_geo: Optional[str] = None, channel_country: Optional[str] = None) -> str:
     """Xác định ngôn ngữ chính xác dựa trên ký tự đặc trưng, từ vựng cốt lõi và quốc gia kênh/thị trường.
@@ -194,7 +226,11 @@ def detect_channel_language(text: str, target_geo: Optional[str] = None, channel
     if len(re.findall(r'[\u0e00-\u0e7f]', text)) >= 3:
         return 'th'
 
-    # 5. Tiếng Nga / Cyrillic
+    # 5. Tiếng Ả Rập / Arabic ([\u0600-\u06ff] bao gồm toàn bộ bảng chữ cái Ả Rập)
+    if len(re.findall(r'[\u0600-\u06ff]', text)) >= 2:
+        return 'ar'
+
+    # 6. Tiếng Nga / Cyrillic
     if len(re.findall(r'[а-яА-ЯёЁ]', text)) >= 3:
         return 'ru'
 
@@ -670,6 +706,10 @@ class CompetitorService:
                 if not re.search(r'[\u4e00-\u9fff]', text):
                     return -999
                 score += 80
+            elif target_lang == 'ar':
+                if not re.search(r'[\u0600-\u06ff]', text):
+                    return -999  # Kênh Ả Rập chỉ nhận kênh có ký tự Ả Rập
+                score += 80
             elif target_lang == 'vi':
                 if re.search(r'[가-힣ぁ-んァ-ヶ\u0e00-\u0e7f]', text):
                     return -999
@@ -773,6 +813,8 @@ class CompetitorService:
                             if target_lang == 'ja' and not re.search(r'[ぁ-んァ-ヶ]', cand_text):
                                 continue
                             if target_lang == 'zh' and not re.search(r'[\u4e00-\u9fff]', cand_text):
+                                continue
+                            if target_lang == 'ar' and not re.search(r'[\u0600-\u06ff]', cand_text):
                                 continue
                             # Fallback tiếng Việt: loại bỏ kênh không có ký tự tiếng Việt hoặc tiếng Anh thuần
                             if target_lang == 'vi':
