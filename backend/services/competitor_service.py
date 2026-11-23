@@ -5,6 +5,7 @@ from typing import List, Dict, Any, Optional
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 import yt_dlp
+from backend.services.time_service import TimeService, NICHE_PROFILES
 
 logger = logging.getLogger(__name__)
 
@@ -279,6 +280,126 @@ def detect_channel_language(text: str, target_geo: Optional[str] = None, channel
     return 'en'
 
 
+QUERY_NICHE_RULES = [
+    ('infidelity_revenge', [
+        r'사이다\s*썰', r'사이다사연', r'바람', r'불륜', r'외도', r'참교육', r'상간', r'맞바람', r'톡썰', r'이혼', r'배신', r'복수',
+        r'ngoại tình', r'bắt gian', r'đánh ghen', r'tiểu tam', r'trả thù', r'người thứ 3', r'con giáp thứ 13', r'phản bội', r'ly hôn',
+        r'infidelidad', r'infiel', r'venganza', r'engaño', r'traición', r'traicion', r'amante',
+        r'浮気', r'不倫', r'修羅場', r'スカッとする', r'ざまぁ',
+        r'cheating', r'infidelity', r'revenge drama', r'betrayal', r'affair', r'caught cheating',
+        r'خيانة', r'انتقام', r'طلاق'
+    ]),
+    ('father_inlaw_drama', [
+        r'bố chồng', r'nàng dâu', r'bố chồng nàng dâu',
+        r'시아버지', r'며느리', r'시댁\s*갈등', r'시누이', r'시동생',
+        r'義父', r'嫁', r'suegro', r'nuera', r'father in law', r'daughter in law'
+    ]),
+    ('mother_inlaw_drama', [
+        r'mẹ chồng', r'mẹ vợ', r'con rể', r'mẹ chồng nàng dâu', r'mẹ vợ con rể',
+        r'시어머니', r'고부\s*갈등', r'고부갈등', r'시월드', r'장모', r'사위',
+        r'義母', r'姑', r'婿', r'suegra', r'yerno', r'mother in law', r'son in law',
+        r'حماة'
+    ]),
+    ('christianity_bible', [
+        r'kinh thánh', r'lời chúa', r'cơ đốc', r'thánh ca', r'cầu nguyện', r'tin lành', r'công giáo', r'bài giảng',
+        r'성경', r'말씀', r'기도', r'묵상', r'기독교', r'설교', r'하나님', r'예수', r'찬양', r'새벽기도',
+        r'聖書', r'キリスト教', r'biblia', r'palabra de dios', r'predica', r'cristian', r'oración', r'oracion',
+        r'bible', r'holy bible', r'scripture', r'gospel', r'jesus', r'devotional', r'sermon', r'christian',
+        r'إنجيل', r'كتاب مقدس'
+    ]),
+    ('buddhism', [
+        r'phật pháp', r'lời phật', r'chữa lành', r'thiền định', r'an lạc', r'đạo phật', r'kinh phật', r'thuyết pháp',
+        r'불경', r'불교', r'법문', r'스님', r'부처님', r'명상', r'마음치유', r'반야심경',
+        r'仏教', r'法話', r'ブッダ', r'説法', r'禅',
+        r'budismo', r'meditacion', r'paz interior', r'buddhism', r'buddha teachings', r'dharma',
+        r'تأمل روحي'
+    ]),
+    ('astrology_horoscope', [
+        r'tử vi', r'12 con giáp', r'xem bói', r'bói bài', r'tarot', r'phong thủy', r'tướng số', r'vận mệnh',
+        r'운세', r'사주', r'타로', r'별자리', r'신점', r'관상', r'손금', r'띠별운세',
+        r'占い', r'タロット', r'星座占い', r'手相',
+        r'horoscopo', r'horóscopo', r'astrologia', r'astrología', r'signos del zodiaco',
+        r'horoscope', r'astrology', r'zodiac', r'tarot reading',
+        r'أبراج', r'طالع'
+    ]),
+    ('reddit_stories', [
+        r'reddit', r'truyện reddit', r'tâm sự reddit', r'aita', r'confessions',
+        r'레딧', r'네이트판', r'커뮤니티\s*썰', r'2ch', r'2ちゃんねる', r'relatos reddit'
+    ]),
+    ('true_crime', [
+        r'vụ án', r'kỳ án', r'trinh thám', r'phá án', r'giết người', r'hồ sơ vụ án',
+        r'미제사건', r'그것이\s*알고싶다', r'실화\s*범죄',
+        r'未解決事件', r'crimen real', r'asesino', r'true crime', r'murder case',
+        r'جرائم حقيقية'
+    ]),
+    ('horror_stories', [
+        r'truyện ma', r'kinh dị', r'tâm linh', r'rùng rợn',
+        r'무서운\s*이야기', r'괴담', r'공포', r'귀신',
+        r'怪談', r'relatos de terror', r'historias de miedo', r'horror stories', r'scary stories',
+        r'قصص رعب'
+    ]),
+    ('recap_stories', [
+        r'tóm tắt phim', r'review phim', r'spoil phim',
+        r'결말포함', r'영화\s*리뷰', r'드라마\s*몰아보기',
+        r'映画解説', r'ネタバレ', r'resumen de pelicula', r'movie recap',
+        r'ملخص مسلسل'
+    ]),
+    ('travel_vlog', [
+        r'du lịch', r'ẩm thực', r'review quán', r'vlog du lịch',
+        r'여행\s*브이로그', r'먹방', r'旅行\s*vlog', r'vlog de viajes', r'travel vlog'
+    ]),
+    ('gaming', [
+        r'gameplay', r'stream game', r'highlight game', r'liên quân', r'liên minh',
+        r'게임', r'ゲーム実況', r'videojuegos', r'gaming', r'walkthrough'
+    ]),
+    ('tech_ai', [
+        r'công nghệ', r'trí tuệ nhân tạo', r'ai tools', r'review điện thoại',
+        r'테크', r'인공지능', r'ガジェット', r'tecnologia', r'tech review', r'artificial intelligence'
+    ]),
+    ('finance_money', [
+        r'tài chính', r'đầu tư', r'chứng khoán', r'bất động sản', r'kiếm tiền',
+        r'재테크', r'주식', r'부동산', r'資産運用', r'finanzas', r'investing', r'personal finance'
+    ]),
+    ('philosophy', [
+        r'triết lý', r'khắc kỷ', r'danh ngôn', r'bài học cuộc sống',
+        r'명언', r'인생철학', r'지혜', r'人生訓', r'estoicismo', r'stoicism', r'philosophy'
+    ]),
+    ('learn_english', [
+        r'học tiếng anh', r'tiếng anh giao tiếp', r'luyện nghe tiếng anh',
+        r'영어회화', r'원어민\s*영어', r'英会話', r'aprender ingles', r'learn english'
+    ]),
+    ('elderly_wisdom', [
+        r'tuổi già', r'dưỡng già', r'tuổi xế chiều', r'노후', r'노년', r'황혼', r'老後', r'vejez', r'elderly wisdom'
+    ]),
+    ('spicy_18_drama', [
+        r'chuyện đêm muộn', r'phòng the', r'thầm kín', r'18\+', r'19금', r'19금\s*사연'
+    ]),
+    ('drama_expose', [
+        r'bóc phốt', r'showbiz', r'vạch trần', r'폭로', r'이슈\s*정리', r'炎上', r'polemicas', r'drama expose'
+    ])
+]
+
+STORY_DRAMA_NICHES = {
+    'infidelity_revenge', 'father_inlaw_drama', 'mother_inlaw_drama',
+    'reddit_stories', 'spicy_18_drama', 'drama_expose'
+}
+
+CONFLICTING_NICHES = {
+    'infidelity_revenge': {'buddhism', 'christianity_bible', 'gaming', 'tech_ai', 'history_geopolitics', 'astrology_horoscope', 'learn_english', 'space_science'},
+    'father_inlaw_drama': {'buddhism', 'christianity_bible', 'gaming', 'tech_ai', 'history_geopolitics', 'astrology_horoscope', 'learn_english', 'space_science'},
+    'mother_inlaw_drama': {'buddhism', 'christianity_bible', 'gaming', 'tech_ai', 'history_geopolitics', 'astrology_horoscope', 'learn_english', 'space_science'},
+    'reddit_stories': {'buddhism', 'christianity_bible', 'gaming', 'tech_ai', 'history_geopolitics', 'space_science'},
+    'christianity_bible': {'gaming', 'infidelity_revenge', 'spicy_18_drama', 'horror_stories', 'tech_ai', 'buddhism', 'astrology_horoscope'},
+    'buddhism': {'gaming', 'infidelity_revenge', 'spicy_18_drama', 'horror_stories', 'tech_ai', 'christianity_bible', 'astrology_horoscope'},
+    'astrology_horoscope': {'gaming', 'christianity_bible', 'tech_ai', 'learn_english'},
+    'true_crime': {'gaming', 'christianity_bible', 'buddhism', 'tech_ai', 'learn_english'},
+    'horror_stories': {'gaming', 'christianity_bible', 'buddhism', 'tech_ai', 'learn_english'},
+    'tech_ai': {'buddhism', 'christianity_bible', 'infidelity_revenge', 'father_inlaw_drama', 'mother_inlaw_drama', 'astrology_horoscope'},
+    'finance_money': {'gaming', 'horror_stories', 'spicy_18_drama', 'astrology_horoscope'},
+    'learn_english': {'gaming', 'horror_stories', 'spicy_18_drama', 'astrology_horoscope', 'buddhism', 'christianity_bible'}
+}
+
+
 class CompetitorService:
     def __init__(self):
         self.ydl_opts = {
@@ -291,8 +412,20 @@ class CompetitorService:
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
         }
+        self.time_service = TimeService()
         self._last_queries = []
         self._last_niche = ""
+
+    def detect_query_niche(self, query: str) -> Optional[str]:
+        """Tự động phân tích từ khóa tìm kiếm để xác định ngách nội dung cốt lõi của người dùng."""
+        if not query:
+            return None
+        ql = query.lower().strip()
+        for niche_key, patterns in QUERY_NICHE_RULES:
+            for pat in patterns:
+                if re.search(pat, ql):
+                    return niche_key
+        return None
 
     def _scrape_channel_avatar(self, channel_url: str) -> str:
         if not channel_url or 'results?search_query=' in channel_url:
@@ -442,7 +575,17 @@ class CompetitorService:
     ) -> List[str]:
         """Tạo danh sách các truy vấn ngách đắt giá nhất, đại diện cho toàn bộ thể loại kênh và chuẩn ngôn ngữ."""
         if custom_query and custom_query.strip():
-            return [custom_query.strip()]
+            cq = custom_query.strip()
+            queries = [cq]
+            q_niche = niche or self.detect_query_niche(cq)
+            q_lang = detect_channel_language(cq, target_geo=target_geo, channel_country=channel_country)
+            if q_niche and q_niche in NICHE_SEARCH_TEMPLATES:
+                n_templates = NICHE_SEARCH_TEMPLATES[q_niche]
+                related = n_templates.get(q_lang, n_templates.get("en", []))
+                for r in related:
+                    if r.lower() != cq.lower() and r not in queries:
+                        queries.append(r)
+            return queries[:4]
 
         queries = []
         all_text = f"{current_channel_name} {' '.join(channel_tags or [])} {channel_description or ''} {' '.join(video_titles or [])}".lower()
@@ -518,9 +661,10 @@ class CompetitorService:
         )
         self._last_queries = queries
         self._last_niche = niche or ""
-        logger.info(f"Finding established competitors for '{current_channel_name}' [Geo: {target_geo}] with queries: {queries}")
+        effective_target_niche = niche or (self.detect_query_niche(custom_query) if custom_query else None)
+        logger.info(f"Finding established competitors for '{current_channel_name or custom_query}' [Geo: {target_geo}, Niche: {effective_target_niche}] with queries: {queries}")
 
-        all_target_text = f"{current_channel_name} {' '.join(channel_tags or [])} {channel_description or ''} {' '.join(video_titles or [])}".lower()
+        all_target_text = f"{custom_query or ''} {current_channel_name} {' '.join(channel_tags or [])} {channel_description or ''} {' '.join(video_titles or [])}".lower()
         target_lang = detect_channel_language(all_target_text, target_geo=target_geo, channel_country=channel_country)
         is_music_target = any(w in all_target_text for w in ['music', 'música', 'singer', 'ca sĩ', 'bài hát', 'nhạc'])
 
@@ -686,14 +830,51 @@ class CompetitorService:
             if (subs >= 1000 or tot_v >= 20000) and vids >= 3:
                 established_candidates.append(c)
 
+        # =========================================================================
+        # 1.4 Phân tích video thực tế của các kênh ứng viên để xác định đúng chủ đề cốt lõi
+        # =========================================================================
+        if api_key and api_key.strip() and established_candidates:
+            def _fetch_candidate_videos(cand: Dict[str, Any]):
+                c_id = cand.get('channel_id')
+                if not c_id:
+                    return
+                uploads_id = 'UU' + c_id[2:]
+                try:
+                    pl_url = f"https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId={uploads_id}&maxResults=5&key={api_key.strip()}"
+                    p_res = requests.get(pl_url, timeout=5).json()
+                    items = p_res.get('items', [])
+                    v_titles = [it.get('snippet', {}).get('title', '') for it in items if it.get('snippet', {}).get('title')]
+                    cand['sample_video_titles'] = v_titles
+                    if v_titles and not cand.get('top_video_title'):
+                        cand['top_video_title'] = v_titles[0]
+                except Exception:
+                    pass
+
+            with ThreadPoolExecutor(max_workers=min(10, len(established_candidates))) as pool:
+                list(pool.map(_fetch_candidate_videos, established_candidates))
+
+        # Phân tích và gán nhãn chủ đề thực tế cho từng kênh ứng viên
+        for cand in established_candidates:
+            sample_titles = cand.get('sample_video_titles') or ([cand['top_video_title']] if cand.get('top_video_title') else [])
+            v_objs = [{'title': t} for t in sample_titles]
+            cand_niche = self.time_service.detect_channel_niche(
+                videos=v_objs,
+                channel_keywords=[],
+                channel_title=cand.get('channel_name', ''),
+                channel_description=cand.get('description', '')
+            )
+            cand['detected_niche'] = cand_niche
+            cand['niche_name'] = NICHE_PROFILES.get(cand_niche, {}).get('name_vi') or 'Cùng Chủ Đề'
+
         # Chấm điểm độ tương đồng ngách & ngôn ngữ để đưa đúng đối thủ thực sự lên đầu
         def _score_candidate(cand: Dict[str, Any]) -> int:
-            text = (cand['channel_name'] + ' ' + cand.get('description', '') + ' ' + cand.get('top_video_title', '')).lower()
+            sample_titles = cand.get('sample_video_titles') or ([cand['top_video_title']] if cand.get('top_video_title') else [])
+            text = (cand['channel_name'] + ' ' + cand.get('description', '') + ' ' + ' '.join(sample_titles)).lower()
             cand_country = cand.get('country', '')
             score = 0
             cand_lang = detect_channel_language(text, target_geo=cand_country, channel_country=cand_country)
 
-            # Khớp ngôn ngữ của kênh phân tích
+            # Khớp ngôn ngữ của kênh phân tích / từ khóa tìm kiếm
             if target_lang == 'ko':
                 if not re.search(r'[가-힣]', text):
                     return -999  # Loại bỏ hoàn toàn kênh ngoại lai khi đang phân tích kênh Hàn Quốc
@@ -723,6 +904,18 @@ class CompetitorService:
             if target_geo and cand_country and cand_country.upper() == target_geo.upper():
                 score += 30
 
+            # Khớp chủ đề ngách dựa trên phân tích video thực tế của kênh
+            if effective_target_niche:
+                c_niche = cand.get('detected_niche')
+                if c_niche == effective_target_niche:
+                    score += 150  # Khớp chính xác 100% chủ đề ngách
+                elif effective_target_niche in STORY_DRAMA_NICHES and c_niche in STORY_DRAMA_NICHES:
+                    score += 90   # Cùng họ thể loại drama / truyện tâm sự
+                elif c_niche in CONFLICTING_NICHES.get(effective_target_niche, set()):
+                    return -999   # Loại bỏ hoàn toàn kênh lệch chủ đề (ví dụ: Phật giáo/tin tức/game khi tìm chuyện gia đình)
+                else:
+                    score -= 40
+
             # Khớp từ khóa chủ đề ngách
             for q in queries:
                 q_words = [w for w in q.lower().split() if len(w) > 1]
@@ -747,29 +940,10 @@ class CompetitorService:
             score += min(20, avg_v // 5000)
             return score
 
-        # Lọc bỏ các kênh điểm âm do sai ngôn ngữ
+        # Lọc bỏ các kênh điểm âm do sai ngôn ngữ hoặc sai chủ đề
         established_candidates = [c for c in established_candidates if _score_candidate(c) > 0]
         established_candidates.sort(key=_score_candidate, reverse=True)
         final_candidates = established_candidates[:limit]
-
-        # Bổ sung video tiêu biểu cho các kênh được chọn nếu chưa có
-        if api_key and api_key.strip() and final_candidates:
-            def _fetch_channel_top_video(cand: Dict[str, Any]):
-                if cand.get('top_video_title'):
-                    return
-                c_id = cand['channel_id']
-                uploads_id = 'UU' + c_id[2:]
-                try:
-                    pl_url = f"https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId={uploads_id}&maxResults=1&key={api_key.strip()}"
-                    p_data = requests.get(pl_url, timeout=5).json()
-                    pl_items = p_data.get('items', [])
-                    if pl_items:
-                        cand['top_video_title'] = pl_items[0].get('snippet', {}).get('title', '')
-                except Exception:
-                    pass
-
-            with ThreadPoolExecutor(max_workers=min(6, len(final_candidates))) as pool:
-                list(pool.map(_fetch_channel_top_video, final_candidates))
 
         # =========================================================================
         # Chiến lược 2: Fallback yt-dlp nếu không có API Key hoặc chưa đủ kênh
@@ -827,6 +1001,13 @@ class CompetitorService:
                             if v_views < 2000:
                                 continue
 
+                            cand_niche = self.time_service.detect_channel_niche(
+                                videos=[{'title': v_title}],
+                                channel_keywords=[],
+                                channel_title=uploader,
+                                channel_description=''
+                            )
+
                             final_candidates.append({
                                 'channel_name': uploader,
                                 'title': uploader,
@@ -843,7 +1024,9 @@ class CompetitorService:
                                 'subscriber_count': 0,
                                 'is_verified': False,
                                 'top_video_title': v_title,
-                                'top_video_views': v_views
+                                'top_video_views': v_views,
+                                'detected_niche': cand_niche,
+                                'niche_name': NICHE_PROFILES.get(cand_niche, {}).get('name_vi') or 'Cùng Chủ Đề'
                             })
                             existing_names.add(uploader.lower())
                             if len(final_candidates) >= limit:

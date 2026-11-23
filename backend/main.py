@@ -368,6 +368,14 @@ def search_competitors_api(req: CompetitorSearchRequest):
         if not req.query or not req.query.strip():
             raise HTTPException(status_code=400, detail="Vui lòng cung cấp từ khóa ngách cần tìm kiếm.")
         effective_key = (req.api_key or "").strip() or get_default_api_key()
+        
+        # Tự động nhận diện ngách từ truy vấn người dùng
+        detected_niche = req.niche or competitor_service.detect_query_niche(req.query.strip())
+        niche_name = ""
+        if detected_niche:
+            from backend.services.time_service import NICHE_PROFILES
+            niche_name = NICHE_PROFILES.get(detected_niche, {}).get("name_vi", detected_niche)
+
         competitors = competitor_service.find_similar_channels(
             current_channel_name=req.channel_name or "",
             current_channel_url=req.channel_url or "",
@@ -377,7 +385,7 @@ def search_competitors_api(req: CompetitorSearchRequest):
             video_titles=[],
             target_geo=req.target_geo or "US",
             channel_country="",
-            niche=req.niche,
+            niche=detected_niche,
             custom_query=req.query.strip(),
             limit=req.limit or 6,
             api_key=effective_key
@@ -386,7 +394,13 @@ def search_competitors_api(req: CompetitorSearchRequest):
             "success": True,
             "query": req.query.strip(),
             "competitors": competitors,
-            "total": len(competitors)
+            "total": len(competitors),
+            "competitor_niche_info": {
+                "detected_niche_code": detected_niche or "custom",
+                "detected_niche_name": niche_name or req.query.strip(),
+                "search_queries": getattr(competitor_service, '_last_queries', [req.query.strip()]),
+                "suggested_tags": getattr(competitor_service, '_last_queries', [req.query.strip()])
+            }
         }
     except HTTPException:
         raise
