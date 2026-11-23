@@ -32,32 +32,32 @@ GEO_TO_LANG_MAP = {
 
 NICHE_SEARCH_TEMPLATES = {
     "infidelity_revenge": {
-        "ko": ['사이다 썰', '바람 불륜 사이다 복수 썰', '사이다사연 참교육', '톡썰 사연 모음'],
-        "ja": ['修羅場 スカッとする話', '浮気 復讐 スカッと', '修羅場 不倫 ざまぁ'],
-        "es": ['historias de traicion drama familiar', 'relatos de infidelidad y venganza', 'historias de infidelidad y engaño'],
-        "vi": ['tâm sự ngoại tình trả thù', 'drama bắt gian ngoại tình', 'đánh ghen bắt gian chuyện có thật'],
-        "en": ['cheating revenge drama stories', 'infidelity betrayal stories reddit', 'family betrayal drama']
+        "ko": ['불륜 사이다 복수 사연 라디오', '사연 라디오 몰아보기', '사이다사연 참교육 라디오', '바람 피운 남편 참교육 사연'],
+        "ja": ['修羅場 スカッとする話 朗読', '浮気 復讐 スカッと 朗読', '修羅場 不倫 ざまぁ 朗読'],
+        "es": ['relatos de infidelidad y venganza', 'historias de traicion drama familiar podcast', 'relatos de infidelidad completos'],
+        "vi": ['tâm sự ngoại tình trả thù radio', 'bắt gian ngoại tình trả thù podcast', 'truyện tâm sự đánh ghen có thật', 'tâm sự đêm khuya ngoại tình'],
+        "en": ['cheating revenge drama stories podcast', 'infidelity betrayal stories full', 'caught cheating revenge stories narrated']
     },
     "father_inlaw_drama": {
-        "ko": ['시어머니 며느리 갈등 사이다 썰', '시댁 갈등 사이다 사연', '막장 시댁 참교육 썰'],
-        "ja": ['義母 嫁 姑 確執 スカッと', '義実家 ざまぁ スカッとする話'],
-        "es": ['drama suegra y nuera historias', 'conflictos familiares historias', 'historias de drama familiar'],
-        "vi": ['mẹ chồng nàng dâu drama', 'bố chồng nàng dâu tâm sự', 'xung đột mẹ chồng nàng dâu'],
-        "en": ['mother in law drama stories', 'toxic mother in law reddit', 'entitled in laws stories']
+        "ko": ['시댁 갈등 사이다사연 라디오', '시어머니 며느리 갈등 사연 라디오', '막장 시댁 참교육 사연 라디오', '사연 라디오 몰아보기'],
+        "ja": ['義母 嫁 姑 確執 スカッと 朗読', '義実家 ざまぁ スカッとする話 朗読'],
+        "es": ['drama suegra y nuera relatos completos', 'conflictos familiares historias podcast', 'historias de drama familiar audio'],
+        "vi": ['tâm sự bố chồng nàng dâu radio', 'mẹ chồng nàng dâu tâm sự đêm khuya', 'xung đột gia đình câu chuyện có thật', 'truyện tâm sự gia đình cay đắng'],
+        "en": ['mother in law drama stories podcast', 'toxic in laws stories narrated', 'family drama confessions full']
     },
     "mother_inlaw_drama": {
-        "ko": ['시어머니 며느리 갈등 사이다 썰', '시어머니 참교육 썰', '사이다 톡썰 모음'],
-        "ja": ['姑 嫁いびり スカッと', '義母 撃退 ざまぁ スカッとする話'],
-        "es": ['drama suegra y nuera historias', 'conflictos familiares historias', 'historias de suegras'],
-        "vi": ['mẹ chồng nàng dâu drama', 'mẹ vợ con rể drama', 'xung đột gia đình'],
-        "en": ['mother in law drama stories', 'toxic mother in law reddit', 'in laws drama']
+        "ko": ['시어머니 며느리 갈등 사연 라디오', '장모 사위 갈등 사연 라디오', '시댁 갈등 사이다사연 라디오', '사연 라디오 몰아보기'],
+        "ja": ['姑 嫁いびり スカッと 朗読', '義母 撃退 ざまぁ スカッとする話 朗読'],
+        "es": ['drama suegra y nuera relatos', 'historias de suegras drama familiar', 'conflictos familiares relatos podcast'],
+        "vi": ['mẹ chồng nàng dâu drama radio', 'mẹ vợ con rể tâm sự gia đình', 'xung đột mẹ chồng nàng dâu có thật', 'tâm sự đêm muộn gia đình'],
+        "en": ['mother in law drama stories podcast', 'toxic mother in law reddit stories', 'in laws drama stories narrated']
     },
     "reddit_stories": {
-        "ko": ['레딧 썰', '네이트판 레전드 썰', '사연 라디오', '커뮤니티 레전드 썰'],
-        "ja": ['2ch スカッと 伝説', '2ちゃんねる スレ 朗読'],
-        "es": ['reddit historias espanol', 'historias de reddit venganza', 'relatos reddit espanol'],
-        "vi": ['truyện reddit vietsub', 'tâm sự reddit kể chuyện', 'drama reddit có thật'],
-        "en": ['reddit stories podcast', 'aita revenge drama', 'best reddit confessions']
+        "ko": ['사연 라디오 몰아보기', '네이트판 레전드 썰 라디오', '커뮤니티 레전드 썰 라디오', '오디오 드라마 사연'],
+        "ja": ['2ch スカッと 伝説 朗読', '2ちゃんねる スレ 朗読 まとめ'],
+        "es": ['reddit historias espanol podcast', 'historias de reddit venganza audio', 'relatos reddit espanol completos'],
+        "vi": ['truyện reddit vietsub radio', 'tâm sự reddit kể chuyện audio', 'drama reddit có thật podcast'],
+        "en": ['reddit stories podcast full', 'aita revenge drama narrated', 'best reddit confessions audio']
     },
     "drama_expose": {
         "ko": ['사건사고 이슈 폭로', '연예 이슈 정리', '논란 이슈 총정리'],
@@ -827,7 +827,7 @@ class CompetitorService:
             if self.is_tv_or_broadcast_network(uploader=c_name, description=c_desc):
                 continue
 
-            if (subs >= 1000 or tot_v >= 20000) and vids >= 3:
+            if (subs >= 3000 or (subs >= 1500 and tot_v >= 80000)) and vids >= 3:
                 established_candidates.append(c)
 
         # =========================================================================
@@ -856,6 +856,11 @@ class CompetitorService:
         # Phân tích và gán nhãn chủ đề thực tế cho từng kênh ứng viên
         for cand in established_candidates:
             sample_titles = cand.get('sample_video_titles') or ([cand['top_video_title']] if cand.get('top_video_title') else [])
+            # Kiểm tra xem kênh có phải chuyên Shorts không qua danh sách video thực tế
+            shorts_cnt = sum(1 for t in sample_titles if any(s in t.lower() for s in ['#shorts', '#short', '#쇼츠', '#썰쇼츠']))
+            if shorts_cnt >= 2:
+                cand['is_shorts_channel'] = True
+
             v_objs = [{'title': t} for t in sample_titles]
             cand_niche = self.time_service.detect_channel_niche(
                 videos=v_objs,
@@ -868,6 +873,9 @@ class CompetitorService:
 
         # Chấm điểm độ tương đồng ngách & ngôn ngữ để đưa đúng đối thủ thực sự lên đầu
         def _score_candidate(cand: Dict[str, Any]) -> int:
+            if cand.get('is_shorts_channel'):
+                return -999  # Loại bỏ hoàn toàn kênh chuyên làm Shorts khi tìm đối thủ
+
             sample_titles = cand.get('sample_video_titles') or ([cand['top_video_title']] if cand.get('top_video_title') else [])
             text = (cand['channel_name'] + ' ' + cand.get('description', '') + ' ' + ' '.join(sample_titles)).lower()
             cand_country = cand.get('country', '')
@@ -915,6 +923,12 @@ class CompetitorService:
                     return -999   # Loại bỏ hoàn toàn kênh lệch chủ đề (ví dụ: Phật giáo/tin tức/game khi tìm chuyện gia đình)
                 else:
                     score -= 40
+
+            # Thưởng điểm cho kênh cùng định dạng kể chuyện audio drama / podcast dài
+            format_markers = ['라디오', '몰아보기', '신청사연', '오디오', '사연극장', 'tâm sự', 'radio', 'podcast', 'kể chuyện', 'relatos', 'narrated']
+            format_matches = sum(1 for m in format_markers if m in text)
+            if format_matches > 0:
+                score += min(50, format_matches * 20)
 
             # Khớp từ khóa chủ đề ngách
             for q in queries:
